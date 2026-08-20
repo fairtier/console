@@ -1,0 +1,16 @@
+CLAUDE.md
+.github/
+
+# Never let local/dev material into the build context: COPY . . plus a
+# registry-pushed buildkit cache (mode=max) would materialize these into
+# layers anyone can pull once the image is public.
+.env.local
+.env.e2e
+.env.worker.local
+e2e/
+node_modules/
+dist/
+playwright-report/
+test-results/
+.git/
+.workspace-api-src/

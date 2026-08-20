@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+/* ==========================================================================
+   FairTier Console design tokens
+   Theme is driven by the data-ft-theme attribute on <html> (set by the
+   settings store). Light is the base; dark overrides via the attribute.
+   ========================================================================== */
+:root,
+:root[data-ft-theme="light"] {
+  --bg:#F4F1EA; --surface:#FFFFFF; --surface-2:#FAF8F2; --inset:#F1EDE3;
+  --ink:#211F1B; --ink-2:#57534A; --ink-3:#8A8478;
+  --line:#E7E2D7; --line-2:#EFEBE1;
+  --accent:#1C6B57; --accent-2:#15564599; --accent-ink:#FFFFFF;
+  --accent-soft:#DCEDE6; --accent-soft-ink:#134B3D;
+  --clay:#C26B3E; --clay-soft:#F6E6D9; --clay-soft-ink:#8A4420;
+  --ok:#2F8A5B; --ok-soft:#E1F0E6; --ok-ink:#1C6B43;
+  --warn:#B5832B; --warn-soft:#F5EAD2; --warn-ink:#86601B;
+  --err:#C0492F; --err-soft:#F6E0D9; --err-ink:#922F1C;
+  --info:#3A6E8F; --info-soft:#DEEAF1; --info-ink:#27536E;
+  --shadow:0 1px 2px rgba(33,31,27,.04), 0 2px 8px rgba(33,31,27,.04);
+  --shadow-lg:0 4px 24px rgba(33,31,27,.10);
+}
+
+:root[data-ft-theme="dark"] {
+  --bg:#17160F; --surface:#211F17; --surface-2:#2A271E; --inset:#1C1A13;
+  --ink:#F2EFE6; --ink-2:#C2BDAF; --ink-3:#8E887A;
+  --line:#34312685; --line-2:#2C2920;
+  --accent:#4FB89B; --accent-2:#4FB89B66; --accent-ink:#10231D;
+  --accent-soft:#1E3A33; --accent-soft-ink:#9FE0CE;
+  --clay:#DB905F; --clay-soft:#3A271B; --clay-soft-ink:#E6B188;
+  --ok:#5FBE89; --ok-soft:#1B3328; --ok-ink:#8FD8AE;
+  --warn:#D6A94E; --warn-soft:#33291480; --warn-ink:#E7C988;
+  --err:#E0795E; --err-soft:#3A211A; --err-ink:#F0A893;
+  --info:#6FA6C6; --info-soft:#1B2B34; --info-ink:#9FC8DD;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 2px 8px rgba(0,0,0,.25);
+  --shadow-lg:0 6px 28px rgba(0,0,0,.45);
+}
+
+/* Expose tokens as Tailwind utilities (bg-surface, text-ink, border-line, …).
+   Values reference the runtime CSS vars so utilities stay theme-reactive. */
+@theme {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-inset: var(--inset);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-ink: var(--accent-soft-ink);
+  --color-clay: var(--clay);
+  --color-clay-soft: var(--clay-soft);
+  --color-clay-soft-ink: var(--clay-soft-ink);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-ok-ink: var(--ok-ink);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-warn-ink: var(--warn-ink);
+  --color-err: var(--err);
+  --color-err-soft: var(--err-soft);
+  --color-err-ink: var(--err-ink);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-info-ink: var(--info-ink);
+
+  --font-sans: 'Schibsted Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --shadow-card: var(--shadow);
+  --shadow-pop: var(--shadow-lg);
+}
+
+@keyframes ftspin { to { transform: rotate(360deg); } }
+@keyframes ftpulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+@keyframes ftbar { 0% { transform:translateX(-100%); } 100% { transform:translateX(220%); } }
+@keyframes ftrise { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Schibsted Grotesk', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#app { min-height: 100vh; }
+
+::selection { background: var(--accent-soft); color: var(--accent-soft-ink); }
+
+/* Native <button> defaults to an arrow cursor; make all interactive controls
+   show the hand pointer (disabled ones keep not-allowed). */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+label[for],
+summary,
+select:not(:disabled) {
+  cursor: pointer;
+}
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* Thin, unobtrusive scrollbars that follow the theme. */
+* { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: var(--line); border-radius: 20px; border: 3px solid transparent; background-clip: content-box; }

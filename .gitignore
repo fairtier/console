@@ -1,0 +1,47 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment files. The tracked ones are `.env` (shared comments), the
+# neutral `.env.production`, and the credential-free *.example templates.
+# Anything else — .env.local, … — is personal or secret and stays
+# out of git. NEVER commit credentials, including in examples.
+.env.*
+!.env.production
+!.env.local.example
+
+# Playwright
+e2e/.auth/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# TypeScript composite build artifacts (tsconfig.gen.json)
+src/api/gen/*.d.ts
+*.tsbuildinfo
+
+# make proto-workspace scratch checkout
+.workspace-api-src/
+
+# Local AI/agent tooling state
+.serena/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

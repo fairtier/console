@@ -1,0 +1,19 @@
+# Bun configuration — https://bun.com/docs/runtime/bunfig
+
+[install]
+# Supply-chain safety: refuse package versions published less than 1 day ago.
+# Most compromised npm releases (eslint-config-prettier, ua-parser-js, chalk,
+# debug, …) are detected and yanked within hours, so a small delay catches
+# them without blocking normal updates.
+#
+# Value is in seconds. 86400 = 24h. Adjust per-package waivers via
+# `minimumReleaseAgeExcludes` if a critical fix needs to land sooner.
+minimumReleaseAge = 86400
+# minimumReleaseAgeExcludes = ["some-pkg-with-urgent-cve-fix"]
+
+[test]
+# Scope the unit runner to src/. Bun discovers `*.spec.*` as well as
+# `*.test.*`, so without this it sweeps up the Playwright specs in e2e/ and
+# dies on `Cannot find module '@playwright/test'` — those run under Node via
+# `bun run test:e2e`, not under `bun test`.
+root = "src"

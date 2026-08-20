@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
+    /* `bun:test` lives in @types/bun; the app project keeps its types clean. */
+    "types": ["@types/bun"]
+  },
+  "references": [
+    { "path": "./tsconfig.gen.json" }
+  ],
+  /* Tests plus everything they import — a composite project has to list it all. */
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "exclude": ["src/api/gen/**"]
+}

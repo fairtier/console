@@ -1,0 +1,12 @@
+version: v2
+# The Console is the single owner of src/api/gen: TypeScript stubs generated
+# from the public workspace-api protos. The input is passed on the command
+# line by the Makefile rather than declared here.
+plugins:
+  # TypeScript protobuf messages + service descriptors. Pinned: an unpinned
+  # remote plugin re-resolves to whatever is current and rewrites every stub's
+  # header, which would make the CI drift check fail spuriously. Keep this in
+  # step with the @bufbuild/protobuf runtime in package.json.
+  - remote: buf.build/bufbuild/es:v2.13.0
+    out: src/api/gen
+    opt: target=ts

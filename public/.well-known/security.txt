@@ -1,0 +1,11 @@
+# Security contact for the FairTier Workspace Console (RFC 9116)
+# https://securitytxt.org
+#
+# This file ships with the application image; it covers vulnerabilities in
+# the Console software itself. For issues in a particular deployment, contact
+# whoever operates that workspace.
+
+Contact: https://github.com/fairtier/console/security/advisories/new
+Contact: mailto:security@fairtier.com
+Expires: 2027-05-28T00:00:00.000Z
+Preferred-Languages: en, cs

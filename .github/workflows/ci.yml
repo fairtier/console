@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  # Run CI for a commit that is already pushed. A push that lands while Actions
+  # is down creates no run at all — nothing queues, so there is nothing to
+  # retry once it recovers. Run it from the branch
+  # (`gh workflow run CI --ref master`).
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Type-check, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Type check
+        run: bun run type-check
+
+      - name: Unit tests
+        run: bun test
+
+      - name: Audit
+        run: bun audit --audit-level=high
+
+      - name: Build
+        run: bun run build
+
+      # Deployment configuration is pure runtime — no live backend exists in
+      # CI, so assert the two things that need none: the refusal to start
+      # unconfigured, and the runtime config surface.
+      - name: Config smoke
+        run: |
+          set +e
+          timeout 15 bun run server.ts
+          code=$?
+          set -e
+          if [ "$code" -ne 1 ]; then
+            echo "expected server.ts to refuse to start unconfigured (exit 1), got $code"
+            exit 1
+          fi
+
+          FT_WORKSPACE_API_URL=http://localhost:1 \
+          FT_AUTH_URL=http://localhost:1 \
+          FT_AUTH_CLIENT_ID=smoke \
+          FT_AUTH_REDIRECT_URI=http://localhost:3000/callback \
+          FT_AUTH_ORGANIZATION=smoke \
+            bun run server.ts &
+          SERVER=$!
+          sleep 2
+          curl -fsS localhost:3000/healthz
+          curl -fsS localhost:3000/config.json | grep -q '"workspaceApiUrl"'
+          # SPA fallback: an unknown route must serve the app shell.
+          curl -fsS localhost:3000/no-such-route | grep -q 'id="app"'
+          kill "$SERVER"
+
+  e2e:
+    name: Hermetic e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      # Builds the app and boots server.ts with dummy FT_* itself
+      # (playwright.config.ts webServer) — no backend or identity provider.
+      - name: Playwright smoke
+        run: bun run test:e2e
+
+  proto-drift:
+    name: Workspace proto drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: bufbuild/buf-action@v1
+        with:
+          setup_only: true
+
+      # The committed stubs must match the workspace-api tag pinned in the
+      # Makefile: regenerate and fail on any diff. `git add -N` registers
+      # newly generated stubs so `git diff` sees additions too (the Makefile
+      # deletes stale stubs before generating, covering removals).
+      - name: Check generated code is up to date
+        run: |
+          make proto-workspace
+          git add -N src/api/gen
+          git diff --exit-code -- src/api/gen
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

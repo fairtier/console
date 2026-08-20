@@ -1,0 +1,6 @@
+# The workspace console is an authenticated application. There is nothing
+# here for search engines or LLM crawlers to index — every meaningful route
+# lives behind the workspace's own login.
+
+User-agent: *
+Disallow: /
