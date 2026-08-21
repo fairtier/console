@@ -32,6 +32,18 @@ export interface WorkspaceBootstrap {
     casdoor_issuer: string
     casdoor_org: string
     console_client_id: string
+    /**
+     * Public endpoints of the workspace's sibling services (workspace-api
+     * v0.18+). Older deployments omit them; the views degrade to not
+     * offering the link.
+     */
+    lakekeeper_url?: string
+    lakekeeper_warehouse?: string
+    /** Present only while the app is enabled. */
+    rill_url?: string
+    /** Present only while the app is enabled. */
+    cube_url?: string
+    duckflight_url?: string
     capabilities: WorkspaceCapabilities
 }
 

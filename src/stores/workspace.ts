@@ -4,10 +4,10 @@ import { loadWorkspaceBootstrap } from '../api/workspaceBootstrap'
 
 /**
  * Endpoints of the workspace's sibling services, for the pages that link out
- * to them. Filled from the bootstrap document, which today carries only the
- * customer domain — the endpoint fields stay blank until the workspace-api
- * serves them, and the views degrade to not offering the link (see
- * CatalogView's / AppsView's ready checks).
+ * to them. Filled from the bootstrap document (workspace-api v0.18+ carries
+ * them); against an older API the endpoint fields stay blank and the views
+ * degrade to not offering the link (see CatalogView's / AppsView's ready
+ * checks).
  */
 export interface ConnectionDetails {
     lakekeeperUrl: string
@@ -16,17 +16,6 @@ export interface ConnectionDetails {
     cubeUrl: string
     rillUrl: string
     duckflightUrl: string
-}
-
-function emptyConnectionDetails(): ConnectionDetails {
-    return {
-        lakekeeperUrl: '',
-        lakekeeperWarehouse: '',
-        customerDomain: '',
-        cubeUrl: '',
-        rillUrl: '',
-        duckflightUrl: '',
-    }
 }
 
 /**
@@ -85,8 +74,12 @@ export const useWorkspaceStore = defineStore('workspace', () => {
             googleOauthEnabled.value = doc.capabilities.google_oauth
             dltEnabled.value = true
             connectionDetails.value = {
-                ...emptyConnectionDetails(),
+                lakekeeperUrl: doc.lakekeeper_url ?? '',
+                lakekeeperWarehouse: doc.lakekeeper_warehouse ?? '',
                 customerDomain: doc.customer_domain,
+                cubeUrl: doc.cube_url ?? '',
+                rillUrl: doc.rill_url ?? '',
+                duckflightUrl: doc.duckflight_url ?? '',
             }
         } finally {
             isLoading.value = false
