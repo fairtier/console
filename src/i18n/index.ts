@@ -1,6 +1,7 @@
 import { createI18n } from 'vue-i18n'
 import en from './locales/en'
 import cs from './locales/cs'
+import { fresherSharedPrefs } from '../lib/prefs'
 
 const LOCALE_KEY = 'ft_locale'
 
@@ -22,6 +23,13 @@ for (const mod of Object.values(fragments)) {
 }
 
 function getStoredLocale(): string {
+    // The shared `ft_prefs` cookie first, when it is newer than our own copy:
+    // that is the locale picked in the account Console, and the very first
+    // render has to already be in it (see ../lib/prefs.ts). The settings store
+    // applies the same rule to the theme.
+    const shared = fresherSharedPrefs()
+    if (shared?.locale) return shared.locale
+
     const stored = localStorage.getItem(LOCALE_KEY)
     if (stored && ['en', 'cs'].includes(stored)) {
         return stored

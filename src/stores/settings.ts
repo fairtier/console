@@ -1,6 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { setLocale, type LocaleCode } from '../i18n'
+import {
+    fresherSharedPrefs,
+    onSharedPrefsChange,
+    setPersistedStamp,
+    writeSharedPrefs,
+} from '../lib/prefs'
 
 type Theme = 'system' | 'light' | 'dark'
 
@@ -11,10 +17,26 @@ const LOCALE_KEY = 'ft_locale'
  * Display preferences — theme and locale. Persisted in localStorage, per
  * browser: there is no preferences service behind the workspace Console, and
  * a display preference is a property of the device you are reading on anyway.
+ *
+ * When the workspace is hosted, the same two values also travel in the
+ * `ft_prefs` cookie (../lib/prefs.ts), so picking a theme here and picking one
+ * in the hosting provider's Console are the same act. Self-hosted, that cookie
+ * is an ordinary same-origin one and nothing about this store changes.
  */
 export const useSettingsStore = defineStore('settings', () => {
-    const localTheme = ref<Theme>(loadStoredTheme())
-    const localLocale = ref<LocaleCode>(loadStoredLocale())
+    // The cookie outranks this origin's copy when it is newer, which is how a
+    // preference set in the other console arrives here.
+    const bootShared = fresherSharedPrefs()
+    const localTheme = ref<Theme>(bootShared?.theme ?? loadStoredTheme())
+    const localLocale = ref<LocaleCode>(bootShared?.locale ?? loadStoredLocale())
+
+    // Adopting it makes it this origin's own choice: localStorage IS the
+    // durable copy here, so the stamp moves with it.
+    if (bootShared) {
+        localStorage.setItem(THEME_KEY, localTheme.value)
+        setLocale(localLocale.value)
+        setPersistedStamp(bootShared.ts)
+    }
 
     const theme = computed(() => localTheme.value)
     const locale = computed(() => localLocale.value)
@@ -48,15 +70,28 @@ export const useSettingsStore = defineStore('settings', () => {
 
     // Actions
     function updateTheme(newTheme: Theme) {
-        localTheme.value = newTheme
-        applyTheme(newTheme)
-        localStorage.setItem(THEME_KEY, newTheme)
+        applySharedTheme(newTheme)
+        // Also to the shared cookie, so an already open account Console adopts
+        // it the moment it regains focus.
+        setPersistedStamp(writeSharedPrefs({ theme: newTheme }).ts)
     }
 
     function updateLocale(newLocale: LocaleCode) {
-        localLocale.value = newLocale
-        setLocale(newLocale)
-        localStorage.setItem(LOCALE_KEY, newLocale)
+        applySharedLocale(newLocale)
+        setPersistedStamp(writeSharedPrefs({ locale: newLocale }).ts)
+    }
+
+    /** Applies a theme to this origin: state, DOM, and its localStorage copy. */
+    function applySharedTheme(next: Theme) {
+        localTheme.value = next
+        applyTheme(next)
+        localStorage.setItem(THEME_KEY, next)
+    }
+
+    /** Same for the locale — setLocale() writes the localStorage copy itself. */
+    function applySharedLocale(next: LocaleCode) {
+        localLocale.value = next
+        setLocale(next)
     }
 
     function applyTheme(theme: Theme) {
@@ -80,6 +115,16 @@ export const useSettingsStore = defineStore('settings', () => {
             }
         })
     }
+
+    // The account Console is a different origin, so the only signal that it
+    // changed a display preference is the cookie — re-read it whenever this tab
+    // comes back to the foreground, which is the moment the desync would be
+    // visible.
+    onSharedPrefsChange((shared) => {
+        if (shared.theme && shared.theme !== localTheme.value) applySharedTheme(shared.theme)
+        if (shared.locale && shared.locale !== localLocale.value) applySharedLocale(shared.locale)
+        setPersistedStamp(shared.ts)
+    })
 
     return {
         // Getters

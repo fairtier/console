@@ -6,10 +6,12 @@ import { useWorkspaceStore } from '../stores/workspace'
 import { useSettingsStore } from '../stores/settings'
 import { useCommandPalette } from '../composables/useCommandPalette'
 import { runtimeConfig } from '../config/runtime'
+import { availableLocales, type LocaleCode } from '../i18n'
 import SidebarNav from './SidebarNav.vue'
 import CommandPalette from '../components/CommandPalette.vue'
 import NotificationBell from '../components/NotificationBell.vue'
 import Icon from '../components/ui/Icon.vue'
+import Segmented from '../components/ui/Segmented.vue'
 
 const { t } = useI18n()
 const { user, logout } = useAuth()
@@ -54,10 +56,31 @@ onMounted(() => {
     void workspaceStore.ensureLoaded()
 })
 
+// The header button stays a one-click light/dark flip; the menu below is where
+// "system" and the language live — every view is translated, there was simply
+// nowhere to choose the language.
 function toggleTheme() {
     const next = settingsStore.effectiveTheme === 'dark' ? 'light' : 'dark'
     settingsStore.updateTheme(next)
 }
+
+const languageOptions = availableLocales.map((l) => ({ value: l.code, label: l.nativeName }))
+
+const themeOptions = computed(() => [
+    { value: 'light' as const, label: t('shell.themeLight') },
+    { value: 'dark' as const, label: t('shell.themeDark') },
+    { value: 'system' as const, label: t('shell.themeSystem') },
+])
+
+const language = computed<LocaleCode>({
+    get: () => settingsStore.locale,
+    set: (val) => settingsStore.updateLocale(val),
+})
+
+const themeChoice = computed<'light' | 'dark' | 'system'>({
+    get: () => settingsStore.theme,
+    set: (val) => settingsStore.updateTheme(val),
+})
 
 function closeSidebar() {
     sidebarOpen.value = false
@@ -143,11 +166,31 @@ function closeMenus() {
                             <div class="text-[11.5px] text-ink-3">{{ email }}</div>
                         </div>
                         <div class="mx-1.5 mb-[5px] mt-0.5 h-px" style="background: var(--line-2)" />
+
+                        <!-- display preferences: shared with the account
+                             Console through the ft_prefs cookie -->
+                        <div class="px-2.5 pb-1.5 pt-1">
+                            <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-ink-3">
+                                {{ t('shell.language') }}
+                            </div>
+                            <Segmented v-model="language" :options="languageOptions" block />
+                            <div class="mb-1.5 mt-2.5 text-[11px] font-bold uppercase tracking-[0.06em] text-ink-3">
+                                {{ t('shell.theme') }}
+                            </div>
+                            <Segmented v-model="themeChoice" :options="themeOptions" block />
+                        </div>
+                        <div class="mx-1.5 my-[5px] h-px" style="background: var(--line-2)" />
+
+                        <!--
+                            Same tab, deliberately: the account pages are a
+                            section of one product and the SSO hops make the
+                            crossing read as a slow route change. Ctrl-click
+                            still opens a new tab, hence rel="noopener".
+                        -->
                         <a
                             v-if="accountUrl"
                             :href="accountUrl"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            rel="noopener"
                             class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-ink hover:bg-surface-2"
                             @click="userMenu = false; closeSidebar()"
                         >

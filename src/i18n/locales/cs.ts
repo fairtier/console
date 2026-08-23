@@ -33,6 +33,11 @@ export default {
         searchPlaceholder: 'Hledat pipeline, tabulky, nastavení…',
         toggleTheme: 'Přepnout motiv',
         newPipeline: 'Nová pipeline',
+        language: 'Jazyk',
+        theme: 'Motiv',
+        themeLight: 'Světlý',
+        themeDark: 'Tmavý',
+        themeSystem: 'Systém',
     },
     notifications: {
         title: 'Oznámení',

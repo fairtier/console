@@ -29,10 +29,16 @@ function isActive(name: string): boolean {
                 {{ t(group.titleKey) }}
             </div>
             <template v-for="item in group.items" :key="item.name">
+                <!--
+                    Same tab, deliberately: the account pages are a section of
+                    one product, not an errand elsewhere, and the SSO hops make
+                    the crossing read as a slow route change. Middle- and
+                    ctrl-click still open a new tab, as for any link — which is
+                    why rel="noopener" stays.
+                -->
                 <a
                     v-if="item.externalUrl"
                     :href="item.externalUrl"
-                    target="_blank"
                     rel="noopener"
                     class="mb-[3px] flex items-center gap-[11px] rounded-[9px] px-[11px] py-[9px] text-[13.5px] font-semibold hover:bg-surface-2"
                     style="color: var(--ink-2)"

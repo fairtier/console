@@ -4,13 +4,19 @@ import App from './App.vue'
 import { createAppRouter } from './router'
 import { i18n } from './i18n'
 import { pinia } from './stores'
-import { loadRuntimeConfig } from './config/runtime'
+import { loadRuntimeConfig, runtimeConfig } from './config/runtime'
 import { initErrorTracking } from './lib/sentry'
+import { configureSharedPrefsPeer } from './lib/prefs'
 
 // Runtime configuration is resolved before anything is built or mounted: the
 // API and Casdoor URLs come from /config.json at deploy time, and nothing may
 // read a half-built config.
 await loadRuntimeConfig()
+
+// Display preferences are shared with the Console that manages this workspace's
+// account, over a cookie on the domain the two have in common — which is only
+// knowable once accountUrl has resolved. Unset (self-host) it stays host-only.
+configureSharedPrefsPeer(runtimeConfig().accountUrl)
 
 const app = createApp(App)
 

@@ -14,8 +14,10 @@ export interface NavItem {
     icon: IconName
     badge?: string
     /**
-     * External destination instead of a route. Rendered as a plain link (new
-     * tab) by the sidebar and as a window.open by the palette.
+     * External destination instead of a route: another origin of the same
+     * product. Rendered as a plain same-tab `<a href>` by the sidebar and as a
+     * location.assign by the palette — crossing to the account Console is a
+     * navigation, not a new window.
      */
     externalUrl?: string
 }

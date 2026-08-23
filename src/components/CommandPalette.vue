@@ -39,7 +39,9 @@ const navCommands = computed<Command[]>(() => {
         keywords: `${t(n.labelKey)} ${n.name}`,
         run: () =>
             n.externalUrl
-                ? void window.open(n.externalUrl, '_blank', 'noopener')
+                ? // Same tab, like the sidebar: a palette entry navigates, it
+                  // does not spawn a window.
+                  void window.location.assign(n.externalUrl)
                 : void router.push({ name: n.name }),
     }))
     items.push({

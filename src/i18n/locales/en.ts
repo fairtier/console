@@ -33,6 +33,11 @@ export default {
         searchPlaceholder: 'Search pipelines, tables, settings…',
         toggleTheme: 'Toggle theme',
         newPipeline: 'New pipeline',
+        language: 'Language',
+        theme: 'Theme',
+        themeLight: 'Light',
+        themeDark: 'Dark',
+        themeSystem: 'System',
     },
     notifications: {
         title: 'Notifications',
