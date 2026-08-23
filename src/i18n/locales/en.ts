@@ -75,10 +75,20 @@ export default {
         integrations: 'Integrations',
         serviceAccounts: 'Service Accounts',
         accountExternal: 'Account & Billing',
+        // The account Console's screens: this app renders them as links into
+        // its origin (layouts/navContract.ts), so it needs its own copy of
+        // their names — the union menu is translated by whichever app draws
+        // it, never by the other one.
+        general: 'General',
+        storage: 'Storage',
+        danger: 'Danger Zone',
+        account: 'Profile & Preferences',
+        billing: 'Billing',
         group: {
             data: 'Data',
             build: 'Build',
             workspace: 'Workspace',
+            settings: 'Settings',
             account: 'Account',
         },
     },

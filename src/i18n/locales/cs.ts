@@ -75,10 +75,17 @@ export default {
         integrations: 'Integrace',
         serviceAccounts: 'Servisní účty',
         accountExternal: 'Účet a fakturace',
+        // Obrazovky konzole účtu — viz layouts/navContract.ts.
+        general: 'Obecné',
+        storage: 'Úložiště',
+        danger: 'Nebezpečná zóna',
+        account: 'Profil a předvolby',
+        billing: 'Fakturace',
         group: {
             data: 'Data',
             build: 'Build',
             workspace: 'Workspace',
+            settings: 'Nastavení',
             account: 'Účet',
         },
     },

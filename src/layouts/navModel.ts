@@ -3,9 +3,15 @@
 // The sidebar and the command palette used to maintain this list twice, and
 // had already drifted — the palette was missing the SQL page. They now share
 // this one, so a screen added here reaches both surfaces at once.
+//
+// When the workspace is hosted, the model is a *union*: this Console's screens
+// plus the account Console's, rendered as links into its origin (see
+// ./navContract.ts). The two apps then show one menu and a person sees one
+// product. Self-hosted there is no second app and the menu is just ours.
 
 import type { IconName } from '../components/ui/icons'
 import { runtimeConfig } from '../config/runtime'
+import { ACCOUNT_NAV, foreignUrl } from './navContract'
 
 export interface NavItem {
     /** Route name. */
@@ -56,28 +62,37 @@ export const navGroups: NavGroup[] = [
 ]
 
 /**
- * When the workspace is hosted by someone who manages the account and billing
- * elsewhere (accountUrl set by the deployment), one external entry links out
- * to it. Self-hosters leave it unset and no account group renders.
+ * The account Console's screens, as links into its origin — the Settings and
+ * Account half of the union menu.
+ *
+ * When the workspace is hosted, the deployment sets `accountUrl` and those
+ * groups appear below ours, indistinguishable from a route. Self-hosters leave
+ * it unset: nothing renders, no dead links, and the app is whole on its own.
  */
-function accountLinkItem(): NavItem | null {
-    const url = runtimeConfig().accountUrl
-    if (!url) return null
-    return { name: 'account-external', labelKey: 'nav.accountExternal', icon: 'billing', externalUrl: url }
+function accountGroups(url: string | null): NavGroup[] {
+    if (!url) return []
+    return ACCOUNT_NAV.map((group) => ({
+        titleKey: group.titleKey,
+        items: group.items.map((item) => ({
+            name: item.id,
+            labelKey: item.labelKey,
+            icon: item.icon,
+            externalUrl: foreignUrl(url, item.path),
+        })),
+    }))
 }
 
-/** The groups the sidebar renders. */
-export function visibleNavGroups(): NavGroup[] {
-    const groups = [...navGroups]
-    const account = accountLinkItem()
-    if (account) groups.push({ titleKey: 'nav.group.account', items: [account] })
-    return groups
+/**
+ * The groups the sidebar renders: ours, then the account Console's.
+ *
+ * `accountUrl` defaults to the deployment's — the argument exists so the test
+ * can exercise both halves without a runtime config to fetch.
+ */
+export function visibleNavGroups(accountUrl: string | null = runtimeConfig().accountUrl): NavGroup[] {
+    return [...navGroups, ...accountGroups(accountUrl)]
 }
 
 /** Every visible entry, flattened — the command palette's view of the model. */
-export function visibleNavItems(): NavItem[] {
-    const items = navGroups.flatMap((group) => group.items)
-    const account = accountLinkItem()
-    if (account) items.push(account)
-    return items
+export function visibleNavItems(accountUrl: string | null = runtimeConfig().accountUrl): NavItem[] {
+    return visibleNavGroups(accountUrl).flatMap((group) => group.items)
 }

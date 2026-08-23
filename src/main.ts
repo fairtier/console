@@ -7,6 +7,7 @@ import { pinia } from './stores'
 import { loadRuntimeConfig, runtimeConfig } from './config/runtime'
 import { initErrorTracking } from './lib/sentry'
 import { configureSharedPrefsPeer } from './lib/prefs'
+import { preconnect } from './lib/preconnect'
 
 // Runtime configuration is resolved before anything is built or mounted: the
 // API and Casdoor URLs come from /config.json at deploy time, and nothing may
@@ -17,6 +18,11 @@ await loadRuntimeConfig()
 // account, over a cookie on the domain the two have in common — which is only
 // knowable once accountUrl has resolved. Unset (self-host) it stays host-only.
 configureSharedPrefsPeer(runtimeConfig().accountUrl)
+
+// Half the sidebar points at that Console's origin, which this browser has
+// usually never talked to. Warm it now, so a crossing is a page load rather
+// than a page load plus a handshake.
+preconnect(runtimeConfig().accountUrl)
 
 const app = createApp(App)
 
