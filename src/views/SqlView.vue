@@ -1,20 +1,63 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { ConnectError, Code } from '@connectrpc/connect'
 import Icon from '../components/ui/Icon.vue'
 import Spinner from '../components/ui/Spinner.vue'
 import SqlEditor from '../components/sql/SqlEditor.vue'
 import ResultsGrid from '../components/sql/ResultsGrid.vue'
 import CatalogTree from '../components/sql/CatalogTree.vue'
+import ExplainPanel from '../components/ExplainPanel.vue'
 import { useSqlEditorStore } from '../stores/sqlEditor'
 import { useWorkspaceStore } from '../stores/workspace'
+import { useToast } from '../composables/useToast'
+import { useExplain } from '../composables/useExplain'
+import { assistClient } from '../api'
+import { errorMessage } from '../api/errors'
 import type { TableRef } from '../api'
 
 const { t } = useI18n()
 const router = useRouter()
 const store = useSqlEditorStore()
 const customerStore = useWorkspaceStore()
+const toast = useToast()
+
+// --- Ask AI: NL → SQL draft. The draft only ever lands in the editor; the
+// user runs it themselves (same review-first posture as every AI surface).
+const aiOpen = ref(false)
+const aiPrompt = ref('')
+const aiNotes = ref('')
+const drafting = ref(false)
+
+async function askAi() {
+    const prompt = aiPrompt.value.trim()
+    if (!prompt || drafting.value) return
+    drafting.value = true
+    aiNotes.value = ''
+    try {
+        const resp = await assistClient.draftSql({ prompt, currentSql: store.sql })
+        store.setSql(resp.sql)
+        aiNotes.value = resp.notes
+    } catch (err) {
+        if (err instanceof ConnectError && err.code === Code.Unimplemented) {
+            toast.info(t('sqlUi.ai.notConfigured'))
+        } else if (err instanceof ConnectError && err.code === Code.ResourceExhausted) {
+            toast.info(t('sqlUi.ai.rateLimited'))
+        } else {
+            toast.error(errorMessage(err, t('sqlUi.ai.draftFailed')))
+        }
+    } finally {
+        drafting.value = false
+    }
+}
+
+// --- Explain a failed query.
+const { open: explainOpen, loading: explaining, result: explainResult, explain, close: closeExplain } = useExplain()
+
+function explainSqlError() {
+    void explain({ case: 'sql', value: { sql: store.sql, errorMessage: store.error } })
+}
 
 const engineOff = computed(() => customerStore.isReady && !customerStore.duckflightEnabled)
 
@@ -85,6 +128,18 @@ function previewTable(table: TableRef) {
                         {{ store.running ? t('sqlUi.running') : t('sqlUi.run') }}
                     </button>
                     <span class="text-[11.5px]" style="color: var(--ink-3)">{{ t('sqlUi.runHint') }}</span>
+                    <button
+                        class="flex h-8 items-center gap-1.5 rounded-[9px] border px-3 text-[12.5px] font-semibold"
+                        :style="{
+                            background: aiOpen ? 'var(--accent-soft)' : 'var(--surface)',
+                            borderColor: 'var(--line)',
+                            color: aiOpen ? 'var(--accent-soft-ink)' : 'var(--ink-2)',
+                        }"
+                        @click="aiOpen = !aiOpen"
+                    >
+                        <Icon name="sparkle" :size="13" />
+                        {{ t('sqlUi.ai.button') }}
+                    </button>
                     <div class="flex-1" />
                     <label class="flex items-center gap-2 text-[12px]" style="color: var(--ink-2)">
                         {{ t('sqlUi.rowLimit') }}
@@ -96,6 +151,33 @@ function previewTable(table: TableRef) {
                             <option v-for="n in ROW_LIMITS" :key="n" :value="n">{{ n }}</option>
                         </select>
                     </label>
+                </div>
+
+                <!-- Ask AI: prompt row, collapsed by default -->
+                <div v-if="aiOpen" class="flex-none border-b px-3 py-2" style="border-color: var(--line); background: var(--inset)">
+                    <div class="flex items-center gap-2">
+                        <input
+                            v-model="aiPrompt"
+                            class="h-8 min-w-0 flex-1 rounded-[9px] border px-3 text-[12.5px]"
+                            style="background: var(--surface); border-color: var(--line); color: var(--ink)"
+                            :placeholder="t('sqlUi.ai.placeholder')"
+                            :disabled="drafting"
+                            @keydown.enter="askAi()"
+                        />
+                        <button
+                            class="flex h-8 items-center gap-2 rounded-[9px] px-3.5 text-[12.5px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+                            style="background: var(--accent); color: var(--accent-ink)"
+                            :disabled="drafting || !aiPrompt.trim()"
+                            @click="askAi()"
+                        >
+                            <Spinner v-if="drafting" :size="13" />
+                            <Icon v-else name="sparkle" :size="13" />
+                            {{ drafting ? t('sqlUi.ai.drafting') : t('sqlUi.ai.draft') }}
+                        </button>
+                    </div>
+                    <div v-if="aiNotes" class="mt-1.5 text-[12px] leading-relaxed" style="color: var(--ink-2)">
+                        {{ aiNotes }}
+                    </div>
                 </div>
 
                 <!-- Editor -->
@@ -115,7 +197,19 @@ function previewTable(table: TableRef) {
                     class="flex-none border-b px-4 py-3"
                     style="background: var(--err-soft); border-color: var(--line)"
                 >
-                    <div class="mb-1 text-[12px] font-bold" style="color: var(--err-ink)">{{ t('sqlUi.errors.title') }}</div>
+                    <div class="mb-1 flex items-center gap-2">
+                        <div class="flex-1 text-[12px] font-bold" style="color: var(--err-ink)">{{ t('sqlUi.errors.title') }}</div>
+                        <button
+                            class="flex h-6 items-center gap-1.5 rounded-[7px] border px-2 text-[11.5px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+                            style="background: var(--surface); border-color: var(--line); color: var(--ink-2)"
+                            :disabled="explaining"
+                            @click="explainSqlError()"
+                        >
+                            <Spinner v-if="explaining" :size="11" />
+                            <Icon v-else name="sparkle" :size="11" />
+                            {{ t('explainUi.button') }}
+                        </button>
+                    </div>
                     <pre
                         class="m-0 whitespace-pre-wrap text-[12px] leading-relaxed"
                         style="font-family: 'JetBrains Mono', monospace; color: var(--err-ink)"
@@ -158,5 +252,7 @@ function previewTable(table: TableRef) {
                 </div>
             </div>
         </div>
+
+        <ExplainPanel :open="explainOpen" :result="explainResult" @close="closeExplain" />
     </div>
 </template>

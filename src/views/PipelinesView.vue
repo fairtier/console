@@ -12,6 +12,8 @@ import DemoProjectCard from '../components/DemoProjectCard.vue'
 import { useToast } from '../composables/useToast'
 import { useConfirm } from '../composables/useConfirm'
 import { useCronText } from '../composables/useCronText'
+import { useExplain } from '../composables/useExplain'
+import ExplainPanel from '../components/ExplainPanel.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -28,6 +30,20 @@ const openMenuId = ref<string | null>(null)
 const expandedId = ref<string | null>(null)
 const runs = ref<PipelineRun[]>([])
 const runsLoading = ref(false)
+
+// AI "Explain" on a failed run: the server assembles the context from its
+// own rows by id — only ids leave the browser.
+const { open: explainOpen, loading: explaining, result: explainResult, explain, close: closeExplain } = useExplain()
+const explainingRunId = ref('')
+
+async function explainRun(pipelineId: string, runId: string) {
+  explainingRunId.value = runId
+  try {
+    await explain({ case: 'pipelineRun', value: { pipelineId, runId } })
+  } finally {
+    explainingRunId.value = ''
+  }
+}
 // Menu is teleported to <body> so it escapes the table card's overflow:hidden
 // clip; position is computed from the trigger button on open.
 const MENU_WIDTH = 172
@@ -342,11 +358,25 @@ async function deletePipeline(id: string) {
             <div><StatusChip :status="run.status" /></div>
             <div style="color:var(--ink-2);">{{ formatRelative(run.startedAt) }}</div>
             <div style="color:var(--ink-2);">{{ run.rowsLoaded }}</div>
-            <div style="color:var(--err); white-space:pre-line; word-break:break-word;" :title="run.errorMessage">{{ run.errorMessage }}</div>
+            <div style="min-width:0;">
+              <div style="color:var(--err); white-space:pre-line; word-break:break-word;" :title="run.errorMessage">{{ run.errorMessage }}</div>
+              <button
+                v-if="run.errorMessage"
+                :disabled="explaining"
+                style="display:inline-flex; align-items:center; gap:6px; margin-top:4px; padding:3px 8px; border:1px solid var(--line); border-radius:7px; background:var(--surface); cursor:pointer; font-family:inherit; font-size:11.5px; font-weight:600; color:var(--ink-2);"
+                @click="explainRun(p.id, run.id)"
+              >
+                <Spinner v-if="explaining && explainingRunId === run.id" :size="11" />
+                <Icon v-else name="sparkle" :size="11" />
+                {{ t('explainUi.button') }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
       </template>
     </div>
+
+    <ExplainPanel :open="explainOpen" :result="explainResult" @close="closeExplain" />
   </div>
 </template>

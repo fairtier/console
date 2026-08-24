@@ -10,132 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file boxcredential.proto.
  */
 export const file_boxcredential: GenFile = /*@__PURE__*/
-  fileDesc("ChNib3hjcmVkZW50aWFsLnByb3RvEhBib3hjcmVkZW50aWFsLnYxIkcKFkRlcG9zaXRHaXRUb2tlblJlcXVlc3QSEAoIdXNlcm5hbWUYASABKAkSDQoFdG9rZW4YAiABKAkSDAoEbm90ZRgDIAEoCSIZChdEZXBvc2l0R2l0VG9rZW5SZXNwb25zZSI6ChtEZXBvc2l0U25hcHNob3RUb2tlblJlcXVlc3QSDQoFdG9rZW4YASABKAkSDAoEbm90ZRgCIAEoCSIeChxEZXBvc2l0U25hcHNob3RUb2tlblJlc3BvbnNlIj4KGkRlcG9zaXRBZ2VQdWJsaWNLZXlSZXF1ZXN0EhIKCnB1YmxpY19rZXkYASABKAkSDAoEbm90ZRgCIAEoCSIdChtEZXBvc2l0QWdlUHVibGljS2V5UmVzcG9uc2UiWAoeRGVwb3NpdEZlZGVyYXRpb25DbGllbnRSZXF1ZXN0EhEKCWNsaWVudF9pZBgBIAEoCRIVCg1jbGllbnRfc2VjcmV0GAIgASgJEgwKBG5vdGUYAyABKAkiIQofRGVwb3NpdEZlZGVyYXRpb25DbGllbnRSZXNwb25zZSImChZGZXRjaEJveFNlY3JldHNSZXF1ZXN0EgwKBGtleXMYASADKAkikgEKF0ZldGNoQm94U2VjcmV0c1Jlc3BvbnNlEkcKB3NlY3JldHMYASADKAsyNi5ib3hjcmVkZW50aWFsLnYxLkZldGNoQm94U2VjcmV0c1Jlc3BvbnNlLlNlY3JldHNFbnRyeRouCgxTZWNyZXRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ATLcBAoUQm94Q3JlZGVudGlhbFNlcnZpY2USaAoPRGVwb3NpdEdpdFRva2VuEiguYm94Y3JlZGVudGlhbC52MS5EZXBvc2l0R2l0VG9rZW5SZXF1ZXN0GikuYm94Y3JlZGVudGlhbC52MS5EZXBvc2l0R2l0VG9rZW5SZXNwb25zZSIAEncKFERlcG9zaXRTbmFwc2hvdFRva2VuEi0uYm94Y3JlZGVudGlhbC52MS5EZXBvc2l0U25hcHNob3RUb2tlblJlcXVlc3QaLi5ib3hjcmVkZW50aWFsLnYxLkRlcG9zaXRTbmFwc2hvdFRva2VuUmVzcG9uc2UiABJ0ChNEZXBvc2l0QWdlUHVibGljS2V5EiwuYm94Y3JlZGVudGlhbC52MS5EZXBvc2l0QWdlUHVibGljS2V5UmVxdWVzdBotLmJveGNyZWRlbnRpYWwudjEuRGVwb3NpdEFnZVB1YmxpY0tleVJlc3BvbnNlIgASgAEKF0RlcG9zaXRGZWRlcmF0aW9uQ2xpZW50EjAuYm94Y3JlZGVudGlhbC52MS5EZXBvc2l0RmVkZXJhdGlvbkNsaWVudFJlcXVlc3QaMS5ib3hjcmVkZW50aWFsLnYxLkRlcG9zaXRGZWRlcmF0aW9uQ2xpZW50UmVzcG9uc2UiABJoCg9GZXRjaEJveFNlY3JldHMSKC5ib3hjcmVkZW50aWFsLnYxLkZldGNoQm94U2VjcmV0c1JlcXVlc3QaKS5ib3hjcmVkZW50aWFsLnYxLkZldGNoQm94U2VjcmV0c1Jlc3BvbnNlIgBCSlpIZ2l0aHViLmNvbS9mYWlydGllci93b3Jrc3BhY2UtYXBpL3Byb3RvL2JveGNyZWRlbnRpYWwvdjE7Ym94Y3JlZGVudGlhbHYxYgZwcm90bzM");
-
-/**
- * @generated from message boxcredential.v1.DepositGitTokenRequest
- */
-export type DepositGitTokenRequest = Message<"boxcredential.v1.DepositGitTokenRequest"> & {
-  /**
-   * Gitea username the token belongs to (the box's fixed admin user).
-   *
-   * @generated from field: string username = 1;
-   */
-  username: string;
-
-  /**
-   * Gitea access token, scoped to write:repository. One token covers all
-   * admin-owned repos on the box.
-   *
-   * @generated from field: string token = 2;
-   */
-  token: string;
-
-  /**
-   * Optional free-form note (e.g. the minting job / token name) for audit.
-   *
-   * @generated from field: string note = 3;
-   */
-  note: string;
-};
-
-/**
- * Describes the message boxcredential.v1.DepositGitTokenRequest.
- * Use `create(DepositGitTokenRequestSchema)` to create a new message.
- */
-export const DepositGitTokenRequestSchema: GenMessage<DepositGitTokenRequest> = /*@__PURE__*/
-  messageDesc(file_boxcredential, 0);
-
-/**
- * @generated from message boxcredential.v1.DepositGitTokenResponse
- */
-export type DepositGitTokenResponse = Message<"boxcredential.v1.DepositGitTokenResponse"> & {
-};
-
-/**
- * Describes the message boxcredential.v1.DepositGitTokenResponse.
- * Use `create(DepositGitTokenResponseSchema)` to create a new message.
- */
-export const DepositGitTokenResponseSchema: GenMessage<DepositGitTokenResponse> = /*@__PURE__*/
-  messageDesc(file_boxcredential, 1);
-
-/**
- * @generated from message boxcredential.v1.DepositSnapshotTokenRequest
- */
-export type DepositSnapshotTokenRequest = Message<"boxcredential.v1.DepositSnapshotTokenRequest"> & {
-  /**
-   * Bearer token the box's rill snapshot sidecar requires (AUTH_TOKEN).
-   *
-   * @generated from field: string token = 1;
-   */
-  token: string;
-
-  /**
-   * Optional free-form note (e.g. the minting job / secret name) for audit.
-   *
-   * @generated from field: string note = 2;
-   */
-  note: string;
-};
-
-/**
- * Describes the message boxcredential.v1.DepositSnapshotTokenRequest.
- * Use `create(DepositSnapshotTokenRequestSchema)` to create a new message.
- */
-export const DepositSnapshotTokenRequestSchema: GenMessage<DepositSnapshotTokenRequest> = /*@__PURE__*/
-  messageDesc(file_boxcredential, 2);
-
-/**
- * @generated from message boxcredential.v1.DepositSnapshotTokenResponse
- */
-export type DepositSnapshotTokenResponse = Message<"boxcredential.v1.DepositSnapshotTokenResponse"> & {
-};
-
-/**
- * Describes the message boxcredential.v1.DepositSnapshotTokenResponse.
- * Use `create(DepositSnapshotTokenResponseSchema)` to create a new message.
- */
-export const DepositSnapshotTokenResponseSchema: GenMessage<DepositSnapshotTokenResponse> = /*@__PURE__*/
-  messageDesc(file_boxcredential, 3);
-
-/**
- * @generated from message boxcredential.v1.DepositAgePublicKeyRequest
- */
-export type DepositAgePublicKeyRequest = Message<"boxcredential.v1.DepositAgePublicKeyRequest"> & {
-  /**
-   * The age X25519 recipient string ("age1..."), validated server-side.
-   *
-   * @generated from field: string public_key = 1;
-   */
-  publicKey: string;
-
-  /**
-   * Optional free-form note (e.g. the minting job / secret name) for audit.
-   *
-   * @generated from field: string note = 2;
-   */
-  note: string;
-};
-
-/**
- * Describes the message boxcredential.v1.DepositAgePublicKeyRequest.
- * Use `create(DepositAgePublicKeyRequestSchema)` to create a new message.
- */
-export const DepositAgePublicKeyRequestSchema: GenMessage<DepositAgePublicKeyRequest> = /*@__PURE__*/
-  messageDesc(file_boxcredential, 4);
-
-/**
- * @generated from message boxcredential.v1.DepositAgePublicKeyResponse
- */
-export type DepositAgePublicKeyResponse = Message<"boxcredential.v1.DepositAgePublicKeyResponse"> & {
-};
-
-/**
- * Describes the message boxcredential.v1.DepositAgePublicKeyResponse.
- * Use `create(DepositAgePublicKeyResponseSchema)` to create a new message.
- */
-export const DepositAgePublicKeyResponseSchema: GenMessage<DepositAgePublicKeyResponse> = /*@__PURE__*/
-  messageDesc(file_boxcredential, 5);
+  fileDesc("ChNib3hjcmVkZW50aWFsLnByb3RvEhBib3hjcmVkZW50aWFsLnYxIlgKHkRlcG9zaXRGZWRlcmF0aW9uQ2xpZW50UmVxdWVzdBIRCgljbGllbnRfaWQYASABKAkSFQoNY2xpZW50X3NlY3JldBgCIAEoCRIMCgRub3RlGAMgASgJIiEKH0RlcG9zaXRGZWRlcmF0aW9uQ2xpZW50UmVzcG9uc2UiJgoWRmV0Y2hCb3hTZWNyZXRzUmVxdWVzdBIMCgRrZXlzGAEgAygJIpIBChdGZXRjaEJveFNlY3JldHNSZXNwb25zZRJHCgdzZWNyZXRzGAEgAygLMjYuYm94Y3JlZGVudGlhbC52MS5GZXRjaEJveFNlY3JldHNSZXNwb25zZS5TZWNyZXRzRW50cnkaLgoMU2VjcmV0c0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEygwIKFEJveENyZWRlbnRpYWxTZXJ2aWNlEoABChdEZXBvc2l0RmVkZXJhdGlvbkNsaWVudBIwLmJveGNyZWRlbnRpYWwudjEuRGVwb3NpdEZlZGVyYXRpb25DbGllbnRSZXF1ZXN0GjEuYm94Y3JlZGVudGlhbC52MS5EZXBvc2l0RmVkZXJhdGlvbkNsaWVudFJlc3BvbnNlIgASaAoPRmV0Y2hCb3hTZWNyZXRzEiguYm94Y3JlZGVudGlhbC52MS5GZXRjaEJveFNlY3JldHNSZXF1ZXN0GikuYm94Y3JlZGVudGlhbC52MS5GZXRjaEJveFNlY3JldHNSZXNwb25zZSIAQkpaSGdpdGh1Yi5jb20vZmFpcnRpZXIvd29ya3NwYWNlLWFwaS9wcm90by9ib3hjcmVkZW50aWFsL3YxO2JveGNyZWRlbnRpYWx2MWIGcHJvdG8z");
 
 /**
  * @generated from message boxcredential.v1.DepositFederationClientRequest
@@ -169,7 +44,7 @@ export type DepositFederationClientRequest = Message<"boxcredential.v1.DepositFe
  * Use `create(DepositFederationClientRequestSchema)` to create a new message.
  */
 export const DepositFederationClientRequestSchema: GenMessage<DepositFederationClientRequest> = /*@__PURE__*/
-  messageDesc(file_boxcredential, 6);
+  messageDesc(file_boxcredential, 0);
 
 /**
  * @generated from message boxcredential.v1.DepositFederationClientResponse
@@ -182,7 +57,7 @@ export type DepositFederationClientResponse = Message<"boxcredential.v1.DepositF
  * Use `create(DepositFederationClientResponseSchema)` to create a new message.
  */
 export const DepositFederationClientResponseSchema: GenMessage<DepositFederationClientResponse> = /*@__PURE__*/
-  messageDesc(file_boxcredential, 7);
+  messageDesc(file_boxcredential, 1);
 
 /**
  * @generated from message boxcredential.v1.FetchBoxSecretsRequest
@@ -203,7 +78,7 @@ export type FetchBoxSecretsRequest = Message<"boxcredential.v1.FetchBoxSecretsRe
  * Use `create(FetchBoxSecretsRequestSchema)` to create a new message.
  */
 export const FetchBoxSecretsRequestSchema: GenMessage<FetchBoxSecretsRequest> = /*@__PURE__*/
-  messageDesc(file_boxcredential, 8);
+  messageDesc(file_boxcredential, 2);
 
 /**
  * @generated from message boxcredential.v1.FetchBoxSecretsResponse
@@ -226,15 +101,21 @@ export type FetchBoxSecretsResponse = Message<"boxcredential.v1.FetchBoxSecretsR
  * Use `create(FetchBoxSecretsResponseSchema)` to create a new message.
  */
 export const FetchBoxSecretsResponseSchema: GenMessage<FetchBoxSecretsResponse> = /*@__PURE__*/
-  messageDesc(file_boxcredential, 9);
+  messageDesc(file_boxcredential, 3);
 
 /**
- * BoxCredentialService receives box-minted credentials deposited outbound by
- * the box — the "credential inversion".
- * Central never holds box admin credentials; the box mints a scoped Gitea
- * token and pushes it up through the tenant-authed internal channel, where it
- * is stored encrypted and used by BoxRepoService to edit the box's Gitea
- * repos (rill, transformations) on the customer's behalf.
+ * BoxCredentialService is the box's private channel to central: the box
+ * deposits what only it can mint, and fetches what only central can mint.
+ * Central never holds box admin credentials.
+ *
+ * It used to carry three more deposits — the box's write-scoped Gitea token,
+ * its rill-snapshot bearer, and its age public key. All three existed for one
+ * reason: so that CENTRAL could write the box's git repos on the customer's
+ * behalf. They were retired with the workspace-plane split (Phase 3E), where
+ * a box serves its own workspace plane and reads those three from its own
+ * Kubernetes Secrets (workspace.StaticBoxCredentials) instead. A deployment
+ * holding no box git credential therefore cannot converge a box repo — the
+ * intended end state, not a degradation.
  *
  * Internal port (:8081) only. The caller must present a box-issued service
  * token (issuer trust binds the tenant slug) — a central Console JWT is
@@ -243,46 +124,6 @@ export const FetchBoxSecretsResponseSchema: GenMessage<FetchBoxSecretsResponse> 
  * @generated from service boxcredential.v1.BoxCredentialService
  */
 export const BoxCredentialService: GenService<{
-  /**
-   * DepositGitToken upserts the box's editor git credential for the calling
-   * tenant. Idempotent: the box seed Job re-deposits on every ArgoCD sync.
-   *
-   * @generated from rpc boxcredential.v1.BoxCredentialService.DepositGitToken
-   */
-  depositGitToken: {
-    methodKind: "unary";
-    input: typeof DepositGitTokenRequestSchema;
-    output: typeof DepositGitTokenResponseSchema;
-  },
-  /**
-   * DepositSnapshotToken upserts the bearer token guarding the box's
-   * published rill-snapshot endpoint (the sidecar's AUTH_TOKEN). Central's
-   * SnapshotService presents it when proxying a Console Save to the box.
-   * Idempotent: the box seed Job re-deposits on every ArgoCD sync.
-   *
-   * @generated from rpc boxcredential.v1.BoxCredentialService.DepositSnapshotToken
-   */
-  depositSnapshotToken: {
-    methodKind: "unary";
-    input: typeof DepositSnapshotTokenRequestSchema;
-    output: typeof DepositSnapshotTokenResponseSchema;
-  },
-  /**
-   * DepositAgePublicKey upserts the box's age PUBLIC key (the dlt-age
-   * keypair's recipient; the private key never leaves the box). The
-   * pipeline mirror encrypts source credentials to it and commits them as
-   * pipelines/<name>.credentials.age (pipelines-as-files Phase 3); a
-   * successful deposit triggers a best-effort mirror sync so existing
-   * pipelines get their credential files immediately. Idempotent: the dlt
-   * seed Job re-deposits on every ArgoCD sync.
-   *
-   * @generated from rpc boxcredential.v1.BoxCredentialService.DepositAgePublicKey
-   */
-  depositAgePublicKey: {
-    methodKind: "unary";
-    input: typeof DepositAgePublicKeyRequestSchema;
-    output: typeof DepositAgePublicKeyResponseSchema;
-  },
   /**
    * DepositFederationClient upserts the OAuth client the box minted for
    * itself so its users can sign in through the central identity provider.
@@ -307,7 +148,7 @@ export const BoxCredentialService: GenService<{
    * at first boot. Anything delivered that way can never be changed or
    * rotated without replacing the customer's machine. This is the day-2 path.
    *
-   * Same trust rules as the deposits — the slug is bound by issuer trust, so a
+   * Same trust rules as the deposit — the slug is bound by issuer trust, so a
    * box can only ever read its own secrets. Idempotent and safe to call on a
    * loop: the box sync Job re-reads on every ArgoCD sync, which is what makes
    * a central rotation converge without touching the box.

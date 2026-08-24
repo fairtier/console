@@ -31,6 +31,15 @@ export default {
       errors: {
         title: 'Query failed',
       },
+      ai: {
+        button: 'Ask AI',
+        placeholder: 'Describe the query — e.g. “revenue by month for the last year”',
+        draft: 'Draft SQL',
+        drafting: 'Drafting…',
+        notConfigured: 'AI drafting is coming soon — it is not enabled on this workspace yet.',
+        rateLimited: 'Too many AI requests right now. Give it a minute and try again.',
+        draftFailed: 'Could not draft the query',
+      },
       disabled: {
         title: 'Query engine is off',
         body: 'The SQL editor runs on the DuckFlight query engine. Enable it under Apps & BI to start querying.',
@@ -67,6 +76,15 @@ export default {
       },
       errors: {
         title: 'Dotaz selhal',
+      },
+      ai: {
+        button: 'Zeptat se AI',
+        placeholder: 'Popište dotaz — např. „tržby po měsících za poslední rok“',
+        draft: 'Navrhnout SQL',
+        drafting: 'Navrhuji…',
+        notConfigured: 'AI návrhy se chystají — na tomto workspace zatím nejsou zapnuté.',
+        rateLimited: 'Příliš mnoho AI požadavků. Chvíli počkejte a zkuste to znovu.',
+        draftFailed: 'Dotaz se nepodařilo navrhnout',
       },
       disabled: {
         title: 'Dotazovací engine je vypnutý',

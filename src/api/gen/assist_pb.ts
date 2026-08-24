@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file assist.proto.
  */
 export const file_assist: GenFile = /*@__PURE__*/
-  fileDesc("Cgxhc3Npc3QucHJvdG8SCWFzc2lzdC52MSIqCglEcmFmdEZpbGUSDAoEcGF0aBgBIAEoCRIPCgdjb250ZW50GAIgASgJIiwKGkRyYWZ0VHJhbnNmb3JtYXRpb25SZXF1ZXN0Eg4KBnByb21wdBgBIAEoCSKQAQobRHJhZnRUcmFuc2Zvcm1hdGlvblJlc3BvbnNlEj0KBWRyYWZ0GAEgASgLMi4udHJhbnNmb3JtYXRpb24udjEuQ3JlYXRlVHJhbnNmb3JtYXRpb25SZXF1ZXN0EiMKBWZpbGVzGAIgAygLMhQuYXNzaXN0LnYxLkRyYWZ0RmlsZRINCgVub3RlcxgDIAEoCSJDChlEcmFmdFJpbGxEYXNoYm9hcmRSZXF1ZXN0Eg4KBnByb21wdBgBIAEoCRIWCg5leGlzdGluZ19wYXRocxgCIAMoCSJQChpEcmFmdFJpbGxEYXNoYm9hcmRSZXNwb25zZRIjCgVmaWxlcxgBIAMoCzIULmFzc2lzdC52MS5EcmFmdEZpbGUSDQoFbm90ZXMYAiABKAky3AEKDUFzc2lzdFNlcnZpY2USZgoTRHJhZnRUcmFuc2Zvcm1hdGlvbhIlLmFzc2lzdC52MS5EcmFmdFRyYW5zZm9ybWF0aW9uUmVxdWVzdBomLmFzc2lzdC52MS5EcmFmdFRyYW5zZm9ybWF0aW9uUmVzcG9uc2UiABJjChJEcmFmdFJpbGxEYXNoYm9hcmQSJC5hc3Npc3QudjEuRHJhZnRSaWxsRGFzaGJvYXJkUmVxdWVzdBolLmFzc2lzdC52MS5EcmFmdFJpbGxEYXNoYm9hcmRSZXNwb25zZSIAQjxaOmdpdGh1Yi5jb20vZmFpcnRpZXIvd29ya3NwYWNlLWFwaS9wcm90by9hc3Npc3QvdjE7YXNzaXN0djFiBnByb3RvMw", [file_transformation]);
+  fileDesc("Cgxhc3Npc3QucHJvdG8SCWFzc2lzdC52MSIqCglEcmFmdEZpbGUSDAoEcGF0aBgBIAEoCRIPCgdjb250ZW50GAIgASgJIiwKGkRyYWZ0VHJhbnNmb3JtYXRpb25SZXF1ZXN0Eg4KBnByb21wdBgBIAEoCSKQAQobRHJhZnRUcmFuc2Zvcm1hdGlvblJlc3BvbnNlEj0KBWRyYWZ0GAEgASgLMi4udHJhbnNmb3JtYXRpb24udjEuQ3JlYXRlVHJhbnNmb3JtYXRpb25SZXF1ZXN0EiMKBWZpbGVzGAIgAygLMhQuYXNzaXN0LnYxLkRyYWZ0RmlsZRINCgVub3RlcxgDIAEoCSJDChlEcmFmdFJpbGxEYXNoYm9hcmRSZXF1ZXN0Eg4KBnByb21wdBgBIAEoCRIWCg5leGlzdGluZ19wYXRocxgCIAMoCSJQChpEcmFmdFJpbGxEYXNoYm9hcmRSZXNwb25zZRIjCgVmaWxlcxgBIAMoCzIULmFzc2lzdC52MS5EcmFmdEZpbGUSDQoFbm90ZXMYAiABKAkiNgoPRHJhZnRTcWxSZXF1ZXN0Eg4KBnByb21wdBgBIAEoCRITCgtjdXJyZW50X3NxbBgCIAEoCSIuChBEcmFmdFNxbFJlc3BvbnNlEgsKA3NxbBgBIAEoCRINCgVub3RlcxgCIAEoCSLBAQoTRXhwbGFpbkVycm9yUmVxdWVzdBI0CgxwaXBlbGluZV9ydW4YASABKAsyHC5hc3Npc3QudjEuUGlwZWxpbmVSdW5UYXJnZXRIABJAChJ0cmFuc2Zvcm1hdGlvbl9ydW4YAiABKAsyIi5hc3Npc3QudjEuVHJhbnNmb3JtYXRpb25SdW5UYXJnZXRIABIoCgNzcWwYAyABKAsyGS5hc3Npc3QudjEuU3FsRXJyb3JUYXJnZXRIAEIICgZ0YXJnZXQiOAoRUGlwZWxpbmVSdW5UYXJnZXQSEwoLcGlwZWxpbmVfaWQYASABKAkSDgoGcnVuX2lkGAIgASgJIkQKF1RyYW5zZm9ybWF0aW9uUnVuVGFyZ2V0EhkKEXRyYW5zZm9ybWF0aW9uX2lkGAEgASgJEg4KBnJ1bl9pZBgCIAEoCSI0Cg5TcWxFcnJvclRhcmdldBILCgNzcWwYASABKAkSFQoNZXJyb3JfbWVzc2FnZRgCIAEoCSJzChRFeHBsYWluRXJyb3JSZXNwb25zZRITCgtleHBsYW5hdGlvbhgBIAEoCRIUCgxsaWtlbHlfY2F1c2UYAiABKAkSFQoNc3VnZ2VzdGVkX2ZpeBgDIAEoCRIZChFzdWdnZXN0ZWRfc25pcHBldBgEIAEoCTL2AgoNQXNzaXN0U2VydmljZRJmChNEcmFmdFRyYW5zZm9ybWF0aW9uEiUuYXNzaXN0LnYxLkRyYWZ0VHJhbnNmb3JtYXRpb25SZXF1ZXN0GiYuYXNzaXN0LnYxLkRyYWZ0VHJhbnNmb3JtYXRpb25SZXNwb25zZSIAEmMKEkRyYWZ0UmlsbERhc2hib2FyZBIkLmFzc2lzdC52MS5EcmFmdFJpbGxEYXNoYm9hcmRSZXF1ZXN0GiUuYXNzaXN0LnYxLkRyYWZ0UmlsbERhc2hib2FyZFJlc3BvbnNlIgASRQoIRHJhZnRTcWwSGi5hc3Npc3QudjEuRHJhZnRTcWxSZXF1ZXN0GhsuYXNzaXN0LnYxLkRyYWZ0U3FsUmVzcG9uc2UiABJRCgxFeHBsYWluRXJyb3ISHi5hc3Npc3QudjEuRXhwbGFpbkVycm9yUmVxdWVzdBofLmFzc2lzdC52MS5FeHBsYWluRXJyb3JSZXNwb25zZSIAQjxaOmdpdGh1Yi5jb20vZmFpcnRpZXIvd29ya3NwYWNlLWFwaS9wcm90by9hc3Npc3QvdjE7YXNzaXN0djFiBnByb3RvMw", [file_transformation]);
 
 /**
  * DraftFile is one generated file, path relative to the target repo root.
@@ -147,6 +147,207 @@ export const DraftRillDashboardResponseSchema: GenMessage<DraftRillDashboardResp
   messageDesc(file_assist, 4);
 
 /**
+ * @generated from message assist.v1.DraftSqlRequest
+ */
+export type DraftSqlRequest = Message<"assist.v1.DraftSqlRequest"> & {
+  /**
+   * Natural-language request, e.g. "revenue by month for the last year".
+   *
+   * @generated from field: string prompt = 1;
+   */
+  prompt: string;
+
+  /**
+   * The editor's current SQL, for requests that refer to it ("add a filter
+   * to this"). Optional.
+   *
+   * @generated from field: string current_sql = 2;
+   */
+  currentSql: string;
+};
+
+/**
+ * Describes the message assist.v1.DraftSqlRequest.
+ * Use `create(DraftSqlRequestSchema)` to create a new message.
+ */
+export const DraftSqlRequestSchema: GenMessage<DraftSqlRequest> = /*@__PURE__*/
+  messageDesc(file_assist, 5);
+
+/**
+ * @generated from message assist.v1.DraftSqlResponse
+ */
+export type DraftSqlResponse = Message<"assist.v1.DraftSqlResponse"> & {
+  /**
+   * One DuckDB SELECT statement. Never executed server-side.
+   *
+   * @generated from field: string sql = 1;
+   */
+  sql: string;
+
+  /**
+   * Explanation, assumptions, and (when EXPLAIN failed) the engine's own
+   * validation message.
+   *
+   * @generated from field: string notes = 2;
+   */
+  notes: string;
+};
+
+/**
+ * Describes the message assist.v1.DraftSqlResponse.
+ * Use `create(DraftSqlResponseSchema)` to create a new message.
+ */
+export const DraftSqlResponseSchema: GenMessage<DraftSqlResponse> = /*@__PURE__*/
+  messageDesc(file_assist, 6);
+
+/**
+ * @generated from message assist.v1.ExplainErrorRequest
+ */
+export type ExplainErrorRequest = Message<"assist.v1.ExplainErrorRequest"> & {
+  /**
+   * @generated from oneof assist.v1.ExplainErrorRequest.target
+   */
+  target: {
+    /**
+     * @generated from field: assist.v1.PipelineRunTarget pipeline_run = 1;
+     */
+    value: PipelineRunTarget;
+    case: "pipelineRun";
+  } | {
+    /**
+     * @generated from field: assist.v1.TransformationRunTarget transformation_run = 2;
+     */
+    value: TransformationRunTarget;
+    case: "transformationRun";
+  } | {
+    /**
+     * @generated from field: assist.v1.SqlErrorTarget sql = 3;
+     */
+    value: SqlErrorTarget;
+    case: "sql";
+  } | { case: undefined; value?: undefined };
+};
+
+/**
+ * Describes the message assist.v1.ExplainErrorRequest.
+ * Use `create(ExplainErrorRequestSchema)` to create a new message.
+ */
+export const ExplainErrorRequestSchema: GenMessage<ExplainErrorRequest> = /*@__PURE__*/
+  messageDesc(file_assist, 7);
+
+/**
+ * PipelineRunTarget names one run of the caller's own pipeline; the run must
+ * be among the pipeline's recent runs (NOT_FOUND otherwise).
+ *
+ * @generated from message assist.v1.PipelineRunTarget
+ */
+export type PipelineRunTarget = Message<"assist.v1.PipelineRunTarget"> & {
+  /**
+   * @generated from field: string pipeline_id = 1;
+   */
+  pipelineId: string;
+
+  /**
+   * @generated from field: string run_id = 2;
+   */
+  runId: string;
+};
+
+/**
+ * Describes the message assist.v1.PipelineRunTarget.
+ * Use `create(PipelineRunTargetSchema)` to create a new message.
+ */
+export const PipelineRunTargetSchema: GenMessage<PipelineRunTarget> = /*@__PURE__*/
+  messageDesc(file_assist, 8);
+
+/**
+ * @generated from message assist.v1.TransformationRunTarget
+ */
+export type TransformationRunTarget = Message<"assist.v1.TransformationRunTarget"> & {
+  /**
+   * @generated from field: string transformation_id = 1;
+   */
+  transformationId: string;
+
+  /**
+   * @generated from field: string run_id = 2;
+   */
+  runId: string;
+};
+
+/**
+ * Describes the message assist.v1.TransformationRunTarget.
+ * Use `create(TransformationRunTargetSchema)` to create a new message.
+ */
+export const TransformationRunTargetSchema: GenMessage<TransformationRunTarget> = /*@__PURE__*/
+  messageDesc(file_assist, 9);
+
+/**
+ * SqlErrorTarget carries a failed editor query verbatim.
+ *
+ * @generated from message assist.v1.SqlErrorTarget
+ */
+export type SqlErrorTarget = Message<"assist.v1.SqlErrorTarget"> & {
+  /**
+   * @generated from field: string sql = 1;
+   */
+  sql: string;
+
+  /**
+   * @generated from field: string error_message = 2;
+   */
+  errorMessage: string;
+};
+
+/**
+ * Describes the message assist.v1.SqlErrorTarget.
+ * Use `create(SqlErrorTargetSchema)` to create a new message.
+ */
+export const SqlErrorTargetSchema: GenMessage<SqlErrorTarget> = /*@__PURE__*/
+  messageDesc(file_assist, 10);
+
+/**
+ * @generated from message assist.v1.ExplainErrorResponse
+ */
+export type ExplainErrorResponse = Message<"assist.v1.ExplainErrorResponse"> & {
+  /**
+   * Plain-language description of what failed.
+   *
+   * @generated from field: string explanation = 1;
+   */
+  explanation: string;
+
+  /**
+   * The single most likely root cause.
+   *
+   * @generated from field: string likely_cause = 2;
+   */
+  likelyCause: string;
+
+  /**
+   * What to do next, concretely.
+   *
+   * @generated from field: string suggested_fix = 3;
+   */
+  suggestedFix: string;
+
+  /**
+   * A corrected SQL/config fragment when the model is confident; often empty.
+   * Rendered read-only — applying it is always the user's explicit action.
+   *
+   * @generated from field: string suggested_snippet = 4;
+   */
+  suggestedSnippet: string;
+};
+
+/**
+ * Describes the message assist.v1.ExplainErrorResponse.
+ * Use `create(ExplainErrorResponseSchema)` to create a new message.
+ */
+export const ExplainErrorResponseSchema: GenMessage<ExplainErrorResponse> = /*@__PURE__*/
+  messageDesc(file_assist, 11);
+
+/**
  * AssistService drafts dbt transformations and Rill dashboards from
  * natural-language descriptions using an LLM. Like
  * pipeline_assist.v1.PipelineAssistService (which may be aliased into this
@@ -185,6 +386,37 @@ export const AssistService: GenService<{
     methodKind: "unary";
     input: typeof DraftRillDashboardRequestSchema;
     output: typeof DraftRillDashboardResponseSchema;
+  },
+  /**
+   * DraftSql turns a natural-language request into one read-only DuckDB
+   * query. The server assembles the schema context from the caller's own
+   * warehouse (all table names, column detail for the most relevant few) and
+   * validates the draft with EXPLAIN best-effort — a statement the engine
+   * rejects still comes back, with the engine's message in notes. The draft
+   * is inserted into the editor, NEVER executed automatically.
+   *
+   * @generated from rpc assist.v1.AssistService.DraftSql
+   */
+  draftSql: {
+    methodKind: "unary";
+    input: typeof DraftSqlRequestSchema;
+    output: typeof DraftSqlResponseSchema;
+  },
+  /**
+   * ExplainError explains one failure in plain language. For pipeline and
+   * transformation runs the client sends only ids — the server assembles the
+   * trusted context from the caller's own rows (config without credentials,
+   * run status, the stored error text) so nothing client-supplied poses as
+   * trusted data. The SQL target is the exception: the editor's SQL and
+   * engine error are client-supplied because the server keeps no query
+   * history.
+   *
+   * @generated from rpc assist.v1.AssistService.ExplainError
+   */
+  explainError: {
+    methodKind: "unary";
+    input: typeof ExplainErrorRequestSchema;
+    output: typeof ExplainErrorResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_assist, 0);

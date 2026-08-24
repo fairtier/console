@@ -15,6 +15,8 @@ import DemoProjectCard from '../components/DemoProjectCard.vue'
 import { useToast } from '../composables/useToast'
 import { useConfirm } from '../composables/useConfirm'
 import { useCronText } from '../composables/useCronText'
+import { useExplain } from '../composables/useExplain'
+import ExplainPanel from '../components/ExplainPanel.vue'
 
 const { t } = useI18n()
 const toast = useToast()
@@ -254,6 +256,20 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', closeMenus, true)
   window.removeEventListener('resize', closeMenus)
 })
+
+// AI "Explain" on a failed run: ids only leave the browser; the server
+// assembles the trusted context (config, failed dbt nodes, error) itself.
+const { open: explainOpen, loading: explaining, result: explainResult, explain, close: closeExplain } = useExplain()
+const explainingRunId = ref('')
+
+async function explainRun(transformationId: string, runId: string) {
+  explainingRunId.value = runId
+  try {
+    await explain({ case: 'transformationRun', value: { transformationId, runId } })
+  } finally {
+    explainingRunId.value = ''
+  }
+}
 
 async function toggleRuns(id: string) {
   if (expandedId.value === id) {
@@ -1035,7 +1051,19 @@ async function copyFile(f: DraftFile) {
                 {{ t('transformationsUi.runs.modelsCount', { total: run.modelsTotal, failed: run.modelsFailed }) }}
                 <template v-if="run.testsTotal"> · {{ t('transformationsUi.runs.testsCount', { total: run.testsTotal, failed: run.testsFailed }) }}</template>
               </div>
-              <div style="color:var(--err); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" :title="run.errorMessage">{{ run.errorMessage }}</div>
+              <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                <div style="flex:1; color:var(--err); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" :title="run.errorMessage">{{ run.errorMessage }}</div>
+                <button
+                  v-if="run.errorMessage"
+                  :disabled="explaining"
+                  style="display:inline-flex; align-items:center; gap:5px; flex:none; padding:3px 8px; border:1px solid var(--line); border-radius:7px; background:var(--surface); cursor:pointer; font-family:inherit; font-size:11.5px; font-weight:600; color:var(--ink-2);"
+                  @click="explainRun(expandedId ?? '', run.id)"
+                >
+                  <Spinner v-if="explaining && explainingRunId === run.id" :size="11" />
+                  <Icon v-else name="sparkle" :size="11" />
+                  {{ t('explainUi.button') }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1049,5 +1077,7 @@ async function copyFile(f: DraftFile) {
     >
       <Icon name="link" :size="13" />{{ t('gitMirror.movedLink') }}
     </RouterLink>
+
+    <ExplainPanel :open="explainOpen" :result="explainResult" @close="closeExplain" />
   </div>
 </template>

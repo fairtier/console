@@ -189,8 +189,13 @@ export type TransformationRun = Message<"transformation.v1.TransformationRun"> &
   testsFailed: number;
 
   /**
-   * JSON array of per-node results:
-   *   [{"name", "status", "execution_time", "message"}, ...]
+   * JSON array of per-node results, each entry carrying "name", "status",
+   * "execution_time" and "message".
+   *
+   * (No indented lines here on purpose: protoc-gen-go runs the comment through
+   * gofmt's doc-comment formatter, which turns an indented block into a code
+   * block — and does it differently across Go releases, so the committed stub
+   * would drift from what CI's toolchain regenerates.)
    *
    * @generated from field: string model_results = 11;
    */
