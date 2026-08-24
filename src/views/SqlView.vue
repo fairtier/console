@@ -42,10 +42,13 @@ async function askAi() {
     aiCannotAnswer.value = false
     try {
         const resp = await assistClient.draftSql({ prompt, currentSql: store.sql })
-        if (resp.sql) {
-            store.setSql(resp.sql)
-        } else {
+        // Branch on the explicit refusal code; `|| !resp.sql` only covers a
+        // server predating the no_relevant_data field (workspace-api <0.26.0),
+        // which signaled refusal with an empty sql.
+        if (resp.noRelevantData || !resp.sql) {
             aiCannotAnswer.value = true
+        } else {
+            store.setSql(resp.sql)
         }
         aiNotes.value = resp.notes
     } catch (err) {
