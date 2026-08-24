@@ -110,6 +110,10 @@ const isEdit = computed(() => editId.value !== '')
 // --- Describe step (AI drafting via PipelineAssistService) ---
 const aiPrompt = ref('')
 const drafting = ref(false)
+// Non-empty after a draft the platform refused as infeasible (e.g. an
+// unsupported database engine); rendered as a standing panel, not a toast.
+const unsupportedReason = ref('')
+const unsupportedNotes = ref('')
 
 // --- Configure step (the real, functional path) ---
 const form = reactive({
@@ -698,8 +702,18 @@ async function draftPipeline() {
   const prompt = aiPrompt.value.trim()
   if (!prompt || drafting.value) return
   drafting.value = true
+  unsupportedReason.value = ''
+  unsupportedNotes.value = ''
   try {
     const resp = await pipelineAssistClient.draftPipeline({ prompt })
+    // The refusal path: the request needs a capability the platform does not
+    // have. Stay on Describe and show the standing reason — pre-filling the
+    // wizard would invite configuring the very thing that cannot run.
+    if (resp.unsupportedReason) {
+      unsupportedReason.value = resp.unsupportedReason
+      unsupportedNotes.value = resp.notes
+      return
+    }
     if (resp.draft) applyDraft(resp.draft)
     if (resp.notes) toast.info(resp.notes)
     goConfigure()
@@ -798,6 +812,17 @@ function finishFiles() {
             @click="aiPrompt = t('pipelinesUi.wizard.describe.examples.sheets')"
             style="border:1px solid var(--line); background:var(--surface-2); border-radius:20px; padding:5px 12px; font-family:inherit; font-size:12px; color:var(--ink-2); cursor:pointer;"
           >{{ t('pipelinesUi.wizard.describe.examples.sheets') }}</button>
+        </div>
+        <div
+          v-if="unsupportedReason"
+          style="display:flex; align-items:flex-start; gap:11px; background:var(--warn-soft); border:1px solid var(--warn); border-radius:14px; padding:14px 16px; margin-top:16px;"
+        >
+          <Icon name="info" :size="18" :style="{ color: 'var(--warn-ink)', flex: 'none', marginTop: '1px' }" />
+          <div style="font-size:13.5px; color:var(--ink); line-height:1.55;">
+            <div style="font-weight:700; color:var(--warn-ink); margin-bottom:3px;">{{ t('pipelinesUi.wizard.describe.unsupportedTitle') }}</div>
+            <div>{{ unsupportedReason }}</div>
+            <div v-if="unsupportedNotes" style="margin-top:6px; color:var(--ink-2);">{{ unsupportedNotes }}</div>
+          </div>
         </div>
         <div style="display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-top:22px;">
           <button

@@ -78,6 +78,7 @@ export default {
           draft: 'Draft with AI',
           notConfigured: "AI drafting isn't enabled on this server yet — set the pipeline up with the guided form.",
           draftFailed: "Couldn't draft the pipeline. Try rewording, or set it up manually.",
+          unsupportedTitle: "We can't ingest from that source yet",
         },
         review: {
           title: 'Review the draft',
@@ -256,6 +257,7 @@ export default {
           draft: 'Navrhnout s AI',
           notConfigured: 'Návrh pomocí AI zatím na tomto serveru není zapnutý — nastavte pipeline pomocí průvodce.',
           draftFailed: 'Návrh pipeline se nezdařil. Zkuste přeformulovat zadání, nebo nastavte ručně.',
+          unsupportedTitle: 'Z tohoto zdroje zatím načítat neumíme',
         },
         review: {
           title: 'Kontrola návrhu',

@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file pipeline_assist.proto.
  */
 export const file_pipeline_assist: GenFile = /*@__PURE__*/
-  fileDesc("ChVwaXBlbGluZV9hc3Npc3QucHJvdG8SEnBpcGVsaW5lX2Fzc2lzdC52MSImChREcmFmdFBpcGVsaW5lUmVxdWVzdBIOCgZwcm9tcHQYASABKAkiWQoVRHJhZnRQaXBlbGluZVJlc3BvbnNlEjEKBWRyYWZ0GAEgASgLMiIucGlwZWxpbmUudjEuQ3JlYXRlUGlwZWxpbmVSZXF1ZXN0Eg0KBW5vdGVzGAIgASgJMn8KFVBpcGVsaW5lQXNzaXN0U2VydmljZRJmCg1EcmFmdFBpcGVsaW5lEigucGlwZWxpbmVfYXNzaXN0LnYxLkRyYWZ0UGlwZWxpbmVSZXF1ZXN0GikucGlwZWxpbmVfYXNzaXN0LnYxLkRyYWZ0UGlwZWxpbmVSZXNwb25zZSIAQk1aS2dpdGh1Yi5jb20vZmFpcnRpZXIvd29ya3NwYWNlLWFwaS9wcm90by9waXBlbGluZV9hc3Npc3QvdjE7cGlwZWxpbmVhc3Npc3R2MWIGcHJvdG8z", [file_pipeline]);
+  fileDesc("ChVwaXBlbGluZV9hc3Npc3QucHJvdG8SEnBpcGVsaW5lX2Fzc2lzdC52MSImChREcmFmdFBpcGVsaW5lUmVxdWVzdBIOCgZwcm9tcHQYASABKAkidQoVRHJhZnRQaXBlbGluZVJlc3BvbnNlEjEKBWRyYWZ0GAEgASgLMiIucGlwZWxpbmUudjEuQ3JlYXRlUGlwZWxpbmVSZXF1ZXN0Eg0KBW5vdGVzGAIgASgJEhoKEnVuc3VwcG9ydGVkX3JlYXNvbhgDIAEoCTJ/ChVQaXBlbGluZUFzc2lzdFNlcnZpY2USZgoNRHJhZnRQaXBlbGluZRIoLnBpcGVsaW5lX2Fzc2lzdC52MS5EcmFmdFBpcGVsaW5lUmVxdWVzdBopLnBpcGVsaW5lX2Fzc2lzdC52MS5EcmFmdFBpcGVsaW5lUmVzcG9uc2UiAEJNWktnaXRodWIuY29tL2ZhaXJ0aWVyL3dvcmtzcGFjZS1hcGkvcHJvdG8vcGlwZWxpbmVfYXNzaXN0L3YxO3BpcGVsaW5lYXNzaXN0djFiBnByb3RvMw", [file_pipeline]);
 
 /**
  * @generated from message pipeline_assist.v1.DraftPipelineRequest
@@ -41,6 +41,7 @@ export type DraftPipelineResponse = Message<"pipeline_assist.v1.DraftPipelineRes
   /**
    * The drafted pipeline request, pre-filled and validated. Its
    * source_credentials field is always empty — the model never drafts secrets.
+   * Unset when unsupported_reason is non-empty.
    *
    * @generated from field: pipeline.v1.CreatePipelineRequest draft = 1;
    */
@@ -53,6 +54,17 @@ export type DraftPipelineResponse = Message<"pipeline_assist.v1.DraftPipelineRes
    * @generated from field: string notes = 2;
    */
   notes: string;
+
+  /**
+   * Non-empty when the request asks for something the platform cannot ingest
+   * (e.g. a database engine no installed worker driver reaches): what is
+   * missing and what the user could do instead. The Console renders this
+   * instead of pre-filling the wizard. Empty string (the proto3 default, so
+   * old drafts stay feasible) means the draft is usable.
+   *
+   * @generated from field: string unsupported_reason = 3;
+   */
+  unsupportedReason: string;
 };
 
 /**
