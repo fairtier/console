@@ -28,6 +28,10 @@ const toast = useToast()
 const aiOpen = ref(false)
 const aiPrompt = ref('')
 const aiNotes = ref('')
+// The model's "cannot answer": the warehouse holds nothing relevant, so
+// there is no draft — the notes say what's missing. Styles the notes as a
+// warning and leaves the editor untouched.
+const aiCannotAnswer = ref(false)
 const drafting = ref(false)
 
 async function askAi() {
@@ -35,9 +39,14 @@ async function askAi() {
     if (!prompt || drafting.value) return
     drafting.value = true
     aiNotes.value = ''
+    aiCannotAnswer.value = false
     try {
         const resp = await assistClient.draftSql({ prompt, currentSql: store.sql })
-        store.setSql(resp.sql)
+        if (resp.sql) {
+            store.setSql(resp.sql)
+        } else {
+            aiCannotAnswer.value = true
+        }
         aiNotes.value = resp.notes
     } catch (err) {
         if (err instanceof ConnectError && err.code === Code.Unimplemented) {
@@ -175,8 +184,14 @@ function previewTable(table: TableRef) {
                             {{ drafting ? t('sqlUi.ai.drafting') : t('sqlUi.ai.draft') }}
                         </button>
                     </div>
-                    <div v-if="aiNotes" class="mt-1.5 text-[12px] leading-relaxed" style="color: var(--ink-2)">
-                        {{ aiNotes }}
+                    <div
+                        v-if="aiNotes"
+                        class="mt-1.5 text-[12px] leading-relaxed"
+                        :style="aiCannotAnswer
+                            ? 'color: var(--warn-ink); background: var(--warn-soft); border: 1px solid var(--warn); border-radius: 9px; padding: 8px 10px;'
+                            : 'color: var(--ink-2)'"
+                    >
+                        <span v-if="aiCannotAnswer" class="font-semibold">{{ t('sqlUi.ai.cannotAnswer') }} </span>{{ aiNotes }}
                     </div>
                 </div>
 

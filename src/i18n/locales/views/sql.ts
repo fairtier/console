@@ -39,6 +39,7 @@ export default {
         notConfigured: 'AI drafting is coming soon — it is not enabled on this workspace yet.',
         rateLimited: 'Too many AI requests right now. Give it a minute and try again.',
         draftFailed: 'Could not draft the query',
+        cannotAnswer: 'Your warehouse has no data for this.',
       },
       disabled: {
         title: 'Query engine is off',
@@ -85,6 +86,7 @@ export default {
         notConfigured: 'AI návrhy se chystají — na tomto workspace zatím nejsou zapnuté.',
         rateLimited: 'Příliš mnoho AI požadavků. Chvíli počkejte a zkuste to znovu.',
         draftFailed: 'Dotaz se nepodařilo navrhnout',
+        cannotAnswer: 'Váš warehouse pro tohle nemá žádná data.',
       },
       disabled: {
         title: 'Dotazovací engine je vypnutý',
