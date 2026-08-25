@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM oven/bun:1.3-slim AS builder
+FROM oven/bun:1.4-slim AS builder
 WORKDIR /app
 
 COPY package.json bun.lock ./
@@ -11,7 +11,7 @@ ENV NODE_ENV=production
 RUN bun --env-file="" run build
 
 # Stage 2: Runtime
-FROM oven/bun:1.3-slim
+FROM oven/bun:1.4-slim
 WORKDIR /app
 
 # Only copy what we need: the built assets and the server script

@@ -16,7 +16,7 @@ belong to whoever hosts the workspace, not to this app.
 
 ## Tech Stack (2026 Standards)
 
-- **Runtime & PM:** Bun 1.3+ (Zig-powered).
+- **Runtime & PM:** Bun 1.4+ (Rust-powered — 1.4 rewrote Bun from Zig to Rust).
 - **Frontend:** Vue 3.5+ (Composition API with `<script setup>`).
 - **Build Tool:** Vite + Rolldown (Rust-powered unified bundler).
 - **State:** Pinia (Store-per-feature).
@@ -117,11 +117,15 @@ framing, which is not a `fetch` call.
 ## Claude-Specific Instructions
 
 1. **Always use Bun:** Do not suggest `npm`, `yarn`, or `node` commands.
-   *One documented exception:* Playwright has no Bun-native runner. It is still
-   invoked as `bun run test:e2e` — the Node process is started by the OS
-   honouring `node_modules/.bin/playwright`'s `#!/usr/bin/env node` shebang, not
-   by anyone typing `node`. Do not "fix" this by adding `--bun`; the Playwright
-   runner does not work under Bun's runtime.
+   *One partial exception:* Playwright ships no Bun-native runner of its own.
+   `bun run test:e2e` resolves `node_modules/.bin/playwright`, whose
+   `#!/usr/bin/env node` shebang hands execution to Node — started by the OS,
+   not by anyone typing `node`. That is still the default, and CI runs it.
+   Bun 1.4 added support for running `playwright test` under Bun's own runtime
+   (`bun --bun run test:e2e`), and the smoke suite was verified green that way
+   on 2026-08-25. It is an option, not the default: Node is what Playwright
+   supports upstream, so a failure there is a real failure rather than a
+   runtime question. Do not switch the scripts or CI over without a reason to.
 2. **Speed over Bloat:** Prefer Bun's built-in APIs (e.g., `Bun.password`,
    `Bun.sqlite`, `Bun.SQL`) over adding heavy npm dependencies.
    *One documented exception,* where the alternative was reimplementing a

@@ -55,11 +55,13 @@ Two tiers, and the split is enforced by config rather than habit:
   No backend and no identity provider — anything behind the login needs a real
   workspace, and is tested against one.
 
-Playwright's runner is Node-based — there is no Bun-native equivalent — but it
-is still invoked through Bun: `bun run test:e2e` resolves
-`node_modules/.bin/playwright`, whose `#!/usr/bin/env node` shebang hands
-execution to Node. Do not "fix" this with `--bun`; the runner does not work
-under Bun's runtime.
+Playwright ships no Bun-native runner, but it is still invoked through Bun:
+`bun run test:e2e` resolves `node_modules/.bin/playwright`, whose
+`#!/usr/bin/env node` shebang hands execution to Node. Since Bun 1.4 the suite
+*also* runs under Bun's own runtime (`bun --bun run test:e2e`, verified green
+2026-08-25). Node stays the default and is what CI runs — it is the runtime
+Playwright supports upstream, so a failure there is a real failure rather than
+a runtime question.
 
 ## Updating dependencies
 

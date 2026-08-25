@@ -7,6 +7,6 @@ plugins:
   # remote plugin re-resolves to whatever is current and rewrites every stub's
   # header, which would make the CI drift check fail spuriously. Keep this in
   # step with the @bufbuild/protobuf runtime in package.json.
-  - remote: buf.build/bufbuild/es:v2.13.0
+  - remote: buf.build/bufbuild/es:v2.14.0
     out: src/api/gen
     opt: target=ts
