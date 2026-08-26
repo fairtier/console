@@ -114,7 +114,18 @@ const loadingEdit = ref(false)
 const source = computed(() => sourceFor(form.sourceType))
 
 // The <select>, driven by the registry rather than a hardcoded list.
-const sourceOptions = computed(() => SOURCES.map((s) => ({ value: s.id, label: t(s.labelKey) })))
+const sourceOptions = computed(() => {
+  const opts = SOURCES.map((s) => ({ value: s.id, label: t(s.labelKey) }))
+  // A pipeline can hold a source_type this build has never heard of — a newer
+  // workspace-api, a self-hoster's own source. With no <option> for it the
+  // select falls back to displaying the first entry, and saving then rewrites
+  // the pipeline's type to that one without the user touching the control.
+  // So the current type is always selectable, named by itself.
+  if (form.sourceType && !SOURCES.some((s) => s.id === form.sourceType)) {
+    opts.push({ value: form.sourceType, label: form.sourceType })
+  }
+  return opts
+})
 
 function addRange() {
   const v = rangeDraft.value.trim()
