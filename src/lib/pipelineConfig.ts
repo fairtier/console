@@ -1,88 +1,14 @@
-// Pure pipeline-config logic, lifted out of PipelineWizardView.
+// Pipeline config assembly and validation, lifted out of PipelineWizardView.
 //
 // The wizard offers two ways to describe a source: a guided form with named
-// fields, and a raw JSON editor. Everything that decides *which* of the two a
-// stored config can be shown in — and how a server validation error finds the
-// field that caused it — is plain data-in/data-out, so it lives here where
-// `bun test` can reach it rather than inside an SFC where nothing can.
+// fields, and a raw JSON editor. What each source type knows about its own
+// guided form lives in ./pipelineSources; this module is the part that is the
+// same for all of them — packing the form into a config, unpacking a stored
+// config back into the form, and routing a server validation error to the
+// field that caused it.
 
-/**
- * A rest_api resource as the backend expects it: name and endpoint are both
- * required (see domain.restAPIResource). The guided form models the full
- * object so object-shaped configs round-trip instead of being flattened to
- * bare names.
- */
-export interface RestResource {
-    name: string
-    endpoint: string
-}
-
-// Keys the guided rest_api form can fully represent. Any config carrying more
-// than these (params, paginator, incremental, per-resource primary_key, …)
-// falls back to the advanced JSON editor so nothing is silently dropped.
-const GUIDED_REST_KEYS = new Set(['base_url', 'resources', 'auth_method', 'pagination'])
-
-// Keys the guided google_sheets form can fully represent (mirrors
-// domain.googleSheetsConfig). Anything else falls back to advanced JSON.
-const GUIDED_SHEETS_KEYS = new Set(['spreadsheet_url_or_id', 'range_names'])
-
-/**
- * toRestResource normalizes one entry of a rest_api `resources` array into the
- * object shape the guided form edits. A bare string is the shorthand the
- * backend also accepts; its endpoint is derived the same way the Add button
- * derives one. Returns null for anything unnamed, which the caller filters out.
- */
-export function toRestResource(r: unknown): RestResource | null {
-    if (typeof r === 'string') return r ? { name: r, endpoint: '/' + r } : null
-    if (r && typeof r === 'object') {
-        const o = r as Record<string, unknown>
-        const name = typeof o.name === 'string' ? o.name : ''
-        if (!name) return null
-        const endpoint = typeof o.endpoint === 'string' && o.endpoint ? o.endpoint : '/' + name
-        return { name, endpoint }
-    }
-    return null
-}
-
-/**
- * restApiIsGuidable reports whether a parsed rest_api config fits the guided
- * form: only known top-level keys, and every resource either a string or a
- * plain {name, endpoint} object. A false here is what sends the wizard to the
- * advanced JSON editor.
- */
-export function restApiIsGuidable(parsed: Record<string, unknown>): boolean {
-    for (const k of Object.keys(parsed)) {
-        if (!GUIDED_REST_KEYS.has(k)) return false
-    }
-    if (parsed.resources !== undefined) {
-        if (!Array.isArray(parsed.resources)) return false
-        for (const r of parsed.resources) {
-            if (typeof r === 'string') continue
-            if (r && typeof r === 'object' && !Array.isArray(r)) {
-                for (const rk of Object.keys(r)) {
-                    if (rk !== 'name' && rk !== 'endpoint') return false
-                }
-                continue
-            }
-            return false
-        }
-    }
-    return true
-}
-
-/** sheetsIsGuidable is restApiIsGuidable's counterpart for google_sheets. */
-export function sheetsIsGuidable(parsed: Record<string, unknown>): boolean {
-    for (const k of Object.keys(parsed)) {
-        if (!GUIDED_SHEETS_KEYS.has(k)) return false
-    }
-    if (parsed.range_names !== undefined) {
-        if (!Array.isArray(parsed.range_names)) return false
-        for (const r of parsed.range_names) {
-            if (typeof r !== 'string') return false
-        }
-    }
-    return true
-}
+import { sourceFor } from './pipelineSources'
+import type { PipelineForm } from './pipelineSources'
 
 /**
  * isValidJson treats blank as valid — an empty credentials or config box means
@@ -95,6 +21,61 @@ export function isValidJson(s: string): boolean {
         return true
     } catch {
         return false
+    }
+}
+
+/**
+ * buildSourceConfig produces the source_config to save. Advanced JSON always
+ * wins when the user has switched it on, and it is the only option for a type
+ * with no guided form. Throws on unparseable JSON — the caller reports it as a
+ * validation error rather than saving something the box cannot read.
+ */
+export function buildSourceConfig(form: PipelineForm, advancedJson: boolean): unknown {
+    const source = sourceFor(form.sourceType)
+    if (advancedJson || !source.guided) {
+        const raw = form.sourceConfigRaw.trim()
+        return raw ? JSON.parse(raw) : {}
+    }
+    return source.toConfig(form)
+}
+
+/** What a stored source_config unpacks into. */
+export interface UnpackedConfig {
+    /** Guided form fields to merge into the wizard's form. */
+    fields: Partial<PipelineForm>
+    /** Pretty-printed config for the JSON editor, kept whichever mode wins. */
+    raw: string
+    /** True when the config cannot be shown in a guided form. */
+    advanced: boolean
+}
+
+/**
+ * unpackSourceConfig turns a stored (or drafted) source_config into form
+ * state. One function for both entry points: an edit and an AI draft land on
+ * the same form, and they used to unpack it with two near-identical copies
+ * that had already drifted apart at the edges.
+ *
+ * A guidable config fills the guided fields; anything else opens the JSON
+ * editor. The raw text is kept either way so the guided/advanced toggle
+ * always has something to show — except for a type whose config is not
+ * hand-edited at all (file_upload's platform-managed file list), which is kept
+ * so saving round-trips it but never switches the wizard into JSON mode.
+ */
+export function unpackSourceConfig(sourceType: string, sourceConfig: string): UnpackedConfig {
+    const source = sourceFor(sourceType)
+    let parsed: Record<string, unknown> | null = null
+    try {
+        parsed = sourceConfig ? (JSON.parse(sourceConfig) as Record<string, unknown>) : {}
+    } catch {
+        parsed = null
+    }
+    if (source.guided && parsed && source.isGuidable(parsed)) {
+        return { fields: source.toForm(parsed), raw: JSON.stringify(parsed, null, 2), advanced: false }
+    }
+    return {
+        fields: {},
+        raw: sourceConfig ? JSON.stringify(parsed ?? {}, null, 2) : '',
+        advanced: !source.fileDrop,
     }
 }
 

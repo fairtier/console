@@ -13,6 +13,7 @@ import { useToast } from '../composables/useToast'
 import { useConfirm } from '../composables/useConfirm'
 import { useCronText } from '../composables/useCronText'
 import { useExplain } from '../composables/useExplain'
+import { sourceFor } from '../lib/pipelineSources'
 import ExplainPanel from '../components/ExplainPanel.vue'
 
 const { t } = useI18n()
@@ -61,26 +62,16 @@ async function loadPipelines(silent = false) {
   }
 }
 
-// --- Source-type presentation (abbr / label / colours), ported from the design.
-interface SourceMeta {
-  abbr: string
-  labelKey: string
-  bg: string
-  fg: string
-}
-const SOURCE_META: Record<string, SourceMeta> = {
-  rest_api: { abbr: 'API', labelKey: 'pipelines.sourceTypes.rest_api', bg: 'var(--accent-soft)', fg: 'var(--accent-soft-ink)' },
-  sql_database: { abbr: 'SQL', labelKey: 'pipelines.sourceTypes.sql_database', bg: 'var(--info-soft)', fg: 'var(--info-ink)' },
-  filesystem: { abbr: 'FS', labelKey: 'pipelines.sourceTypes.filesystem', bg: 'var(--clay-soft)', fg: 'var(--clay-soft-ink)' },
-  google_sheets: { abbr: 'GS', labelKey: 'pipelines.sourceTypes.google_sheets', bg: 'var(--ok-soft)', fg: 'var(--ok-ink)' },
-  file_upload: { abbr: 'UP', labelKey: 'pipelines.sourceTypes.file_upload', bg: 'var(--warn-soft)', fg: 'var(--warn-ink)' },
-}
-function sourceMeta(type: string): SourceMeta {
-  return SOURCE_META[type] ?? { abbr: type.slice(0, 3).toUpperCase(), labelKey: '', bg: 'var(--inset)', fg: 'var(--ink-2)' }
+// --- Source-type presentation (abbr / colours), from the shared registry:
+// the same module the wizard reads, so a new source type is one file and both
+// views follow. An unknown type still renders — a neutral badge abbreviated
+// from the type itself, and the raw type as its label.
+function sourceMeta(type: string) {
+  return sourceFor(type).badge
 }
 function sourceLabel(type: string): string {
-  const meta = SOURCE_META[type]
-  return meta ? t(meta.labelKey) : type
+  const { labelKey } = sourceFor(type)
+  return labelKey ? t(labelKey) : type
 }
 
 // --- Relative-time formatter for the last-run column. Best-effort buckets

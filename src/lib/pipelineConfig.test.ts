@@ -1,98 +1,30 @@
 import { describe, expect, test } from 'bun:test'
-import {
-    formFieldFor,
-    isValidJson,
-    restApiIsGuidable,
-    sheetsIsGuidable,
-    toRestResource,
-} from './pipelineConfig'
+import { buildSourceConfig, formFieldFor, isValidJson, unpackSourceConfig } from './pipelineConfig'
+import type { PipelineForm } from './pipelineSources'
 
-// These characterize the guided-vs-advanced decision as it stands. The
-// promise being pinned is not "the guided form is clever" but the opposite:
-// it must refuse anything it cannot render, because accepting a config it
-// only half-understands means saving it back with the rest silently dropped.
-
-describe('restApiIsGuidable', () => {
-    test('accepts the four keys the guided form has fields for', () => {
-        expect(
-            restApiIsGuidable({
-                base_url: 'https://api.example.com',
-                resources: ['users', 'orders'],
-                auth_method: 'bearer',
-                pagination: 'cursor',
-            }),
-        ).toBe(true)
-    })
-
-    test('accepts an empty config — a brand new pipeline', () => {
-        expect(restApiIsGuidable({})).toBe(true)
-    })
-
-    test('rejects any key the form would drop on save', () => {
-        // The exact keys named in the review: a config carrying these opens in
-        // the JSON editor rather than losing them.
-        for (const extra of ['params', 'paginator', 'incremental', 'headers']) {
-            expect(restApiIsGuidable({ base_url: 'https://x', [extra]: {} })).toBe(false)
-        }
-    })
-
-    test('accepts object resources with exactly name and endpoint', () => {
-        expect(restApiIsGuidable({ resources: [{ name: 'users', endpoint: '/v2/users' }] })).toBe(true)
-        expect(restApiIsGuidable({ resources: [{ name: 'users' }] })).toBe(true)
-    })
-
-    test('rejects a resource carrying anything else', () => {
-        expect(restApiIsGuidable({ resources: [{ name: 'users', primary_key: 'id' }] })).toBe(false)
-    })
-
-    test('rejects resources that are not an array of strings or objects', () => {
-        expect(restApiIsGuidable({ resources: 'users' })).toBe(false)
-        expect(restApiIsGuidable({ resources: [42] })).toBe(false)
-        expect(restApiIsGuidable({ resources: [null] })).toBe(false)
-        expect(restApiIsGuidable({ resources: [['users']] })).toBe(false)
-    })
-})
-
-describe('sheetsIsGuidable', () => {
-    test('accepts the spreadsheet reference and its range list', () => {
-        expect(sheetsIsGuidable({ spreadsheet_url_or_id: 'abc', range_names: ['Sheet1!A:D'] })).toBe(true)
-        expect(sheetsIsGuidable({})).toBe(true)
-    })
-
-    test('rejects an unknown key', () => {
-        expect(sheetsIsGuidable({ spreadsheet_url_or_id: 'abc', credentials: {} })).toBe(false)
-    })
-
-    test('rejects ranges that are not a list of strings', () => {
-        expect(sheetsIsGuidable({ range_names: 'Sheet1' })).toBe(false)
-        expect(sheetsIsGuidable({ range_names: [{ sheet: 'Sheet1' }] })).toBe(false)
-    })
-})
-
-describe('toRestResource', () => {
-    test('expands the string shorthand into name + derived endpoint', () => {
-        expect(toRestResource('users')).toEqual({ name: 'users', endpoint: '/users' })
-    })
-
-    test('keeps an explicit endpoint', () => {
-        expect(toRestResource({ name: 'users', endpoint: '/v2/users' })).toEqual({
-            name: 'users',
-            endpoint: '/v2/users',
-        })
-    })
-
-    test('derives the endpoint when the object omits or blanks it', () => {
-        expect(toRestResource({ name: 'users' })).toEqual({ name: 'users', endpoint: '/users' })
-        expect(toRestResource({ name: 'users', endpoint: '' })).toEqual({ name: 'users', endpoint: '/users' })
-    })
-
-    test('drops anything unnamed rather than inventing a name', () => {
-        expect(toRestResource('')).toBeNull()
-        expect(toRestResource({ endpoint: '/users' })).toBeNull()
-        expect(toRestResource(null)).toBeNull()
-        expect(toRestResource(42)).toBeNull()
-    })
-})
+function blankForm(over: Partial<PipelineForm> = {}): PipelineForm {
+    return {
+        name: '',
+        sourceType: 'rest_api',
+        baseUrl: '',
+        resources: [],
+        authMethod: 'bearer',
+        pagination: 'none',
+        spreadsheet: '',
+        rangeNames: [],
+        connectionId: '',
+        detach: false,
+        oauthGrantId: '',
+        oauthEmail: '',
+        sourceConfigRaw: '',
+        credentialsRaw: '',
+        datasetName: '',
+        writeDisposition: 'append',
+        mergeStrategy: '',
+        schedule: '',
+        ...over,
+    }
+}
 
 describe('isValidJson', () => {
     test('blank counts as valid — it means "nothing supplied"', () => {
@@ -103,6 +35,87 @@ describe('isValidJson', () => {
     test('accepts an object and rejects a truncated one', () => {
         expect(isValidJson('{"a":1}')).toBe(true)
         expect(isValidJson('{"a":')).toBe(false)
+    })
+})
+
+describe('buildSourceConfig', () => {
+    test('a guided type builds from its fields', () => {
+        const cfg = buildSourceConfig(blankForm({ baseUrl: 'https://api.example.com' }), false)
+        expect(cfg).toEqual({ base_url: 'https://api.example.com', auth_method: 'bearer', pagination: 'none' })
+    })
+
+    test('advanced JSON wins over the guided fields', () => {
+        const form = blankForm({ baseUrl: 'https://ignored', sourceConfigRaw: '{"base_url":"https://typed"}' })
+        expect(buildSourceConfig(form, true)).toEqual({ base_url: 'https://typed' })
+    })
+
+    test('a type with no guided form uses the raw editor whatever the toggle says', () => {
+        const form = blankForm({ sourceType: 'sql_database', sourceConfigRaw: '{"table_names":["t"]}' })
+        expect(buildSourceConfig(form, false)).toEqual({ table_names: ['t'] })
+    })
+
+    test('an empty raw editor means an empty config, not a parse error', () => {
+        expect(buildSourceConfig(blankForm({ sourceType: 'filesystem' }), false)).toEqual({})
+    })
+
+    test('throws on unparseable JSON rather than saving something the box cannot read', () => {
+        const form = blankForm({ sourceType: 'filesystem', sourceConfigRaw: '{oops' })
+        expect(() => buildSourceConfig(form, false)).toThrow()
+    })
+})
+
+describe('unpackSourceConfig', () => {
+    // One function now serves both entry points — opening a pipeline to edit
+    // and applying an AI draft. They must land on the same form.
+    test('a guidable config fills the guided fields and stays out of JSON mode', () => {
+        const out = unpackSourceConfig('rest_api', '{"base_url":"https://x","resources":["users"]}')
+        expect(out.advanced).toBe(false)
+        expect(out.fields).toEqual({
+            baseUrl: 'https://x',
+            resources: [{ name: 'users', endpoint: '/users' }],
+            authMethod: 'bearer',
+            pagination: 'none',
+        })
+    })
+
+    test('a config the form cannot render opens the JSON editor', () => {
+        const out = unpackSourceConfig('rest_api', '{"base_url":"https://x","paginator":{"type":"json_link"}}')
+        expect(out.advanced).toBe(true)
+        expect(out.fields).toEqual({})
+        // …and the JSON editor gets the whole config, pretty-printed, so the
+        // key that caused the fallback is right there to edit.
+        expect(JSON.parse(out.raw)).toEqual({ base_url: 'https://x', paginator: { type: 'json_link' } })
+        expect(out.raw).toContain('\n')
+    })
+
+    test('an unknown source type opens the JSON editor rather than nothing', () => {
+        const out = unpackSourceConfig('clickhouse', '{"dsn":"…"}')
+        expect(out.advanced).toBe(true)
+        expect(JSON.parse(out.raw)).toEqual({ dsn: '…' })
+    })
+
+    test('file_upload keeps its config but never switches into JSON mode', () => {
+        // The platform-managed file list is not hand-edited; the wizard shows
+        // the file drop where the editor would be. The raw is kept so saving
+        // round-trips the list instead of erasing it.
+        const out = unpackSourceConfig('file_upload', '{"files":[{"name":"a.csv"}]}')
+        expect(out.advanced).toBe(false)
+        expect(JSON.parse(out.raw)).toEqual({ files: [{ name: 'a.csv' }] })
+    })
+
+    test('an empty config leaves the editor empty, not showing "{}"', () => {
+        expect(unpackSourceConfig('rest_api', '').raw).toBe('{}')
+        expect(unpackSourceConfig('sql_database', '').raw).toBe('')
+    })
+
+    test('the guided form always wins back a config that fits it', () => {
+        // The regression this guards: a pipeline saved from the guided form
+        // must reopen in the guided form, not fall to advanced JSON.
+        const saved = JSON.stringify({
+            spreadsheet_url_or_id: 'abc',
+            range_names: ['Sheet1'],
+        })
+        expect(unpackSourceConfig('google_sheets', saved).advanced).toBe(false)
     })
 })
 

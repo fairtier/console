@@ -15,13 +15,12 @@ import { useToast } from '../composables/useToast'
 import { useConfirm } from '../composables/useConfirm'
 import { useCronText } from '../composables/useCronText'
 import {
+    buildSourceConfig,
     formFieldFor,
     isValidJson,
-    restApiIsGuidable,
-    sheetsIsGuidable,
-    toRestResource,
-    type RestResource,
+    unpackSourceConfig,
 } from '../lib/pipelineConfig'
+import { SOURCES, sourceFor, type PipelineForm, type RestResource } from '../lib/pipelineSources'
 import type { PipelineVersion } from '../api/gen/pipeline_pb.js'
 
 const { t } = useI18n()
@@ -45,7 +44,7 @@ const STEP_FILES = 2
 const stepLabels = computed(() => [
   t('pipelinesUi.wizard.steps.describe'),
   t('pipelinesUi.wizard.steps.configure'),
-  ...(form.sourceType === 'file_upload' && !isEdit.value ? [t('pipelinesUi.wizard.steps.files')] : []),
+  ...(source.value.fileDrop && !isEdit.value ? [t('pipelinesUi.wizard.steps.files')] : []),
 ])
 const current = ref(STEP_DESCRIBE)
 
@@ -61,7 +60,7 @@ const unsupportedReason = ref('')
 const unsupportedNotes = ref('')
 
 // --- Configure step (the real, functional path) ---
-const form = reactive({
+const form = reactive<PipelineForm>({
   name: '',
   sourceType: 'rest_api',
   // rest_api guided fields
@@ -108,11 +107,14 @@ const fieldErrors = reactive<Record<string, string>>({})
 const submitting = ref(false)
 const loadingEdit = ref(false)
 
-const isRestApi = computed(() => form.sourceType === 'rest_api')
-const isSheets = computed(() => form.sourceType === 'google_sheets')
-const isFileUpload = computed(() => form.sourceType === 'file_upload')
-// Source types with a guided form; the rest use the raw JSON editor.
-const hasGuidedForm = computed(() => isRestApi.value || isSheets.value)
+// Everything the wizard used to branch on per source type — guided form or
+// raw JSON, credentials or none, schedule or manual, file drop, Google
+// sign-in — is a capability the registry answers (src/lib/pipelineSources).
+// An unknown source_type gets a generic entry rather than nothing.
+const source = computed(() => sourceFor(form.sourceType))
+
+// The <select>, driven by the registry rather than a hardcoded list.
+const sourceOptions = computed(() => SOURCES.map((s) => ({ value: s.id, label: t(s.labelKey) })))
 
 function addRange() {
   const v = rangeDraft.value.trim()
@@ -140,7 +142,7 @@ const oauthAvailable = computed(() => (oauthState.value === 'unknown' ? null : o
 
 // True once the user has connected a Google account this session (legacy
 // grant path — the connection picker has its own selected state).
-const sheetsConnected = computed(() => isSheets.value && !!form.oauthGrantId)
+const sheetsConnected = computed(() => source.value.googleOAuth && !!form.oauthGrantId)
 
 // --- Workspace-level Google connections (the preferred credential) ---
 const connectionsStore = useConnectionsStore()
@@ -156,7 +158,7 @@ const connectionOptions = computed(() =>
 // server is still keeping something the user cannot see.
 watch(connectionOptions, (opts) => {
   const first = opts[0]
-  if (!isEdit.value && isSheets.value && !form.connectionId && !form.oauthGrantId && first) {
+  if (!isEdit.value && source.value.googleOAuth && !form.connectionId && !form.oauthGrantId && first) {
     form.connectionId = first.id
   }
 })
@@ -183,7 +185,7 @@ const credentialChoice = computed<string>({
 // from "this server has no OAuth at all", and unlike the old probe it does not
 // mint a consent state just to find out.
 async function probeOAuthAvailability() {
-  if (!isSheets.value || oauthState.value !== 'unknown') return
+  if (!source.value.googleOAuth || oauthState.value !== 'unknown') return
   try {
     const resp = await oauthClientClient.getOAuthClient({ provider: 'google' })
     if (!resp.flowAvailable) oauthState.value = 'unavailable'
@@ -272,7 +274,7 @@ watch(() => form.credentialsRaw, (v) => {
 // Probe when Google Sheets becomes the selected source. The connections list
 // loads alongside; an older plane answers Unimplemented and the picker simply
 // never appears (availability = 'unavailable').
-watch(isSheets, (on) => {
+watch(() => source.value.googleOAuth, (on) => {
   if (on) {
     probeOAuthAvailability()
     connectionsStore.load().catch(() => {})
@@ -284,17 +286,15 @@ const createdPipelineId = ref('')
 const uploadedCount = ref(0)
 const runningNow = ref(false)
 
-// file_upload pipelines carry no customer credentials (the platform injects
-// the workspace's own storage credentials server-side) and run manually by
-// default: re-drop a file, hit run. Replace keeps the table matching the file.
+// Selecting a source type applies whatever that type declares as its
+// defaults (file_upload: no credentials, no schedule, replace — the platform
+// injects the storage credentials, and the pipeline runs when the user hits
+// run after dropping a file). Create only: an edit is already configured.
 watch(() => form.sourceType, (type) => {
-  if (type === 'file_upload' && !isEdit.value) {
-    form.credentialsRaw = ''
-    form.schedule = ''
-    form.writeDisposition = 'replace'
-  }
-  // A Google grant is meaningless for any other source type.
-  if (type !== 'google_sheets') disconnectGoogle()
+  const next = sourceFor(type)
+  if (next.defaults && !isEdit.value) Object.assign(form, next.defaults)
+  // A Google grant is meaningless for a source that does not sign in.
+  if (!next.googleOAuth) disconnectGoogle()
 })
 
 function addResource() {
@@ -308,41 +308,16 @@ function removeResource(name: string) {
   form.resources = form.resources.filter((x) => x.name !== name)
 }
 
-// --- Source config assembly ---
-// In guided mode (rest_api, google_sheets) we build a structured object;
-// otherwise the raw JSON the user typed is used verbatim. Advanced JSON always
-// wins when enabled.
-function buildSourceConfig(): unknown {
-  if (advancedJson.value || !hasGuidedForm.value) {
-    const raw = form.sourceConfigRaw.trim()
-    return raw ? JSON.parse(raw) : {}
-  }
-  if (isSheets.value) {
-    const cfg: Record<string, unknown> = {}
-    if (form.spreadsheet.trim()) cfg.spreadsheet_url_or_id = form.spreadsheet.trim()
-    if (form.rangeNames.length) cfg.range_names = [...form.rangeNames]
-    return cfg
-  }
-  const cfg: Record<string, unknown> = {}
-  if (form.baseUrl.trim()) cfg.base_url = form.baseUrl.trim()
-  if (form.resources.length) {
-    cfg.resources = form.resources.map((r) => ({ name: r.name, endpoint: r.endpoint }))
-  }
-  cfg.auth_method = form.authMethod
-  cfg.pagination = form.pagination
-  return cfg
-}
-
 function buildCredentials(): unknown {
   // Google Sheets via a workspace connection: send only the reference; the
   // backend resolves the connection's refresh token at serve/render time, so
   // the pipeline follows the connection (reconnect once, everywhere).
-  if (isSheets.value && form.connectionId) {
+  if (source.value.googleOAuth && form.connectionId) {
     return { oauth: { connection_id: form.connectionId } }
   }
   // Legacy grant path: the backend swaps the grant for the stored refresh
   // token and injects the client credentials.
-  if (isSheets.value && form.oauthGrantId) {
+  if (source.value.googleOAuth && form.oauthGrantId) {
     return { oauth: { grant_id: form.oauthGrantId } }
   }
   const raw = form.credentialsRaw.trim()
@@ -373,7 +348,7 @@ function validate(): boolean {
   if (!form.name.trim()) errors.push(t('pipelines.validation.nameRequired'))
   if (!form.sourceType) errors.push(t('pipelines.validation.sourceTypeRequired'))
   if (!form.datasetName.trim()) errors.push(t('pipelines.validation.datasetRequired'))
-  if ((advancedJson.value || !hasGuidedForm.value) && !isValidJson(form.sourceConfigRaw)) {
+  if ((advancedJson.value || !source.value.guided) && !isValidJson(form.sourceConfigRaw)) {
     errors.push(`${t('pipelines.sourceConfig')}: ${t('pipelines.validation.invalidJson')}`)
   }
   // A connected Google account uses the connection/grant, not the raw
@@ -383,7 +358,7 @@ function validate(): boolean {
   }
   // On create, a Google Sheets pipeline needs one credential method: a Google
   // connection, a one-shot grant, or a pasted service-account key.
-  if (isSheets.value && !isEdit.value && !form.connectionId && !form.oauthGrantId && !form.credentialsRaw.trim()) {
+  if (source.value.googleOAuth && !isEdit.value && !form.connectionId && !form.oauthGrantId && !form.credentialsRaw.trim()) {
     errors.push(t('pipelinesUi.wizard.configure.sheetsOAuth.required'))
   }
   // A malformed cron would be accepted by the API and then silently never fire
@@ -399,7 +374,7 @@ async function submit() {
   let sourceConfig: string
   let sourceCredentials: string
   try {
-    sourceConfig = JSON.stringify(buildSourceConfig())
+    sourceConfig = JSON.stringify(buildSourceConfig(form, advancedJson.value))
     sourceCredentials = JSON.stringify(buildCredentials())
   } catch {
     formError.value = t('pipelines.validation.invalidJson')
@@ -442,7 +417,7 @@ async function submit() {
       toast.success(t('pipelinesUi.toast.created'))
       // File-drop pipelines continue to the Files step: now that the pipeline
       // exists there is a prefix to upload into.
-      if (isFileUpload.value && resp.pipeline) {
+      if (source.value.fileDrop && resp.pipeline) {
         createdPipelineId.value = resp.pipeline.id
         current.value = STEP_FILES
         return
@@ -460,6 +435,16 @@ async function submit() {
   }
 }
 
+// Unpack a stored (or drafted) source_config into the form. One helper for
+// both entry points: an edit and an AI draft must land on the same form, and
+// the two used to do it with near-identical copies that had drifted apart.
+function applySourceConfig(sourceType: string, sourceConfig: string) {
+  const unpacked = unpackSourceConfig(sourceType, sourceConfig)
+  Object.assign(form, unpacked.fields)
+  form.sourceConfigRaw = unpacked.raw
+  advancedJson.value = unpacked.advanced
+}
+
 // --- Edit mode: prefill from getPipeline, jump straight to Configure ---
 async function loadForEdit() {
   loadingEdit.value = true
@@ -473,31 +458,7 @@ async function loadForEdit() {
     form.schedule = p.schedule
     form.writeDisposition = p.writeDisposition || 'append'
     form.mergeStrategy = p.mergeStrategy
-    // Try to unpack a rest_api guided config; fall back to advanced JSON.
-    let parsed: Record<string, unknown> | null = null
-    try { parsed = p.sourceConfig ? (JSON.parse(p.sourceConfig) as Record<string, unknown>) : {} } catch { parsed = null }
-    if (p.sourceType === 'rest_api' && parsed && restApiIsGuidable(parsed)) {
-      form.baseUrl = typeof parsed.base_url === 'string' ? parsed.base_url : ''
-      form.resources = Array.isArray(parsed.resources)
-        ? parsed.resources.map(toRestResource).filter((r): r is RestResource => r !== null)
-        : []
-      form.authMethod = typeof parsed.auth_method === 'string' ? parsed.auth_method : 'bearer'
-      form.pagination = typeof parsed.pagination === 'string' ? parsed.pagination : 'none'
-      // Keep the raw available for the advanced editor too.
-      form.sourceConfigRaw = JSON.stringify(parsed, null, 2)
-    } else if (p.sourceType === 'google_sheets' && parsed && sheetsIsGuidable(parsed)) {
-      form.spreadsheet = typeof parsed.spreadsheet_url_or_id === 'string' ? parsed.spreadsheet_url_or_id : ''
-      form.rangeNames = Array.isArray(parsed.range_names) ? parsed.range_names.filter((r): r is string => typeof r === 'string') : []
-      form.sourceConfigRaw = JSON.stringify(parsed, null, 2)
-    } else if (p.sourceType === 'file_upload') {
-      // The config (the platform-managed files list) is not hand-edited; keep
-      // the raw JSON so saving round-trips it, and manage files via the
-      // FileDropManager shown in the source card instead.
-      form.sourceConfigRaw = p.sourceConfig ? JSON.stringify(parsed ?? {}, null, 2) : ''
-    } else {
-      advancedJson.value = true
-      form.sourceConfigRaw = p.sourceConfig ? JSON.stringify(parsed ?? {}, null, 2) : ''
-    }
+    applySourceConfig(p.sourceType, p.sourceConfig)
     // Credential material is write-only and stays empty (empty = keep existing
     // on save). The connection *reference* is not material, and showing it is
     // the difference between an editor that says which account is attached and
@@ -588,26 +549,7 @@ function applyDraft(d: {
   // Credentials are never drafted — the user fills them in Configure.
   form.credentialsRaw = ''
   disconnectGoogle()
-  let parsed: Record<string, unknown> | null = null
-  try { parsed = d.sourceConfig ? (JSON.parse(d.sourceConfig) as Record<string, unknown>) : {} } catch { parsed = null }
-  if (form.sourceType === 'rest_api' && parsed && restApiIsGuidable(parsed)) {
-    form.baseUrl = typeof parsed.base_url === 'string' ? parsed.base_url : ''
-    form.resources = Array.isArray(parsed.resources)
-      ? parsed.resources.map(toRestResource).filter((r): r is RestResource => r !== null)
-      : []
-    form.authMethod = typeof parsed.auth_method === 'string' ? parsed.auth_method : 'bearer'
-    form.pagination = typeof parsed.pagination === 'string' ? parsed.pagination : 'none'
-    form.sourceConfigRaw = JSON.stringify(parsed, null, 2)
-    advancedJson.value = false
-  } else if (form.sourceType === 'google_sheets' && parsed && sheetsIsGuidable(parsed)) {
-    form.spreadsheet = typeof parsed.spreadsheet_url_or_id === 'string' ? parsed.spreadsheet_url_or_id : ''
-    form.rangeNames = Array.isArray(parsed.range_names) ? parsed.range_names.filter((r): r is string => typeof r === 'string') : []
-    form.sourceConfigRaw = JSON.stringify(parsed, null, 2)
-    advancedJson.value = false
-  } else {
-    advancedJson.value = true
-    form.sourceConfigRaw = parsed ? JSON.stringify(parsed, null, 2) : ''
-  }
+  applySourceConfig(form.sourceType, d.sourceConfig)
 }
 
 async function draftPipeline() {
@@ -766,7 +708,7 @@ function finishFiles() {
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
             <h2 style="margin:0; font-size:16px; font-weight:700;">{{ t('pipelinesUi.wizard.configure.sourceTitle') }}</h2>
             <button
-              v-if="hasGuidedForm"
+              v-if="source.guided"
               @click="advancedJson = !advancedJson"
               style="display:flex; align-items:center; gap:6px; border:1px solid var(--line); background:var(--surface-2); border-radius:8px; padding:5px 10px; font-family:inherit; font-size:12px; font-weight:600; color:var(--ink-3); cursor:pointer;"
             >
@@ -791,18 +733,14 @@ function finishFiles() {
                   v-model="form.sourceType"
                   style="width:100%; height:40px; padding:0 13px; border:1px solid var(--line); border-radius:10px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:14px; outline:none; appearance:none; cursor:pointer;"
                 >
-                  <option value="rest_api">{{ t('pipelines.sourceTypes.rest_api') }}</option>
-                  <option value="sql_database">{{ t('pipelines.sourceTypes.sql_database') }}</option>
-                  <option value="filesystem">{{ t('pipelines.sourceTypes.filesystem') }}</option>
-                  <option value="google_sheets">{{ t('pipelines.sourceTypes.google_sheets') }}</option>
-                  <option value="file_upload">{{ t('pipelines.sourceTypes.file_upload') }}</option>
+                  <option v-for="opt in sourceOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
                 </select>
                 <Icon name="chevronDown" :size="15" :style="{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--ink-3)' }" />
               </div>
             </div>
 
             <!-- rest_api guided fields -->
-            <template v-if="isRestApi && !advancedJson">
+            <template v-if="source.id === 'rest_api' && !advancedJson">
               <div style="grid-column:1 / -1;">
                 <label style="display:block; font-size:12.5px; font-weight:600; color:var(--ink-2); margin-bottom:6px;">{{ t('pipelinesUi.wizard.configure.baseUrl') }}</label>
                 <input
@@ -870,7 +808,7 @@ function finishFiles() {
             </template>
 
             <!-- google_sheets guided fields -->
-            <template v-else-if="isSheets && !advancedJson">
+            <template v-else-if="source.id === 'google_sheets' && !advancedJson">
               <div style="grid-column:1 / -1;">
                 <label style="display:block; font-size:12.5px; font-weight:600; color:var(--ink-2); margin-bottom:6px;">{{ t('pipelinesUi.wizard.configure.spreadsheet') }}</label>
                 <input
@@ -909,7 +847,7 @@ function finishFiles() {
 
             <!-- file_upload: files are dropped after creation (create) or
                  managed right here (edit) — no JSON, no credentials -->
-            <div v-else-if="isFileUpload" style="grid-column:1 / -1;">
+            <div v-else-if="source.fileDrop" style="grid-column:1 / -1;">
               <template v-if="isEdit">
                 <FileDropManager :pipeline-id="editId" />
               </template>
@@ -935,14 +873,14 @@ function finishFiles() {
 
         <!-- Credentials (file_upload needs none: the platform uses the
              workspace's own storage credentials) -->
-        <div v-if="!isFileUpload" style="background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:22px; margin-bottom:16px;">
+        <div v-if="source.credentials" style="background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:22px; margin-bottom:16px;">
           <h2 style="margin:0 0 5px; font-size:16px; font-weight:700;">{{ t('pipelinesUi.wizard.configure.credentialsTitle') }}</h2>
           <div style="font-size:12.5px; color:var(--ink-2); margin-bottom:16px;">
             {{ isEdit ? t('pipelinesUi.wizard.configure.credentialsHelpEdit') : t('pipelinesUi.wizard.configure.credentialsHelp') }}
           </div>
 
           <!-- google_sheets: Sign in with Google (default) + service account (advanced) -->
-          <template v-if="isSheets">
+          <template v-if="source.googleOAuth">
             <!-- OAuth (hidden when the server has no Google OAuth configured) -->
             <div v-if="oauthAvailable !== false" style="margin-bottom:14px;">
               <!-- Workspace connection picker (preferred): the pipeline
@@ -1095,7 +1033,7 @@ function finishFiles() {
             </div>
 
             <!-- file_upload runs manually: drop a file, run the pipeline -->
-            <div v-if="!isFileUpload" style="grid-column:1 / -1;">
+            <div v-if="source.schedulable" style="grid-column:1 / -1;">
               <label style="display:block; font-size:12.5px; font-weight:600; color:var(--ink-2); margin-bottom:6px;">{{ t('pipelines.schedule') }}</label>
               <div style="display:flex; align-items:center; gap:11px; flex-wrap:wrap;">
                 <input
