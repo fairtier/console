@@ -14,6 +14,14 @@ import FileDropManager from '../components/FileDropManager.vue'
 import { useToast } from '../composables/useToast'
 import { useConfirm } from '../composables/useConfirm'
 import { useCronText } from '../composables/useCronText'
+import {
+    formFieldFor,
+    isValidJson,
+    restApiIsGuidable,
+    sheetsIsGuidable,
+    toRestResource,
+    type RestResource,
+} from '../lib/pipelineConfig'
 import type { PipelineVersion } from '../api/gen/pipeline_pb.js'
 
 const { t } = useI18n()
@@ -21,71 +29,6 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const { confirm } = useConfirm()
-
-// A rest_api resource as the backend expects it: name + endpoint are both
-// required (see domain.restAPIResource). The guided form models the full object
-// so object-shaped configs round-trip instead of being flattened to names.
-interface RestResource {
-  name: string
-  endpoint: string
-}
-
-// Keys the guided rest_api form can fully represent. Any config carrying more
-// than these (params, paginator, incremental, per-resource primary_key, …)
-// falls back to the advanced JSON editor so nothing is silently dropped.
-const GUIDED_REST_KEYS = new Set(['base_url', 'resources', 'auth_method', 'pagination'])
-
-function toRestResource(r: unknown): RestResource | null {
-  if (typeof r === 'string') return r ? { name: r, endpoint: '/' + r } : null
-  if (r && typeof r === 'object') {
-    const o = r as Record<string, unknown>
-    const name = typeof o.name === 'string' ? o.name : ''
-    if (!name) return null
-    const endpoint = typeof o.endpoint === 'string' && o.endpoint ? o.endpoint : '/' + name
-    return { name, endpoint }
-  }
-  return null
-}
-
-// Keys the guided google_sheets form can fully represent (mirrors
-// domain.googleSheetsConfig). Anything else falls back to advanced JSON.
-const GUIDED_SHEETS_KEYS = new Set(['spreadsheet_url_or_id', 'range_names'])
-
-// True when a parsed google_sheets config fits the guided form.
-function sheetsIsGuidable(parsed: Record<string, unknown>): boolean {
-  for (const k of Object.keys(parsed)) {
-    if (!GUIDED_SHEETS_KEYS.has(k)) return false
-  }
-  if (parsed.range_names !== undefined) {
-    if (!Array.isArray(parsed.range_names)) return false
-    for (const r of parsed.range_names) {
-      if (typeof r !== 'string') return false
-    }
-  }
-  return true
-}
-
-// True when a parsed rest_api config fits the guided form (only known top-level
-// keys, and every resource is a string or a plain {name, endpoint} object).
-function restApiIsGuidable(parsed: Record<string, unknown>): boolean {
-  for (const k of Object.keys(parsed)) {
-    if (!GUIDED_REST_KEYS.has(k)) return false
-  }
-  if (parsed.resources !== undefined) {
-    if (!Array.isArray(parsed.resources)) return false
-    for (const r of parsed.resources) {
-      if (typeof r === 'string') continue
-      if (r && typeof r === 'object' && !Array.isArray(r)) {
-        for (const rk of Object.keys(r)) {
-          if (rk !== 'name' && rk !== 'endpoint') return false
-        }
-        continue
-      }
-      return false
-    }
-  }
-  return true
-}
 
 // Steps (0-based): Describe · Configure (· Files).
 // Every step here is a real one. There used to be a stubbed Review step
@@ -412,11 +355,6 @@ const credentialsProvided = computed(() =>
   !!form.connectionId || !!form.oauthGrantId || form.credentialsRaw.trim() !== '',
 )
 
-function isValidJson(s: string): boolean {
-  if (!s.trim()) return true
-  try { JSON.parse(s); return true } catch { return false }
-}
-
 // --- Schedule: validated + spelled out (src/lib/cron.ts) ---
 const cronText = useCronText()
 const scheduleError = computed(() => cronText.error(form.schedule))
@@ -453,34 +391,6 @@ function validate(): boolean {
   if (scheduleError.value) errors.push(`${t('pipelines.schedule')}: ${scheduleError.value}`)
   formError.value = errors.join(' ')
   return errors.length === 0
-}
-
-// Maps a server FieldViolation path (e.g. "base_url", "resources[0].endpoint")
-// to the id of the form field that should display it. Unmapped paths return ''
-// and surface via the toast instead.
-function formFieldFor(path: string): string {
-  const p = path.replace(/\[\d+\]/g, '') // strip array indices
-  switch (p) {
-    case 'base_url':
-      return 'baseUrl'
-    case 'resources':
-    case 'resources.name':
-    case 'resources.endpoint':
-      return 'resources'
-    case 'spreadsheet_url_or_id':
-      return 'spreadsheet'
-    case 'range_names':
-      return 'rangeNames'
-    case 'connection_string':
-    case 'access_key_id':
-    case 'secret_access_key':
-    case 'service_account_key':
-      return 'credentialsRaw'
-    default:
-      // Everything else (bucket_url, tables_config.*, incremental.*, …) lives in
-      // the advanced/generic source config editor.
-      return 'sourceConfigRaw'
-  }
 }
 
 async function submit() {
