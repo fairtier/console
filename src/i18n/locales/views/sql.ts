@@ -8,6 +8,8 @@ export default {
       run: 'Run',
       running: 'Running…',
       runHint: 'Ctrl/Cmd + Enter',
+      format: 'Format',
+      formatHint: 'Format SQL — Ctrl/Cmd + Shift + F',
       rowLimit: 'Row limit',
       editorPlaceholder: 'SELECT * FROM …',
       status: {
@@ -55,6 +57,8 @@ export default {
       run: 'Spustit',
       running: 'Běží…',
       runHint: 'Ctrl/Cmd + Enter',
+      format: 'Formátovat',
+      formatHint: 'Naformátovat SQL — Ctrl/Cmd + Shift + F',
       rowLimit: 'Limit řádků',
       editorPlaceholder: 'SELECT * FROM …',
       status: {

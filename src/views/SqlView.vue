@@ -14,6 +14,7 @@ import { useWorkspaceStore } from '../stores/workspace'
 import { useToast } from '../composables/useToast'
 import { useExplain } from '../composables/useExplain'
 import { assistClient } from '../api'
+import { formatSql } from '../lib/sqlFormat'
 import { errorMessage } from '../api/errors'
 import type { TableRef } from '../api'
 
@@ -22,6 +23,11 @@ const router = useRouter()
 const store = useSqlEditorStore()
 const customerStore = useWorkspaceStore()
 const toast = useToast()
+
+// --- Formatting. Deterministic and client-side: the draft's layout is not
+// something to spend a model round trip on, and the same button re-lays out
+// SQL the user typed. The editor owns the transaction (undo, caret).
+const editor = ref<InstanceType<typeof SqlEditor> | null>(null)
 
 // --- Ask AI: NL → SQL draft. The draft only ever lands in the editor; the
 // user runs it themselves (same review-first posture as every AI surface).
@@ -48,7 +54,7 @@ async function askAi() {
         if (resp.noRelevantData || !resp.sql) {
             aiCannotAnswer.value = true
         } else {
-            store.setSql(resp.sql)
+            store.setSql(formatSql(resp.sql))
         }
         aiNotes.value = resp.notes
     } catch (err) {
@@ -141,6 +147,16 @@ function previewTable(table: TableRef) {
                     </button>
                     <span class="text-[11.5px]" style="color: var(--ink-3)">{{ t('sqlUi.runHint') }}</span>
                     <button
+                        class="flex h-8 items-center gap-1.5 rounded-[9px] border px-3 text-[12.5px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+                        style="background: var(--surface); border-color: var(--line); color: var(--ink-2)"
+                        :disabled="!store.sql.trim()"
+                        :title="t('sqlUi.formatHint')"
+                        @click="editor?.formatDoc()"
+                    >
+                        <Icon name="alignLeft" :size="13" />
+                        {{ t('sqlUi.format') }}
+                    </button>
+                    <button
                         class="flex h-8 items-center gap-1.5 rounded-[9px] border px-3 text-[12.5px] font-semibold"
                         :style="{
                             background: aiOpen ? 'var(--accent-soft)' : 'var(--surface)',
@@ -201,6 +217,8 @@ function previewTable(table: TableRef) {
                 <!-- Editor -->
                 <div class="h-[220px] flex-none border-b" style="border-color: var(--line)">
                     <SqlEditor
+                        ref="editor"
+                        :formatter="formatSql"
                         :model-value="store.sql"
                         :schema="store.autocompleteSchema"
                         :placeholder-text="t('sqlUi.editorPlaceholder')"

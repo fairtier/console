@@ -13,6 +13,10 @@ const props = defineProps<{
     // lang-sql schema map for table/column autocomplete: { "ns.table": [col] }
     schema: Record<string, string[]>
     placeholderText?: string
+    // Opt-in pretty-printer for Mod-Shift-f and the parent's Format button.
+    // A prop rather than a built-in, because the same editor also holds dbt
+    // models, whose Jinja a SQL formatter respaces.
+    formatter?: (sql: string) => string
 }>()
 
 const emit = defineEmits<{
@@ -103,6 +107,9 @@ onMounted(() => {
                 // Highest precedence so Mod-Enter beats the default newline.
                 Prec.highest(keymap.of([
                     { key: 'Mod-Enter', run: () => (emit('run'), true) },
+                    // Unhandled without a formatter, so the dbt editor keeps
+                    // whatever the browser binds Mod-Shift-f to.
+                    { key: 'Mod-Shift-f', run: () => formatDoc() },
                 ])),
                 keymap.of([...completionKeymap, ...defaultKeymap, ...historyKeymap]),
                 EditorView.updateListener.of((update) => {
@@ -143,7 +150,24 @@ function focus() {
     view?.focus()
 }
 
-defineExpose({ focus })
+// formatDoc rewrites the whole document through props.formatter as one
+// undoable transaction. The caret is carried by offset and clamped: after a
+// reflow no offset is truly "the same place", but staying near it beats the
+// jump to end-of-document a plain full-range replace would cause.
+function formatDoc(): boolean {
+    if (!view || !props.formatter) return false
+    const current = view.state.doc.toString()
+    const formatted = props.formatter(current)
+    if (formatted === current) return true // no-op: keep it out of the undo history
+    const head = Math.min(view.state.selection.main.head, formatted.length)
+    view.dispatch({
+        changes: { from: 0, to: current.length, insert: formatted },
+        selection: { anchor: head },
+    })
+    return true
+}
+
+defineExpose({ focus, formatDoc })
 </script>
 
 <template>

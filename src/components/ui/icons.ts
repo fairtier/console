@@ -48,6 +48,7 @@ export const ICONS = {
     signout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
     code: '<path d="m18 16 4-4-4-4M6 8l-4 4 4 4M14.5 4l-5 16"/>',
     sliders: '<path d="M22 12H2M5.5 6h13M5.5 18h13"/>',
+    alignLeft: '<path d="M3 6h18M3 12h11M3 18h15"/>',
     server: '<rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/>',
 } as const
 
