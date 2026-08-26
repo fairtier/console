@@ -1,0 +1,127 @@
+<script setup lang="ts">
+// What the pipeline reads from: its name, its source type, and whichever form
+// that type brings — a guided one, the platform-managed file drop, or the raw
+// JSON editor. The per-type knowledge is the registry's
+// (src/lib/pipelineSources); the per-type markup is SOURCE_FORMS'. This card
+// only decides which of the three to show.
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import type { PipelineForm, PipelineSource } from '../../lib/pipelineSources'
+import FileDropManager from '../FileDropManager.vue'
+import Icon from '../ui/Icon.vue'
+import { SOURCE_FORMS } from './sourceForms'
+
+const props = defineProps<{
+    form: PipelineForm
+    source: PipelineSource
+    options: { value: string; label: string }[]
+    fieldErrors: Record<string, string>
+    /** Editing an existing pipeline: files are managed here rather than after create. */
+    isEdit: boolean
+    /** The pipeline being edited, for the file drop. Empty while creating. */
+    pipelineId: string
+}>()
+
+const advancedJson = defineModel<boolean>('advancedJson', { required: true })
+
+const { t } = useI18n()
+
+const guidedForm = computed(() => (props.source.guided ? SOURCE_FORMS[props.source.id] : undefined))
+</script>
+
+<template>
+    <div
+        class="mb-4 rounded-2xl border p-[22px]"
+        style="background: var(--surface); border-color: var(--line); box-shadow: var(--shadow)"
+    >
+        <div class="mb-[18px] flex items-center justify-between">
+            <h2 class="text-base font-bold">{{ t('pipelinesUi.wizard.configure.sourceTitle') }}</h2>
+            <button
+                v-if="source.guided"
+                class="flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-[5px] font-sans text-xs font-semibold"
+                style="background: var(--surface-2); border-color: var(--line); color: var(--ink-3)"
+                @click="advancedJson = !advancedJson"
+            >
+                <Icon name="code" :size="13" />
+                {{ advancedJson ? t('pipelinesUi.wizard.configure.guided') : t('pipelinesUi.wizard.configure.advancedJson') }}
+            </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-[14px]">
+            <div class="col-span-full">
+                <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">
+                    {{ t('pipelines.name') }}
+                </label>
+                <input
+                    v-model="form.name"
+                    :placeholder="t('pipelines.namePlaceholder')"
+                    class="h-10 w-full rounded-[10px] border px-[13px] font-sans text-sm outline-none"
+                    style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
+                />
+            </div>
+
+            <div class="col-span-full">
+                <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">
+                    {{ t('pipelines.sourceType') }}
+                </label>
+                <div class="relative">
+                    <select
+                        v-model="form.sourceType"
+                        class="h-10 w-full cursor-pointer appearance-none rounded-[10px] border px-[13px] font-sans text-sm outline-none"
+                        style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
+                    >
+                        <option v-for="opt in options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                    <Icon
+                        name="chevronDown"
+                        :size="15"
+                        class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2"
+                        :style="{ color: 'var(--ink-3)' }"
+                    />
+                </div>
+            </div>
+
+            <!-- The selected type's guided form, if it has one and the user has
+                 not switched to raw JSON. -->
+            <component
+                :is="guidedForm"
+                v-if="guidedForm && !advancedJson"
+                :form="form"
+                :field-errors="fieldErrors"
+            />
+
+            <!-- file_upload: files are dropped after creation (create) or
+                 managed right here (edit) — no JSON, no credentials -->
+            <div v-else-if="source.fileDrop" class="col-span-full">
+                <FileDropManager v-if="isEdit" :pipeline-id="pipelineId" />
+                <div
+                    v-else
+                    class="flex items-start gap-[11px] rounded-[14px] border px-4 py-[14px]"
+                    style="background: var(--inset); border-color: var(--line)"
+                >
+                    <Icon name="info" :size="18" class="mt-px flex-none" :style="{ color: 'var(--ink-3)' }" />
+                    <div class="text-[13.5px] leading-[1.55]" style="color: var(--ink-2)">
+                        {{ t('pipelinesUi.fileDrop.createHint') }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- generic / advanced raw JSON -->
+            <div v-else class="col-span-full">
+                <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">
+                    {{ t('pipelinesUi.wizard.configure.genericConfig') }}
+                </label>
+                <textarea
+                    v-model="form.sourceConfigRaw"
+                    rows="6"
+                    placeholder='{"base_url": "https://api.example.com", "resources": []}'
+                    class="w-full resize-y rounded-[10px] border px-[13px] py-[11px] font-mono text-[13px] leading-[1.5] outline-none"
+                    style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
+                ></textarea>
+                <p v-if="fieldErrors.sourceConfigRaw" class="mt-1.5 text-xs" style="color: var(--err)">
+                    {{ fieldErrors.sourceConfigRaw }}
+                </p>
+            </div>
+        </div>
+    </div>
+</template>

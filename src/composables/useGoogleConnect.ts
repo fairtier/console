@@ -189,3 +189,6 @@ export function useGoogleConnect(form: PipelineForm, enabled: Ref<boolean>, isEd
 
     return { state, available, connecting, error, connected, connectionOptions, credentialChoice, connect, disconnect }
 }
+
+/** The flow's public surface, as the wizard hands it to CredentialsCard. */
+export type GoogleConnect = ReturnType<typeof useGoogleConnect>
