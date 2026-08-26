@@ -217,3 +217,23 @@ describe('file_upload', () => {
         expect(SOURCES.filter((s) => s.fileDrop).map((s) => s.id)).toEqual(['file_upload'])
     })
 })
+
+describe('labels', () => {
+    // Adding a source is meant to be one file plus a line in SOURCES. The
+    // failure mode of forgetting the strings is a <select> reading
+    // "pipelines.sourceTypes.whatever", which type-check cannot see.
+    test('every source has a string in both locales', async () => {
+        const en = (await import('../../i18n/locales/en')).default as Record<string, unknown>
+        const cs = (await import('../../i18n/locales/cs')).default as Record<string, unknown>
+        for (const locale of [en, cs]) {
+            for (const s of SOURCES) {
+                const value = s.labelKey.split('.').reduce<unknown>(
+                    (node, key) => (node && typeof node === 'object' ? (node as Record<string, unknown>)[key] : undefined),
+                    locale,
+                )
+                expect(typeof value).toBe('string')
+                expect(value).not.toBe('')
+            }
+        }
+    })
+})
