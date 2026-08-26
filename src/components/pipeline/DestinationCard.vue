@@ -7,6 +7,7 @@ import { useI18n } from 'vue-i18n'
 import { useCronText } from '../../composables/useCronText'
 import type { PipelineForm } from '../../lib/pipelineSources'
 import Icon from '../ui/Icon.vue'
+import Select from '../ui/Select.vue'
 
 const props = defineProps<{
     form: PipelineForm
@@ -16,6 +17,14 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+
+const writeDispositions = computed(() =>
+    (['append', 'replace', 'merge'] as const).map((v) => ({ value: v as string, label: t(`pipelines.writeDispositions.${v}`) })),
+)
+const mergeStrategies = computed(() => [
+    { value: '', label: t('pipelines.mergeStrategies.default') },
+    { value: 'upsert', label: t('pipelines.mergeStrategies.upsert') },
+])
 
 const cronText = useCronText()
 const scheduleError = computed(() => cronText.error(props.form.schedule))
@@ -53,45 +62,14 @@ const scheduleNextRuns = computed(() => (scheduleError.value ? '' : cronText.nex
                 <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">
                     {{ t('pipelines.writeDisposition') }}
                 </label>
-                <div class="relative">
-                    <select
-                        v-model="form.writeDisposition"
-                        class="h-10 w-full cursor-pointer appearance-none rounded-[10px] border px-[13px] font-sans text-sm outline-none"
-                        style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
-                    >
-                        <option value="append">{{ t('pipelines.writeDispositions.append') }}</option>
-                        <option value="replace">{{ t('pipelines.writeDispositions.replace') }}</option>
-                        <option value="merge">{{ t('pipelines.writeDispositions.merge') }}</option>
-                    </select>
-                    <Icon
-                        name="chevronDown"
-                        :size="15"
-                        class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2"
-                        :style="{ color: 'var(--ink-3)' }"
-                    />
-                </div>
+                <Select v-model="form.writeDisposition" :options="writeDispositions" />
             </div>
 
             <div v-if="form.writeDisposition === 'merge'">
                 <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">
                     {{ t('pipelines.mergeStrategy') }}
                 </label>
-                <div class="relative">
-                    <select
-                        v-model="form.mergeStrategy"
-                        class="h-10 w-full cursor-pointer appearance-none rounded-[10px] border px-[13px] font-sans text-sm outline-none"
-                        style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
-                    >
-                        <option value="">{{ t('pipelines.mergeStrategies.default') }}</option>
-                        <option value="upsert">{{ t('pipelines.mergeStrategies.upsert') }}</option>
-                    </select>
-                    <Icon
-                        name="chevronDown"
-                        :size="15"
-                        class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2"
-                        :style="{ color: 'var(--ink-3)' }"
-                    />
-                </div>
+                <Select v-model="form.mergeStrategy" :options="mergeStrategies" />
             </div>
 
             <!-- file_upload runs manually: drop a file, run the pipeline -->

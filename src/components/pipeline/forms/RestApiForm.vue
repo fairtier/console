@@ -6,10 +6,11 @@
 // (src/lib/pipelineSources/restApi.ts). A config carrying anything more opens
 // in the JSON editor instead — the two are one decision, so change them
 // together.
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { PipelineForm } from '../../../lib/pipelineSources'
 import Icon from '../../ui/Icon.vue'
+import Select from '../../ui/Select.vue'
 
 const props = defineProps<{
     form: PipelineForm
@@ -17,6 +18,19 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+
+const authMethods = computed(() => [
+    { value: 'bearer', label: t('pipelinesUi.wizard.configure.auth.bearer') },
+    { value: 'api_key', label: t('pipelinesUi.wizard.configure.auth.apiKey') },
+    { value: 'basic', label: t('pipelinesUi.wizard.configure.auth.basic') },
+    { value: 'none', label: t('pipelinesUi.wizard.configure.auth.none') },
+])
+const paginations = computed(() => [
+    { value: 'none', label: t('pipelinesUi.wizard.configure.paging.none') },
+    { value: 'cursor', label: t('pipelinesUi.wizard.configure.paging.cursor') },
+    { value: 'page_number', label: t('pipelinesUi.wizard.configure.paging.pageNumber') },
+    { value: 'offset', label: t('pipelinesUi.wizard.configure.paging.offset') },
+])
 
 const resourceDraft = ref('')
 
@@ -87,47 +101,13 @@ function removeResource(name: string) {
         <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">
             {{ t('pipelinesUi.wizard.configure.authMethod') }}
         </label>
-        <div class="relative">
-            <select
-                v-model="form.authMethod"
-                class="h-10 w-full cursor-pointer appearance-none rounded-[10px] border px-[13px] font-sans text-sm outline-none"
-                style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
-            >
-                <option value="bearer">{{ t('pipelinesUi.wizard.configure.auth.bearer') }}</option>
-                <option value="api_key">{{ t('pipelinesUi.wizard.configure.auth.apiKey') }}</option>
-                <option value="basic">{{ t('pipelinesUi.wizard.configure.auth.basic') }}</option>
-                <option value="none">{{ t('pipelinesUi.wizard.configure.auth.none') }}</option>
-            </select>
-            <Icon
-                name="chevronDown"
-                :size="15"
-                class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2"
-                :style="{ color: 'var(--ink-3)' }"
-            />
-        </div>
+        <Select v-model="form.authMethod" :options="authMethods" />
     </div>
 
     <div>
         <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">
             {{ t('pipelinesUi.wizard.configure.pagination') }}
         </label>
-        <div class="relative">
-            <select
-                v-model="form.pagination"
-                class="h-10 w-full cursor-pointer appearance-none rounded-[10px] border px-[13px] font-sans text-sm outline-none"
-                style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
-            >
-                <option value="none">{{ t('pipelinesUi.wizard.configure.paging.none') }}</option>
-                <option value="cursor">{{ t('pipelinesUi.wizard.configure.paging.cursor') }}</option>
-                <option value="page_number">{{ t('pipelinesUi.wizard.configure.paging.pageNumber') }}</option>
-                <option value="offset">{{ t('pipelinesUi.wizard.configure.paging.offset') }}</option>
-            </select>
-            <Icon
-                name="chevronDown"
-                :size="15"
-                class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2"
-                :style="{ color: 'var(--ink-3)' }"
-            />
-        </div>
+        <Select v-model="form.pagination" :options="paginations" />
     </div>
 </template>

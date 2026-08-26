@@ -12,11 +12,12 @@
 // clear a sign-in while this card is not even mounted, so the composable cannot
 // live here. This card renders it and owns the one coupling that belongs to a
 // field rather than to the flow — typing a key clears the sign-in.
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { DETACH, type GoogleConnect } from '../../composables/useGoogleConnect'
 import type { PipelineForm } from '../../lib/pipelineSources'
 import Icon from '../ui/Icon.vue'
+import Select from '../ui/Select.vue'
 import Spinner from '../ui/Spinner.vue'
 
 const props = defineProps<{
@@ -33,6 +34,27 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+
+// The connection picker's options. A single control carries three different
+// answers — see useGoogleConnect's credentialChoice, which unpacks the DETACH
+// sentinel back into form.connectionId / form.detach.
+//
+// "Keep existing" appears only when there is something to keep that this picker
+// cannot name: a pipeline holding its own token or a service-account key. An
+// attached connection is shown as itself, selected.
+const credentialOptions = computed(() => {
+    const opts: { value: string; label: string }[] = []
+    if (props.isEdit && props.hasStoredCredentials && !props.attachedConnectionId) {
+        opts.push({ value: '', label: t('connections.picker.keepExisting') })
+    }
+    for (const c of props.google.connectionOptions.value) {
+        opts.push({ value: c.id, label: c.email && c.email !== c.name ? `${c.name} (${c.email})` : c.name })
+    }
+    if (props.isEdit && props.hasStoredCredentials) {
+        opts.push({ value: DETACH, label: t('connections.picker.detach') })
+    }
+    return opts
+})
 
 // Typing a service-account key clears any OAuth grant/connection so the two
 // never collide. It lives here, next to the field that triggers it.
@@ -70,26 +92,13 @@ watch(
                         {{ t('connections.picker.label') }}
                     </label>
                     <div class="flex flex-wrap items-center gap-[9px]">
-                        <select
+                        <Select
                             v-model="google.credentialChoice.value"
-                            class="h-9 min-w-[220px] flex-1 rounded-[10px] border px-2.5 font-sans text-[13px] outline-none"
-                            style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
-                        >
-                            <!-- "Keep existing" only when there is something to
-                                 keep that this picker cannot name: a pipeline
-                                 holding its own token or a service-account key.
-                                 An attached connection is shown as itself,
-                                 selected. -->
-                            <option v-if="isEdit && hasStoredCredentials && !attachedConnectionId" value="">
-                                {{ t('connections.picker.keepExisting') }}
-                            </option>
-                            <option v-for="c in google.connectionOptions.value" :key="c.id" :value="c.id">
-                                {{ c.name }}{{ c.email && c.email !== c.name ? ` (${c.email})` : '' }}
-                            </option>
-                            <option v-if="isEdit && hasStoredCredentials" :value="DETACH">
-                                {{ t('connections.picker.detach') }}
-                            </option>
-                        </select>
+                            :options="credentialOptions"
+                            size="sm"
+                            class="min-w-[220px] flex-1"
+                            :aria-label="t('connections.picker.label')"
+                        />
                         <button
                             type="button"
                             :disabled="google.connecting.value"

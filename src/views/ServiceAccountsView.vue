@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { lakekeeperUserClient, warehouseClient } from '../api'
 import { errorMessage } from '../api/errors'
 import Icon from '../components/ui/Icon.vue'
 import CopyButton from '../components/ui/CopyButton.vue'
+import Select from '../components/ui/Select.vue'
 import Spinner from '../components/ui/Spinner.vue'
 import { useConfirm } from '../composables/useConfirm'
 import { useToast } from '../composables/useToast'
@@ -33,6 +34,11 @@ const consecutiveRegex = /[-_]{2}/
 
 const accounts = ref<ServiceAccount[]>([])
 const warehouses = ref<string[]>([])
+const roleOptions = computed(() =>
+  (['reader', 'writer', 'admin'] as Role[]).map((r) => ({ value: r, label: t(`serviceAccounts.roles.${r}`) })),
+)
+const warehouseOptions = computed(() => warehouses.value.map((w) => ({ value: w, label: w })))
+
 const loading = ref(true)
 const creating = ref(false)
 const submitting = ref(false)
@@ -271,43 +277,13 @@ async function deleteAccount(account: ServiceAccount) {
           <label class="mb-[6px] block text-[12.5px] font-semibold" style="color: var(--ink-2)">{{
             t('serviceAccounts.form.role')
           }}</label>
-          <div class="relative">
-            <select
-              v-model="form.role"
-              class="h-10 w-full cursor-pointer appearance-none rounded-[10px] px-[13px] text-[14px] outline-none"
-              style="border: 1px solid var(--line); background: var(--surface-2); color: var(--ink)"
-            >
-              <option value="reader">{{ t('serviceAccounts.roles.reader') }}</option>
-              <option value="writer">{{ t('serviceAccounts.roles.writer') }}</option>
-              <option value="admin">{{ t('serviceAccounts.roles.admin') }}</option>
-            </select>
-            <Icon
-              name="chevronDown"
-              :size="15"
-              class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-              :style="{ color: 'var(--ink-3)' }"
-            />
-          </div>
+          <Select v-model="form.role" :options="roleOptions" />
         </div>
         <div>
           <label class="mb-[6px] block text-[12.5px] font-semibold" style="color: var(--ink-2)">{{
             t('serviceAccounts.form.warehouse')
           }}</label>
-          <div class="relative">
-            <select
-              v-model="form.warehouseName"
-              class="h-10 w-full cursor-pointer appearance-none rounded-[10px] px-[13px] text-[14px] outline-none"
-              style="border: 1px solid var(--line); background: var(--surface-2); color: var(--ink)"
-            >
-              <option v-for="w in warehouses" :key="w" :value="w">{{ w }}</option>
-            </select>
-            <Icon
-              name="chevronDown"
-              :size="15"
-              class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-              :style="{ color: 'var(--ink-3)' }"
-            />
-          </div>
+          <Select v-model="form.warehouseName" :options="warehouseOptions" />
         </div>
       </div>
 

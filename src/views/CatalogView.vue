@@ -10,6 +10,7 @@ import type { S3Config } from '../api/gen/warehouse_pb'
 import { StorageProvider, CredentialDelegationMode } from '../api/gen/warehouse_pb'
 import { useToast } from '../composables/useToast'
 import Icon from '../components/ui/Icon.vue'
+import Select from '../components/ui/Select.vue'
 import SecretField from '../components/ui/SecretField.vue'
 import CodeSnippet from '../components/ui/CodeSnippet.vue'
 import Spinner from '../components/ui/Spinner.vue'
@@ -328,13 +329,7 @@ onMounted(async () => {
 
                             <div>
                                 <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">{{ t('catalog.warehouses.advanced.provider') }}</label>
-                                <select
-                                    v-model="whStorage.provider"
-                                    class="h-[34px] w-full rounded-[9px] border bg-surface-2 px-2 text-[12.5px] text-ink outline-none focus:border-accent"
-                                    style="border-color:var(--line)"
-                                >
-                                    <option v-for="o in whProviderOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
-                                </select>
+                                <Select v-model="whStorage.provider" :options="whProviderOptions" size="sm" />
                             </div>
 
                             <div class="grid grid-cols-2 gap-2">
@@ -366,13 +361,7 @@ onMounted(async () => {
 
                             <div>
                                 <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">{{ t('catalog.warehouses.advanced.credMode') }}</label>
-                                <select
-                                    v-model="whStorage.credMode"
-                                    class="h-[34px] w-full rounded-[9px] border bg-surface-2 px-2 text-[12.5px] text-ink outline-none focus:border-accent"
-                                    style="border-color:var(--line)"
-                                >
-                                    <option v-for="o in whCredModeOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
-                                </select>
+                                <Select v-model="whStorage.credMode" :options="whCredModeOptions" size="sm" />
                             </div>
                         </div>
 

@@ -9,6 +9,7 @@ import type { FileEntry } from '../api/gen/boxrepo_pb.js'
 import type { DraftFile } from '../api/gen/assist_pb.js'
 import type { Pipeline } from '../api/gen/pipeline_pb.js'
 import Icon from '../components/ui/Icon.vue'
+import Select from '../components/ui/Select.vue'
 import StatusChip from '../components/ui/StatusChip.vue'
 import Spinner from '../components/ui/Spinner.vue'
 import DemoProjectCard from '../components/DemoProjectCard.vue'
@@ -44,6 +45,10 @@ function draftDbtFiles(prompt: string, _existingPaths: string[]) {
 
 const transformations = ref<Transformation[]>([])
 const pipelines = ref<Pipeline[]>([])
+const triggerAfterOptions = computed(() => [
+  { value: '', label: t('transformationsUi.form.triggerAfterNone') },
+  ...pipelines.value.map((p) => ({ value: p.id, label: p.name })),
+])
 const loading = ref(false)
 const openMenuId = ref<string | null>(null)
 const MENU_WIDTH = 172
@@ -778,10 +783,7 @@ async function copyFile(f: DraftFile) {
         </label>
         <label style="display:block;">
           <span style="display:block; font-size:12.5px; font-weight:700; color:var(--ink-2); margin-bottom:6px;">{{ t('transformationsUi.form.triggerAfter') }}</span>
-          <select v-model="form.triggerAfterPipelineId" style="width:100%; height:40px; padding:0 10px; border:1px solid var(--line); border-radius:11px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:13.5px; outline:none;">
-            <option value="">{{ t('transformationsUi.form.triggerAfterNone') }}</option>
-            <option v-for="p in pipelines" :key="p.id" :value="p.id">{{ p.name }}</option>
-          </select>
+          <Select v-model="form.triggerAfterPipelineId" :options="triggerAfterOptions" />
         </label>
         <label v-if="showSelectorInput" style="display:block;">
           <span style="display:block; font-size:12.5px; font-weight:700; color:var(--ink-2); margin-bottom:6px;">{{ t('transformationsUi.form.dbtSelector') }}</span>

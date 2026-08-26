@@ -69,7 +69,7 @@ export function useGoogleConnect(form: PipelineForm, enabled: Ref<boolean>, isEd
         }
     })
 
-    // A <select> carries one value, so detach rides in the same control as the
+    // The picker carries one value, so detach rides in the same control as the
     // connection choice and is unpacked into form.connectionId / form.detach.
     const credentialChoice = computed<string>({
         get: () => (form.detach ? DETACH : form.connectionId),

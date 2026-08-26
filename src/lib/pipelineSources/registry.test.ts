@@ -220,7 +220,7 @@ describe('file_upload', () => {
 
 describe('labels', () => {
     // Adding a source is meant to be one file plus a line in SOURCES. The
-    // failure mode of forgetting the strings is a <select> reading
+    // failure mode of forgetting the strings is a picker reading
     // "pipelines.sourceTypes.whatever", which type-check cannot see.
     test('every source has a string in both locales', async () => {
         const en = (await import('../../i18n/locales/en')).default as Record<string, unknown>

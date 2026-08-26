@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { ConnectError, Code } from '@connectrpc/connect'
 import Icon from '../components/ui/Icon.vue'
+import Select from '../components/ui/Select.vue'
 import Spinner from '../components/ui/Spinner.vue'
 import SqlEditor from '../components/sql/SqlEditor.vue'
 import ResultsGrid from '../components/sql/ResultsGrid.vue'
@@ -80,6 +81,9 @@ function explainSqlError() {
 const engineOff = computed(() => customerStore.isReady && !customerStore.duckflightEnabled)
 
 const ROW_LIMITS = [100, 500, 1000]
+// The native control needed `.number` to keep the value numeric; Select is
+// generic over its option type, so the numbers survive on their own.
+const rowLimitOptions = ROW_LIMITS.map((n) => ({ value: n, label: String(n) }))
 
 // Double-quote an identifier for the preview statement (embedded quotes are
 // doubled). The user can type arbitrary SQL anyway — this is correctness for
@@ -171,13 +175,13 @@ function previewTable(table: TableRef) {
                     <div class="flex-1" />
                     <label class="flex items-center gap-2 text-[12px]" style="color: var(--ink-2)">
                         {{ t('sqlUi.rowLimit') }}
-                        <select
-                            v-model.number="store.maxRows"
-                            class="h-7 rounded-[7px] border px-1.5 text-[12px]"
-                            style="background: var(--surface); border-color: var(--line); color: var(--ink)"
-                        >
-                            <option v-for="n in ROW_LIMITS" :key="n" :value="n">{{ n }}</option>
-                        </select>
+                        <Select
+                            v-model="store.maxRows"
+                            :options="rowLimitOptions"
+                            size="sm"
+                            class="w-[86px]"
+                            :aria-label="t('sqlUi.rowLimit')"
+                        />
                     </label>
                 </div>
 

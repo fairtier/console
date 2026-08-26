@@ -9,6 +9,7 @@ import { useI18n } from 'vue-i18n'
 import type { PipelineForm, PipelineSource } from '../../lib/pipelineSources'
 import FileDropManager from '../FileDropManager.vue'
 import Icon from '../ui/Icon.vue'
+import Select from '../ui/Select.vue'
 import { SOURCE_FORMS } from './sourceForms'
 
 const props = defineProps<{
@@ -64,21 +65,7 @@ const guidedForm = computed(() => (props.source.guided ? SOURCE_FORMS[props.sour
                 <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">
                     {{ t('pipelines.sourceType') }}
                 </label>
-                <div class="relative">
-                    <select
-                        v-model="form.sourceType"
-                        class="h-10 w-full cursor-pointer appearance-none rounded-[10px] border px-[13px] font-sans text-sm outline-none"
-                        style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
-                    >
-                        <option v-for="opt in options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-                    </select>
-                    <Icon
-                        name="chevronDown"
-                        :size="15"
-                        class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2"
-                        :style="{ color: 'var(--ink-3)' }"
-                    />
-                </div>
+                <Select v-model="form.sourceType" :options="options" />
             </div>
 
             <!-- The selected type's guided form, if it has one and the user has
