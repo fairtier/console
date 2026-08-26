@@ -87,19 +87,21 @@ function restApiIsGuidable(parsed: Record<string, unknown>): boolean {
   return true
 }
 
-// Steps (0-based): Describe · Review · Configure · Preview (· Files).
+// Steps (0-based): Describe · Configure (· Files).
+// Every step here is a real one. There used to be a stubbed Review step
+// between the two and a stubbed Preview after them; nothing ever navigated
+// forward into either, so the only way to reach Review was Back from
+// Configure — which dropped the user onto a panel claiming AI drafting did
+// not exist, one step after drafting had worked. Don't advertise a step in
+// the stepper until it does something.
 // The Files step exists only for file_upload pipelines: it opens right after
 // creation, once there is a pipeline id to upload into.
 const STEP_DESCRIBE = 0
-const STEP_REVIEW = 1
-const STEP_CONFIGURE = 2
-const STEP_PREVIEW = 3
-const STEP_FILES = 4
+const STEP_CONFIGURE = 1
+const STEP_FILES = 2
 const stepLabels = computed(() => [
   t('pipelinesUi.wizard.steps.describe'),
-  t('pipelinesUi.wizard.steps.review'),
   t('pipelinesUi.wizard.steps.configure'),
-  t('pipelinesUi.wizard.steps.preview'),
   ...(form.sourceType === 'file_upload' && !isEdit.value ? [t('pipelinesUi.wizard.steps.files')] : []),
 ])
 const current = ref(STEP_DESCRIBE)
@@ -767,8 +769,9 @@ function finishFiles() {
       <h1 style="margin:0; font-size:20px; font-weight:700; letter-spacing:-.01em;">{{ t('pipelinesUi.wizard.editTitle') }}</h1>
     </div>
 
-    <!-- Stepper -->
-    <div style="margin-bottom:24px;">
+    <!-- Stepper. Editing is a single form, not a walk through the wizard —
+         a stepper there would only ever show Configure. -->
+    <div v-if="!isEdit" style="margin-bottom:24px;">
       <Stepper :steps="stepLabels" :current="current" />
     </div>
 
@@ -778,7 +781,7 @@ function finishFiles() {
     </div>
 
     <template v-else>
-      <!-- STEP 1: DESCRIBE (advisory, no backend) -->
+      <!-- STEP 1: DESCRIBE (AI drafting) -->
       <div
         v-if="current === STEP_DESCRIBE"
         style="background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); padding:26px;"
@@ -846,31 +849,7 @@ function finishFiles() {
         </div>
       </div>
 
-      <!-- STEP 2: REVIEW (advisory, stubbed) -->
-      <div
-        v-else-if="current === STEP_REVIEW"
-        style="background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); padding:26px;"
-      >
-        <h2 style="margin:0 0 12px; font-size:18px; font-weight:700; letter-spacing:-.01em;">{{ t('pipelinesUi.wizard.review.title') }}</h2>
-        <div style="display:flex; align-items:flex-start; gap:11px; background:var(--inset); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:20px;">
-          <Icon name="info" :size="18" :style="{ color: 'var(--ink-3)', flex: 'none', marginTop: '1px' }" />
-          <div style="font-size:13.5px; color:var(--ink-2); line-height:1.55;">{{ t('pipelinesUi.wizard.review.stub') }}</div>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <button
-            @click="goBack"
-            style="display:flex; align-items:center; gap:7px; height:42px; padding:0 16px; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--ink-2); font-family:inherit; font-size:14px; font-weight:600; cursor:pointer;"
-          >
-            <Icon name="chevronLeft" :size="15" />{{ t('common.back') }}
-          </button>
-          <button
-            @click="goConfigure"
-            style="display:flex; align-items:center; gap:8px; height:42px; padding:0 20px; border:none; border-radius:11px; background:var(--accent); color:var(--accent-ink); font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; box-shadow:var(--shadow);"
-          >{{ t('pipelinesUi.wizard.review.goConfigure') }}<Icon name="chevronRight" :size="15" /></button>
-        </div>
-      </div>
-
-      <!-- STEP 3: CONFIGURE (functional) -->
+      <!-- STEP 2: CONFIGURE -->
       <div v-else-if="current === STEP_CONFIGURE">
         <!-- Source -->
         <div style="background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:22px; margin-bottom:16px;">
@@ -1254,40 +1233,7 @@ function finishFiles() {
         </div>
       </div>
 
-      <!-- STEP 4: PREVIEW (advisory, stubbed — no fake rows) -->
-      <div
-        v-else-if="current === STEP_PREVIEW"
-        style="background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); padding:26px;"
-      >
-        <h2 style="margin:0 0 12px; font-size:18px; font-weight:700; letter-spacing:-.01em;">{{ t('pipelinesUi.wizard.preview.title') }}</h2>
-        <div style="display:flex; align-items:flex-start; gap:11px; background:var(--inset); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:20px;">
-          <Icon name="info" :size="18" :style="{ color: 'var(--ink-3)', flex: 'none', marginTop: '1px' }" />
-          <div style="flex:1;">
-            <div style="font-size:13.5px; color:var(--ink-2); line-height:1.55; margin-bottom:8px;">{{ t('pipelinesUi.wizard.preview.stub') }}</div>
-            <span style="display:inline-flex; align-items:center; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; background:var(--surface-2); color:var(--ink-3);">{{ t('common.comingSoon') }}</span>
-          </div>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <button
-            @click="goConfigure"
-            style="display:flex; align-items:center; gap:7px; height:42px; padding:0 16px; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--ink-2); font-family:inherit; font-size:14px; font-weight:600; cursor:pointer;"
-          >
-            <Icon name="chevronLeft" :size="15" />{{ t('common.back') }}
-          </button>
-          <button
-            @click="submit"
-            :disabled="submitting"
-            style="display:flex; align-items:center; gap:8px; height:42px; padding:0 22px; border:none; border-radius:11px; background:var(--accent); color:var(--accent-ink); font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; box-shadow:var(--shadow);"
-            :style="submitting ? 'opacity:.6; cursor:not-allowed;' : ''"
-          >
-            <Spinner v-if="submitting" :size="16" />
-            <Icon v-else name="check" :size="16" />
-            {{ t('pipelinesUi.wizard.configure.submitCreate') }}
-          </button>
-        </div>
-      </div>
-
-      <!-- STEP 5: FILES (file_upload only, after the pipeline exists) -->
+      <!-- STEP 3: FILES (file_upload only, after the pipeline exists) -->
       <div
         v-else-if="current === STEP_FILES"
         style="background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); padding:26px;"

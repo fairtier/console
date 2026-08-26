@@ -59,9 +59,7 @@ export default {
         editTitle: 'Edit pipeline',
         steps: {
           describe: 'Describe',
-          review: 'Review',
           configure: 'Configure',
-          preview: 'Preview',
           files: 'Files',
         },
         describe: {
@@ -79,11 +77,6 @@ export default {
           notConfigured: "AI drafting isn't enabled on this server yet — set the pipeline up with the guided form.",
           draftFailed: "Couldn't draft the pipeline. Try rewording, or set it up manually.",
           unsupportedTitle: "We can't ingest from that source yet",
-        },
-        review: {
-          title: 'Review the draft',
-          stub: 'AI drafting is not available yet. Use the guided form to set the pipeline up — it writes the same configuration by hand.',
-          goConfigure: 'Configure manually',
         },
         configure: {
           sourceTitle: 'Source',
@@ -141,12 +134,6 @@ export default {
           },
           submitCreate: 'Create pipeline',
           submitSave: 'Save changes',
-          toPreview: 'Test connection & preview',
-        },
-        preview: {
-          title: 'Preview',
-          stub: 'Test connection and sample rows are coming soon. You can create the pipeline now — the first scheduled (or manual) run will load your data.',
-          sampleRows: 'Sample rows',
         },
       },
       fileDrop: {
@@ -238,9 +225,7 @@ export default {
         editTitle: 'Upravit pipeline',
         steps: {
           describe: 'Popsat',
-          review: 'Kontrola',
           configure: 'Nastavit',
-          preview: 'Náhled',
           files: 'Soubory',
         },
         describe: {
@@ -258,11 +243,6 @@ export default {
           notConfigured: 'Návrh pomocí AI zatím na tomto serveru není zapnutý — nastavte pipeline pomocí průvodce.',
           draftFailed: 'Návrh pipeline se nezdařil. Zkuste přeformulovat zadání, nebo nastavte ručně.',
           unsupportedTitle: 'Z tohoto zdroje zatím načítat neumíme',
-        },
-        review: {
-          title: 'Kontrola návrhu',
-          stub: 'Návrh pomocí AI zatím není k dispozici. Použijte průvodce — vytvoří stejnou konfiguraci ručně.',
-          goConfigure: 'Nastavit ručně',
         },
         configure: {
           sourceTitle: 'Zdroj',
@@ -318,12 +298,6 @@ export default {
           },
           submitCreate: 'Vytvořit pipeline',
           submitSave: 'Uložit změny',
-          toPreview: 'Otestovat připojení a náhled',
-        },
-        preview: {
-          title: 'Náhled',
-          stub: 'Test připojení a ukázková data brzy přibudou. Pipeline můžete vytvořit už teď — data načte první naplánovaný (nebo ruční) běh.',
-          sampleRows: 'Ukázkové řádky',
         },
       },
       fileDrop: {
