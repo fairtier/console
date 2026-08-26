@@ -8,7 +8,7 @@ export default {
       google: {
         title: 'Google account',
         subtitle:
-          'Connect Google once and use it everywhere: Sheets pipelines reference this connection, and the SQL editor can query your sheets live.',
+          'Connect Google once and use it everywhere: Sheets pipelines reference this connection instead of storing their own credentials.',
         connect: 'Connect Google',
         disconnect: 'Disconnect',
         empty: 'No Google account connected yet.',
@@ -16,11 +16,11 @@ export default {
         needsApp:
           'Connecting needs this workspace’s own Google app first — set it up in the “Google” card below, then try again.',
         trustNote:
-          'Anyone with access to this workspace (including its SQL engine token) can query the sheets this account can read. Access uses the read-only Sheets scope.',
+          'Pipelines in this workspace can read the sheets this account can read. Access uses the read-only Sheets scope.',
       },
       removeConfirm: {
         title: 'Disconnect “{name}”?',
-        body: 'Live sheet queries stop within the hour as the last issued token expires. Pipelines referencing this connection are refused — detach them first; the Console will tell you if any still use it.',
+        body: 'Pipelines referencing this connection are refused — detach them first; the Console will tell you if any still use it.',
         confirm: 'Disconnect',
       },
       picker: {
@@ -48,7 +48,7 @@ export default {
       google: {
         title: 'Účet Google',
         subtitle:
-          'Připojte Google jednou a používejte ho všude: pipeline Sheets na toto připojení odkazují a SQL editor umí dotazovat vaše tabulky naživo.',
+          'Připojte Google jednou a používejte ho všude: pipeline Sheets na toto připojení odkazují a nemusí ukládat vlastní přihlašovací údaje.',
         connect: 'Připojit Google',
         disconnect: 'Odpojit',
         empty: 'Zatím není připojen žádný účet Google.',
@@ -56,11 +56,11 @@ export default {
         needsApp:
           'Připojení nejdřív vyžaduje vlastní aplikaci Google tohoto workspace — nastavte ji v kartě „Google“ níže a zkuste to znovu.',
         trustNote:
-          'Kdokoli s přístupem do tohoto workspace (včetně tokenu SQL enginu) může dotazovat tabulky, které tento účet vidí. Přístup používá read-only scope pro Sheets.',
+          'Pipeline v tomto workspace mohou číst tabulky, které tento účet vidí. Přístup používá read-only scope pro Sheets.',
       },
       removeConfirm: {
         title: 'Odpojit „{name}“?',
-        body: 'Živé dotazy na tabulky přestanou fungovat do hodiny, jakmile vyprší poslední vydaný token. Pipeline odkazující na toto připojení odpojení zablokují — nejdřív je odpojte; konzole vám řekne, jestli ho nějaká stále používá.',
+        body: 'Pipeline odkazující na toto připojení odpojení zablokují — nejdřív je odpojte; konzole vám řekne, jestli ho nějaká stále používá.',
         confirm: 'Odpojit',
       },
       picker: {
