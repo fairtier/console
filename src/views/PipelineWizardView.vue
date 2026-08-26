@@ -3,10 +3,8 @@ import { ref, computed, reactive, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { ConnectError, Code } from '@connectrpc/connect'
-import { pipelineClient, pipelineAssistClient, oauthClientClient } from '../api'
+import { pipelineClient, pipelineAssistClient } from '../api'
 import { errorMessage, fieldViolations } from '../api/errors'
-import { connectGoogleSheets, OAuthUnavailableError, OAuthClientNotConfiguredError } from '../api/googleOAuth'
-import { useConnectionsStore } from '../stores/connections'
 import Icon from '../components/ui/Icon.vue'
 import Stepper from '../components/ui/Stepper.vue'
 import Spinner from '../components/ui/Spinner.vue'
@@ -14,6 +12,7 @@ import FileDropManager from '../components/FileDropManager.vue'
 import { useToast } from '../composables/useToast'
 import { useConfirm } from '../composables/useConfirm'
 import { useCronText } from '../composables/useCronText'
+import { DETACH, useGoogleConnect } from '../composables/useGoogleConnect'
 import {
     buildSourceConfig,
     formFieldFor,
@@ -136,161 +135,34 @@ function removeRange(name: string) {
   form.rangeNames = form.rangeNames.filter((x) => x !== name)
 }
 
-// --- Google Sheets "Sign in with Google" ---
-// Three answers, not two, because the user can act on the middle one:
-//   'unknown'     not probed yet
-//   'unavailable' this server cannot run the flow — use a service account
-//   'setup'       it can, but this workspace has not connected its own Google
-//                 app yet — send them to Integrations
-//   'ready'       an app is connected; the Connect button works
-type OAuthState = 'unknown' | 'unavailable' | 'setup' | 'ready'
-const oauthState = ref<OAuthState>('unknown')
-const oauthConnecting = ref(false)
-const oauthError = ref('')
-
-// Kept as a boolean for the template's "hide the whole block" test.
-const oauthAvailable = computed(() => (oauthState.value === 'unknown' ? null : oauthState.value !== 'unavailable'))
-
-// True once the user has connected a Google account this session (legacy
-// grant path — the connection picker has its own selected state).
-const sheetsConnected = computed(() => source.value.googleOAuth && !!form.oauthGrantId)
-
-// --- Workspace-level Google connections (the preferred credential) ---
-const connectionsStore = useConnectionsStore()
-const connectionOptions = computed(() =>
-  connectionsStore.availability === 'ready'
-    ? connectionsStore.connections.filter((c) => c.type === 'google')
-    : [],
-)
-// On create, preselect the only sensible default once the list arrives. Edits
-// are prefilled from the pipeline itself (loadForEdit) — a connection id is a
-// reference, not credential material, so the editor can and must show which
-// account is attached: a blank picker reads as "nothing is set" while the
-// server is still keeping something the user cannot see.
-watch(connectionOptions, (opts) => {
-  const first = opts[0]
-  if (!isEdit.value && source.value.googleOAuth && !form.connectionId && !form.oauthGrantId && first) {
-    form.connectionId = first.id
-  }
-})
+// --- Google Sheets "Sign in with Google" (src/composables/useGoogleConnect) ---
+// The probe, the consent popup, promoting the grant to a workspace connection
+// and the connection picker all live in the composable, which writes into the
+// form: a connection, a one-shot grant and a pasted service-account key are
+// three ways to say the same thing, so setting one has to clear the other two.
+const googleOAuth = computed(() => source.value.googleOAuth)
+const {
+  state: oauthState,
+  available: oauthAvailable,
+  connecting: oauthConnecting,
+  error: oauthError,
+  connected: sheetsConnected,
+  connectionOptions,
+  credentialChoice,
+  connect: connectGoogle,
+  disconnect: disconnectGoogle,
+} = useGoogleConnect(form, googleOAuth, isEdit)
 
 // The pipeline's stored credential state, as the server reports it on edit.
 // attachedConnectionId is '' when the pipeline holds its own credentials.
 const attachedConnectionId = ref('')
 const hasStoredCredentials = ref(false)
 
-// Picker sentinel for "drop the stored credentials". A <select> carries one
-// value, so detach rides in the same control as the connection choice and is
-// unpacked into form.connectionId / form.detach here.
-const DETACH = '__detach__'
-const credentialChoice = computed<string>({
-  get: () => (form.detach ? DETACH : form.connectionId),
-  set: (v) => {
-    form.detach = v === DETACH
-    form.connectionId = v === DETACH ? '' : v
-  },
-})
-
-// Ask the workspace whether an OAuth app is connected. The RPC is the source of
-// truth rather than a probe of /start: it distinguishes "no app connected yet"
-// from "this server has no OAuth at all", and unlike the old probe it does not
-// mint a consent state just to find out.
-async function probeOAuthAvailability() {
-  if (!source.value.googleOAuth || oauthState.value !== 'unknown') return
-  try {
-    const resp = await oauthClientClient.getOAuthClient({ provider: 'google' })
-    if (!resp.flowAvailable) oauthState.value = 'unavailable'
-    else oauthState.value = resp.configured ? 'ready' : 'setup'
-  } catch (err) {
-    // An older workspace plane does not serve the service at all.
-    oauthState.value = err instanceof ConnectError && err.code === Code.Unimplemented ? 'unavailable' : 'setup'
-  }
-}
-
-async function connectGoogle() {
-  oauthError.value = ''
-  oauthConnecting.value = true
-  try {
-    const res = await connectGoogleSheets()
-    let promoted = false
-    if (connectionsStore.availability !== 'unavailable') {
-      // Promote the grant to a workspace connection so this sign-in is the
-      // last one: future pipelines (and live SQL) reuse it by reference.
-      // Attempted even while availability is still 'unknown' — the probe is
-      // best-effort and a swallowed load must not silently downgrade a
-      // capable plane to the one-shot grant path.
-      //
-      // Signing in with an account that is already connected re-authorizes
-      // that connection server-side and returns it, id unchanged. There is
-      // deliberately no client-side "already exists → reuse the existing row"
-      // fallback: that turned a reconnect into a no-op that reattached the
-      // very token the user was trying to replace, and spent the fresh grant
-      // doing it, so the error the customer was told to fix could not be
-      // fixed. If the server ever does refuse, the refusal must be visible.
-      try {
-        const conn = await connectionsStore.createFromGoogleGrant(res.grant_id)
-        form.connectionId = conn.id
-        form.detach = false
-        form.oauthGrantId = ''
-        form.oauthEmail = ''
-        promoted = true
-      } catch (err) {
-        if (!(err instanceof ConnectError && err.code === Code.Unimplemented)) {
-          // Grants are one-time and consumption happens server-side, so after
-          // any other failure the grant may already be dead — surface the
-          // error instead of embedding a reference that cannot redeem.
-          throw err
-        }
-        // Unimplemented: an older plane without ConnectionService — the
-        // grant was never touched, the one-shot fallback below is correct.
-      }
-    }
-    if (!promoted) {
-      // Legacy plane without ConnectionService: one-shot grant per pipeline.
-      form.oauthGrantId = res.grant_id
-      form.oauthEmail = res.email
-      form.connectionId = ''
-      form.detach = false
-    }
-    form.credentialsRaw = '' // OAuth and service-account are mutually exclusive
-    oauthState.value = 'ready'
-    toast.success(t('pipelinesUi.wizard.configure.sheetsOAuth.connected', { email: res.email }))
-  } catch (err) {
-    if (err instanceof OAuthUnavailableError) {
-      oauthState.value = 'unavailable'
-    } else if (err instanceof OAuthClientNotConfiguredError) {
-      // The app was disconnected between the probe and the click.
-      oauthState.value = 'setup'
-    } else {
-      oauthError.value = errorMessage(err, t('pipelinesUi.wizard.configure.sheetsOAuth.failed'))
-    }
-  } finally {
-    oauthConnecting.value = false
-  }
-}
-
-function disconnectGoogle() {
-  form.oauthGrantId = ''
-  form.oauthEmail = ''
-  form.connectionId = ''
-  form.detach = false
-}
-
 // Typing a service-account key clears any OAuth grant/connection so the two
 // never collide.
 watch(() => form.credentialsRaw, (v) => {
   if (v.trim() && (form.oauthGrantId || form.connectionId)) disconnectGoogle()
 })
-
-// Probe when Google Sheets becomes the selected source. The connections list
-// loads alongside; an older plane answers Unimplemented and the picker simply
-// never appears (availability = 'unavailable').
-watch(() => source.value.googleOAuth, (on) => {
-  if (on) {
-    probeOAuthAvailability()
-    connectionsStore.load().catch(() => {})
-  }
-}, { immediate: true })
 
 // Post-create upload flow (file_upload only).
 const createdPipelineId = ref('')
@@ -304,8 +176,6 @@ const runningNow = ref(false)
 watch(() => form.sourceType, (type) => {
   const next = sourceFor(type)
   if (next.defaults && !isEdit.value) Object.assign(form, next.defaults)
-  // A Google grant is meaningless for a source that does not sign in.
-  if (!next.googleOAuth) disconnectGoogle()
 })
 
 function addResource() {
