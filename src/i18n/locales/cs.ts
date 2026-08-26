@@ -208,6 +208,7 @@ export default {
             filesystem: 'Souborový systém',
             google_sheets: 'Tabulky Google',
             file_upload: 'Nahrání souborů',
+            duckdb: 'DuckDB engine',
         },
         datasetName: 'Název datasetu',
         datasetNamePlaceholder: 'raw_github',

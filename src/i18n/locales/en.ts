@@ -211,6 +211,7 @@ export default {
             filesystem: 'Filesystem',
             google_sheets: 'Google Sheets',
             file_upload: 'File upload',
+            duckdb: 'DuckDB engine',
         },
         datasetName: 'Dataset Name',
         datasetNamePlaceholder: 'raw_github',

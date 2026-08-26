@@ -32,6 +32,15 @@ export const SOURCES: PipelineSource[] = [
     }),
     googleSheets,
     fileUpload,
+    // Extraction through a DuckDB extension (mysql today) — config shape is
+    // {extension, attach, tables}; the JSON editor is its v1 UI, matching the
+    // generic entries above. See workspace-api validateDuckDBConfig for the
+    // save-time contract.
+    genericSource('duckdb', 'pipelines.sourceTypes.duckdb', {
+        abbr: 'DDB',
+        bg: 'var(--info-soft)',
+        fg: 'var(--info-ink)',
+    }),
 ]
 
 const BY_ID = new Map(SOURCES.map((s) => [s.id, s]))
