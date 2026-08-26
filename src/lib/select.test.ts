@@ -110,7 +110,17 @@ describe('panelPosition', () => {
         expect(p.placement).toBe('above')
         // 300 wanted, 700 - 4 - 8 = 688 available, so the full panel fits.
         expect(p.maxHeight).toBe(300)
-        expect(p.top).toBe(700 - 4 - 300)
+        // Pinned by its bottom edge: 4px above the trigger's top, whatever the
+        // list actually ends up measuring.
+        expect(p.bottom).toBe(800 - 700 + 4)
+    })
+
+    test('an upward panel is pinned to the trigger, not to maxHeight', () => {
+        // A two-option list is far shorter than the room above it. Pinned by
+        // `top` it would hang in mid-air; pinned by `bottom` it sits on the
+        // trigger either way.
+        const low = { top: 700, left: 200, width: 300, height: 40 }
+        expect(panelPosition(low, 288, viewport).bottom).toBe(panelPosition(low, 60, viewport).bottom)
     })
 
     test('caps maxHeight to the room available rather than overflowing', () => {

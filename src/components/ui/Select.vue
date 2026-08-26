@@ -49,7 +49,7 @@ const open = ref(false)
 const active = ref(-1)
 const trigger = ref<HTMLButtonElement | null>(null)
 const list = ref<HTMLUListElement | null>(null)
-const pos = ref<PanelPosition>({ top: 0, left: 0, width: 0, maxHeight: 0, placement: 'below' })
+const pos = ref<PanelPosition>({ top: 0, bottom: 0, left: 0, width: 0, maxHeight: 0, placement: 'below' })
 
 const label = computed(() => labelFor(props.options, model.value, props.placeholder))
 const isPlaceholder = computed(() => selectedIndex(props.options, model.value) < 0)
@@ -237,7 +237,8 @@ onBeforeUnmount(() => {
                 role="listbox"
                 class="fixed z-[250] m-0 overflow-y-auto rounded-[10px] border p-1 outline-none"
                 :style="{
-                    top: `${pos.top}px`,
+                    top: pos.placement === 'below' ? `${pos.top}px` : 'auto',
+                    bottom: pos.placement === 'above' ? `${pos.bottom}px` : 'auto',
                     left: `${pos.left}px`,
                     width: `${pos.width}px`,
                     maxHeight: `${pos.maxHeight}px`,

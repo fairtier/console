@@ -120,8 +120,15 @@ export interface Viewport {
 }
 
 export interface PanelPosition {
-    /** Viewport coordinates — the panel is position:fixed. */
+    /**
+     * Viewport coordinates — the panel is position:fixed. `placement` decides
+     * which vertical edge is authoritative: a panel opening below is pinned by
+     * `top`, one opening above by `bottom`. Pinning an upward panel by `top`
+     * would work only when it is exactly `maxHeight` tall — a two-option list
+     * would hang detached, `maxHeight - contentHeight` above its trigger.
+     */
     top: number
+    bottom: number
     left: number
     width: number
     maxHeight: number
@@ -156,7 +163,8 @@ export function panelPosition(
 
     const width = Math.min(trigger.width, Math.max(0, viewport.width - margin * 2))
     const left = Math.max(margin, Math.min(trigger.left, viewport.width - width - margin))
-    const top = placement === 'below' ? trigger.top + trigger.height + gap : trigger.top - gap - maxHeight
+    const top = trigger.top + trigger.height + gap
+    const bottom = viewport.height - trigger.top + gap
 
-    return { top, left, width, maxHeight, placement }
+    return { top, bottom, left, width, maxHeight, placement }
 }
