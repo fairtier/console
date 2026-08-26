@@ -118,10 +118,17 @@ const guidedForm = computed(() => (props.source.guided ? SOURCE_FORMS[props.sour
                     class="w-full resize-y rounded-[10px] border px-[13px] py-[11px] font-mono text-[13px] leading-[1.5] outline-none"
                     style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
                 ></textarea>
-                <p v-if="fieldErrors.sourceConfigRaw" class="mt-1.5 text-xs" style="color: var(--err)">
-                    {{ fieldErrors.sourceConfigRaw }}
-                </p>
             </div>
         </div>
+
+        <!-- Violations with no field of their own. Outside the grid, so they
+             show in guided mode too: this used to render only inside the JSON
+             editor's branch, which meant a server rejection of a key the
+             guided form does not have a field for — bucket_url,
+             tables_config.*, incremental.* — appeared nowhere at all and
+             survived only as a toast the user had already dismissed. -->
+        <p v-if="fieldErrors.sourceConfigRaw" class="mt-3 text-xs" style="color: var(--err)">
+            {{ fieldErrors.sourceConfigRaw }}
+        </p>
     </div>
 </template>

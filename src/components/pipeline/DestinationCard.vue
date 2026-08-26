@@ -12,6 +12,7 @@ const props = defineProps<{
     form: PipelineForm
     /** False for a source that runs manually (file_upload): no schedule field. */
     schedulable: boolean
+    fieldErrors: Record<string, string>
 }>()
 
 const { t } = useI18n()
@@ -44,6 +45,9 @@ const scheduleNextRuns = computed(() => (scheduleError.value ? '' : cronText.nex
                     class="h-10 w-full rounded-[10px] border px-[13px] font-mono text-[13px] outline-none"
                     style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
                 />
+                <p v-if="fieldErrors.datasetName" class="mt-1.5 text-xs" style="color: var(--err)">
+                    {{ fieldErrors.datasetName }}
+                </p>
             </div>
             <div>
                 <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">

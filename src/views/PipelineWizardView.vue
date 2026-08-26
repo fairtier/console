@@ -379,7 +379,7 @@ function goBack() {
           :field-errors="fieldErrors"
         />
 
-        <DestinationCard :form="form" :schedulable="source.schedulable" />
+        <DestinationCard :form="form" :schedulable="source.schedulable" :field-errors="fieldErrors" />
 
         <p v-if="formError" style="color:var(--err); font-size:13px; margin:0 0 14px;">{{ formError }}</p>
 

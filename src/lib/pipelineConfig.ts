@@ -133,6 +133,8 @@ export function formFieldFor(path: string): string {
             return 'spreadsheet'
         case 'range_names':
             return 'rangeNames'
+        case 'dataset_name':
+            return 'datasetName'
         case 'connection_string':
         case 'access_key_id':
         case 'secret_access_key':
@@ -140,7 +142,10 @@ export function formFieldFor(path: string): string {
             return 'credentialsRaw'
         default:
             // Everything else (bucket_url, tables_config.*, incremental.*, …)
-            // lives in the advanced/generic source config editor.
+            // belongs to the source config. SourceCard renders this one
+            // whether or not the JSON editor is open — in guided mode there is
+            // no field to point at, and a violation with nowhere to render is
+            // a violation the user never sees.
             return 'sourceConfigRaw'
     }
 }

@@ -200,6 +200,10 @@ describe('formFieldFor', () => {
         }
     })
 
+    test('routes the dataset name to the destination field', () => {
+        expect(formFieldFor('dataset_name')).toBe('datasetName')
+    })
+
     test('falls back to the source-config editor for everything else', () => {
         for (const p of ['bucket_url', 'tables_config.name', 'incremental.cursor_path', 'wat']) {
             expect(formFieldFor(p)).toBe('sourceConfigRaw')
@@ -209,7 +213,10 @@ describe('formFieldFor', () => {
     test('every mapping names a real form field', () => {
         // The wizard renders an error only where a field with this id exists;
         // a typo here is an error that disappears.
-        const known = new Set(['baseUrl', 'resources', 'spreadsheet', 'rangeNames', 'credentialsRaw', 'sourceConfigRaw'])
+        const known = new Set([
+            'baseUrl', 'resources', 'spreadsheet', 'rangeNames',
+            'credentialsRaw', 'sourceConfigRaw', 'datasetName',
+        ])
         const paths = [
             'base_url', 'resources', 'resources[0].name', 'resources[0].endpoint',
             'spreadsheet_url_or_id', 'range_names', 'connection_string', 'access_key_id',
