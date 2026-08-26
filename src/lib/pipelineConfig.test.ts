@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'bun:test'
-import { buildSourceConfig, formFieldFor, isValidJson, unpackSourceConfig } from './pipelineConfig'
+import {
+    buildCredentials,
+    buildSourceConfig,
+    credentialsProvided,
+    formFieldFor,
+    isValidJson,
+    unpackSourceConfig,
+} from './pipelineConfig'
 import type { PipelineForm } from './pipelineSources'
 
 function blankForm(over: Partial<PipelineForm> = {}): PipelineForm {
@@ -61,6 +68,61 @@ describe('buildSourceConfig', () => {
     test('throws on unparseable JSON rather than saving something the box cannot read', () => {
         const form = blankForm({ sourceType: 'filesystem', sourceConfigRaw: '{oops' })
         expect(() => buildSourceConfig(form, false)).toThrow()
+    })
+})
+
+describe('buildCredentials', () => {
+    const sheets = (over: Partial<PipelineForm> = {}) => blankForm({ sourceType: 'google_sheets', ...over })
+
+    test('a Google connection is sent as a reference, not a secret', () => {
+        // The point of the connection: the backend resolves the refresh token
+        // at render time, so reconnecting once in Integrations fixes every
+        // pipeline that references it.
+        expect(buildCredentials(sheets({ connectionId: 'conn-1' }))).toEqual({
+            oauth: { connection_id: 'conn-1' },
+        })
+    })
+
+    test('the connection wins over a one-shot grant and a pasted key', () => {
+        const form = sheets({ connectionId: 'conn-1', oauthGrantId: 'g-1', credentialsRaw: '{"service_account_key":{}}' })
+        expect(buildCredentials(form)).toEqual({ oauth: { connection_id: 'conn-1' } })
+    })
+
+    test('a one-shot grant is the fallback for a plane without connections', () => {
+        expect(buildCredentials(sheets({ oauthGrantId: 'g-1' }))).toEqual({ oauth: { grant_id: 'g-1' } })
+    })
+
+    test('a service-account key is the fallback below that', () => {
+        expect(buildCredentials(sheets({ credentialsRaw: '{"service_account_key":{"x":1}}' }))).toEqual({
+            service_account_key: { x: 1 },
+        })
+    })
+
+    test('a non-Google source ignores any stray connection reference', () => {
+        // Selecting another type clears these, but the precedence must not
+        // depend on that having happened: a rest_api pipeline must never be
+        // saved with an oauth credential.
+        const form = blankForm({ connectionId: 'conn-1', oauthGrantId: 'g-1', credentialsRaw: '{"api_key":"k"}' })
+        expect(buildCredentials(form)).toEqual({ api_key: 'k' })
+    })
+
+    test('nothing supplied is an empty object, not a parse error', () => {
+        expect(buildCredentials(blankForm())).toEqual({})
+    })
+})
+
+describe('credentialsProvided', () => {
+    // On update, empty credentials mean "keep what is stored". Answering true
+    // for an untouched form would overwrite a working credential with {}.
+    test('false for an untouched form', () => {
+        expect(credentialsProvided(blankForm())).toBe(false)
+        expect(credentialsProvided(blankForm({ credentialsRaw: '   ' }))).toBe(false)
+    })
+
+    test('true for each of the three ways to supply one', () => {
+        expect(credentialsProvided(blankForm({ connectionId: 'conn-1' }))).toBe(true)
+        expect(credentialsProvided(blankForm({ oauthGrantId: 'g-1' }))).toBe(true)
+        expect(credentialsProvided(blankForm({ credentialsRaw: '{"api_key":"k"}' }))).toBe(true)
     })
 })
 

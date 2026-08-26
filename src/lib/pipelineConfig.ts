@@ -39,6 +39,41 @@ export function buildSourceConfig(form: PipelineForm, advancedJson: boolean): un
     return source.toConfig(form)
 }
 
+/**
+ * buildCredentials produces the source_credentials to save.
+ *
+ * For a Google source the preferred answer is a *reference*, not a secret: the
+ * backend resolves the connection's refresh token at serve/render time, so the
+ * pipeline follows the connection and a reconnect happens once, in
+ * Integrations. The one-shot grant below it is the fallback for a workspace
+ * plane that does not serve ConnectionService yet — the backend swaps it for
+ * the stored refresh token and injects the client credentials. Either way the
+ * raw textarea is ignored.
+ *
+ * Throws on unparseable JSON, like buildSourceConfig.
+ */
+export function buildCredentials(form: PipelineForm): unknown {
+    const source = sourceFor(form.sourceType)
+    if (source.googleOAuth && form.connectionId) {
+        return { oauth: { connection_id: form.connectionId } }
+    }
+    if (source.googleOAuth && form.oauthGrantId) {
+        return { oauth: { grant_id: form.oauthGrantId } }
+    }
+    const raw = form.credentialsRaw.trim()
+    return raw ? JSON.parse(raw) : {}
+}
+
+/**
+ * credentialsProvided reports whether the user supplied new credentials this
+ * session. It decides a contract, not a display: on update, empty credentials
+ * mean "keep what is stored", so answering true for an untouched form would
+ * overwrite a working credential with {}.
+ */
+export function credentialsProvided(form: PipelineForm): boolean {
+    return !!form.connectionId || !!form.oauthGrantId || form.credentialsRaw.trim() !== ''
+}
+
 /** What a stored source_config unpacks into. */
 export interface UnpackedConfig {
     /** Guided form fields to merge into the wizard's form. */

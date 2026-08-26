@@ -17,7 +17,9 @@ import { useToast } from '../composables/useToast'
 import { useCronText } from '../composables/useCronText'
 import { useGoogleConnect } from '../composables/useGoogleConnect'
 import {
+    buildCredentials,
     buildSourceConfig,
+    credentialsProvided,
     formFieldFor,
     isValidJson,
     unpackSourceConfig,
@@ -142,28 +144,6 @@ watch(() => form.sourceType, (type) => {
   if (next.defaults && !isEdit.value) Object.assign(form, next.defaults)
 })
 
-function buildCredentials(): unknown {
-  // Google Sheets via a workspace connection: send only the reference; the
-  // backend resolves the connection's refresh token at serve/render time, so
-  // the pipeline follows the connection (reconnect once, everywhere).
-  if (source.value.googleOAuth && form.connectionId) {
-    return { oauth: { connection_id: form.connectionId } }
-  }
-  // Legacy grant path: the backend swaps the grant for the stored refresh
-  // token and injects the client credentials.
-  if (source.value.googleOAuth && form.oauthGrantId) {
-    return { oauth: { grant_id: form.oauthGrantId } }
-  }
-  const raw = form.credentialsRaw.trim()
-  return raw ? JSON.parse(raw) : {}
-}
-
-// Whether the user supplied new credentials this session (used on edit, where
-// empty means "keep existing").
-const credentialsProvided = computed(() =>
-  !!form.connectionId || !!form.oauthGrantId || form.credentialsRaw.trim() !== '',
-)
-
 // --- Schedule validity (src/lib/cron.ts) ---
 // A malformed cron would be accepted by the API and then silently never fire
 // on the box, so validate() has to see it. The spelled-out hint and the
@@ -203,7 +183,7 @@ async function submit() {
   let sourceCredentials: string
   try {
     sourceConfig = JSON.stringify(buildSourceConfig(form, advancedJson.value))
-    sourceCredentials = JSON.stringify(buildCredentials())
+    sourceCredentials = JSON.stringify(buildCredentials(form))
   } catch {
     formError.value = t('pipelines.validation.invalidJson')
     return
@@ -219,7 +199,7 @@ async function submit() {
         sourceConfig,
         // Empty credentials = keep existing (server contract). A reconnected
         // Google account or a re-pasted key counts as new credentials.
-        sourceCredentials: credentialsProvided.value ? sourceCredentials : '',
+        sourceCredentials: credentialsProvided(form) ? sourceCredentials : '',
         // ...and clearCredentials is the only way to say "drop them", which
         // keep-existing otherwise makes inexpressible. The two are mutually
         // exclusive; the picker cannot produce both at once.
