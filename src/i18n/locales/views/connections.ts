@@ -8,7 +8,7 @@ export default {
       google: {
         title: 'Google account',
         subtitle:
-          'Connect Google once and use it everywhere: Sheets pipelines reference this connection instead of storing their own credentials.',
+          'Connect Google once and use it everywhere: pipelines reading a spreadsheet or a Drive file reference this connection instead of storing their own credentials.',
         connect: 'Connect Google',
         disconnect: 'Disconnect',
         empty: 'No Google account connected yet.',
@@ -16,7 +16,7 @@ export default {
         needsApp:
           'Connecting needs this workspace’s own Google app first — set it up in the “Google” card below, then try again.',
         trustNote:
-          'Pipelines in this workspace can read the sheets this account can read. Access uses the read-only Sheets scope.',
+          'Pipelines in this workspace can read the sheets this account can read. Access uses the read-only Sheets scope — plus, for a Drive source, access to the individual files you point a pipeline at, never your whole Drive.',
       },
       removeConfirm: {
         title: 'Disconnect “{name}”?',
@@ -53,7 +53,7 @@ export default {
       google: {
         title: 'Účet Google',
         subtitle:
-          'Připojte Google jednou a používejte ho všude: pipeline Sheets na toto připojení odkazují a nemusí ukládat vlastní přihlašovací údaje.',
+          'Připojte Google jednou a používejte ho všude: pipeline čtoucí tabulku nebo soubor na Disku na toto připojení odkazují a nemusí ukládat vlastní přihlašovací údaje.',
         connect: 'Připojit Google',
         disconnect: 'Odpojit',
         empty: 'Zatím není připojen žádný účet Google.',
@@ -61,7 +61,7 @@ export default {
         needsApp:
           'Připojení nejdřív vyžaduje vlastní aplikaci Google tohoto workspace — nastavte ji v kartě „Google“ níže a zkuste to znovu.',
         trustNote:
-          'Pipeline v tomto workspace mohou číst tabulky, které tento účet vidí. Přístup používá read-only scope pro Sheets.',
+          'Pipeline v tomto workspace mohou číst tabulky, které tento účet vidí. Přístup používá read-only scope pro Sheets — a u zdroje z Disku navíc přístup k jednotlivým souborům, na které pipeline nasměrujete, nikdy k celému Disku.',
       },
       removeConfirm: {
         title: 'Odpojit „{name}“?',
