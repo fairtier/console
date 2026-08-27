@@ -4,6 +4,7 @@ import {
     buildSourceConfig,
     credentialsProvided,
     formFieldFor,
+    googleScopeFor,
     isValidJson,
     unpackSourceConfig,
 } from './pipelineConfig'
@@ -109,6 +110,50 @@ describe('buildCredentials', () => {
     test('nothing supplied is an empty object, not a parse error', () => {
         expect(buildCredentials(blankForm())).toEqual({})
     })
+
+    test('a duckdb/gdrive pipeline sends the same connection reference', () => {
+        // The half that was missing: the backend has accepted this envelope on
+        // duckdb since workspace-api v0.32.0, but the Console could only offer
+        // a JSON box to paste a refresh token into.
+        const form = blankForm({
+            sourceType: 'duckdb',
+            sourceConfigRaw: '{"extension":"gdrive","tables":[{"name":"invoices","query":"SELECT 1"}]}',
+            connectionId: 'conn-1',
+        })
+        expect(buildCredentials(form)).toEqual({ oauth: { connection_id: 'conn-1' } })
+    })
+
+    test('a duckdb pipeline on another extension never sends one', () => {
+        const form = blankForm({
+            sourceType: 'duckdb',
+            sourceConfigRaw: '{"extension":"mysql","attach":"host=db"}',
+            connectionId: 'conn-1',
+            credentialsRaw: '{"attach_params":{"password":"p"}}',
+        })
+        expect(buildCredentials(form)).toEqual({ attach_params: { password: 'p' } })
+    })
+})
+
+describe('googleScopeFor', () => {
+    test('names what the source reads, so the consent can ask for just that', () => {
+        expect(googleScopeFor(blankForm({ sourceType: 'google_sheets' }))).toBe('sheets')
+        expect(googleScopeFor(blankForm())).toBe('')
+    })
+
+    test('reads the duckdb answer out of its config', () => {
+        const duck = (raw: string) => googleScopeFor(blankForm({ sourceType: 'duckdb', sourceConfigRaw: raw }))
+        expect(duck('{"extension":"gdrive"}')).toBe('drive')
+        expect(duck('{"extension":"mysql"}')).toBe('')
+    })
+
+    test('a config still being typed claims nothing rather than throwing', () => {
+        // The editor is a textarea: every keystroke is a parse attempt, and
+        // most of them are half a config.
+        const duck = (raw: string) => googleScopeFor(blankForm({ sourceType: 'duckdb', sourceConfigRaw: raw }))
+        expect(duck('{"extension": "gdri')).toBe('')
+        expect(duck('')).toBe('')
+        expect(duck('[1,2]')).toBe('')
+    })
 })
 
 describe('credentialsProvided', () => {
@@ -200,6 +245,12 @@ describe('formFieldFor', () => {
         }
     })
 
+    test('routes an oauth violation to the connection picker', () => {
+        // "This account is not authorized for Drive" is about the account the
+        // picker chose; inside the collapsed advanced textarea nobody sees it.
+        expect(formFieldFor('oauth')).toBe('connectionId')
+    })
+
     test('routes the dataset name to the destination field', () => {
         expect(formFieldFor('dataset_name')).toBe('datasetName')
     })
@@ -215,12 +266,12 @@ describe('formFieldFor', () => {
         // a typo here is an error that disappears.
         const known = new Set([
             'baseUrl', 'resources', 'spreadsheet', 'rangeNames',
-            'credentialsRaw', 'sourceConfigRaw', 'datasetName',
+            'credentialsRaw', 'sourceConfigRaw', 'datasetName', 'connectionId',
         ])
         const paths = [
             'base_url', 'resources', 'resources[0].name', 'resources[0].endpoint',
             'spreadsheet_url_or_id', 'range_names', 'connection_string', 'access_key_id',
-            'secret_access_key', 'service_account_key', 'dataset_name', 'bucket_url',
+            'secret_access_key', 'service_account_key', 'oauth', 'dataset_name', 'bucket_url',
         ]
         for (const p of paths) expect(known.has(formFieldFor(p))).toBe(true)
     })

@@ -8,13 +8,14 @@
 //
 // Adding a source is now a file plus a line in SOURCES.
 
+import { duckDb } from './duckDb'
 import { fileUpload } from './fileUpload'
 import { genericSource } from './generic'
 import { googleSheets } from './googleSheets'
 import { restApi } from './restApi'
 import type { PipelineSource } from './types'
 
-export type { PipelineForm, PipelineSource, RestResource, SourceBadge } from './types'
+export type { GoogleScope, PipelineForm, PipelineSource, RestResource, SourceBadge } from './types'
 export { toRestResource } from './restApi'
 
 /** Every source the wizard offers, in the order it offers them. */
@@ -45,30 +46,7 @@ export const SOURCES: PipelineSource[] = [
     ),
     googleSheets,
     fileUpload,
-    // Extraction through a DuckDB extension — config shape is
-    // {extension, attach, tables}; the JSON editor is its v1 UI, matching the
-    // generic entries above. See workspace-api validateDuckDBConfig for the
-    // save-time contract, and docs/plans/duckdb-source-ui.md (monorepo) for
-    // the guided forms that are meant to replace this editor.
-    genericSource(
-        'duckdb',
-        'pipelines.sourceTypes.duckdb',
-        { abbr: 'DDB', bg: 'var(--info-soft)', fg: 'var(--info-ink)' },
-        {
-            // A database extension, which is the shape that needs the most
-            // explaining: an ATTACH template whose every secret part is a
-            // {placeholder} filled from the credentials below. Reader
-            // extensions (pdf, webbed, httpfs, gdrive) take no attach and
-            // give each table an explicit query over the reader function.
-            config:
-                '{\n' +
-                '  "extension": "mysql",\n' +
-                '  "attach": "host=db.internal port=3306 user=readonly database=shop password={password}",\n' +
-                '  "tables": [{"name": "orders", "cursor_column": "updated_at"}]\n' +
-                '}',
-            credentials: '{"attach_params": {"password": "…"}}',
-        },
-    ),
+    duckDb,
 ]
 
 const BY_ID = new Map(SOURCES.map((s) => [s.id, s]))

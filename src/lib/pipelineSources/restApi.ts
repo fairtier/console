@@ -32,7 +32,7 @@ export const restApi: PipelineSource = {
     credentials: true,
     schedulable: true,
     fileDrop: false,
-    googleOAuth: false,
+    googleScope: () => '',
 
     // Only ever seen in Advanced JSON — the guided form is the default view.
     configPlaceholder:

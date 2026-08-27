@@ -111,9 +111,9 @@ export default {
           credentialsTitle: 'Credentials',
           credentialsHelp: 'Stored encrypted, never shown again.',
           credentialsHelpEdit: 'Leave empty to keep the existing credentials.',
-          sheetsCredentialsHelp: 'Paste a Google service-account key (the JSON file from the Google Cloud console) as {\'{"service_account_key": { … }}\'}, and share the spreadsheet read-only with the key\'s client_email.',
           sheetsOAuth: {
             help: 'Approve read-only access to your Google Sheets — no files to download, no sharing to set up.',
+            advancedHelp: 'Paste a Google service-account key (the JSON file from the Google Cloud console) as {\'{"service_account_key": { … }}\'}, and share the spreadsheet read-only with the key\'s client_email.',
             connect: 'Sign in with Google',
             connected: 'Connected as {email}.',
             connectedAs: 'Connected as {email}',
@@ -124,6 +124,25 @@ export default {
             advancedToggle: 'Advanced: use a service account instead',
             needsClient:
               'Signing in with Google uses your own Google app — your consent screen, your quota. Connect one once and every Sheets pipeline can use it.',
+            goToIntegrations: 'Set up in Integrations',
+          },
+          // Google Drive (duckdb/gdrive) asks for different access than Sheets
+          // does, so it says different words. Only the strings that would be
+          // wrong for the other one live here; connect/reconnect/connected are
+          // shared with sheetsOAuth.
+          driveOAuth: {
+            help: 'Approve access to the Google Drive files this pipeline reads — the files you point it at, not your whole Drive.',
+            advancedHelp: 'Or paste the credentials JSON for this source yourself. Signing in above is the shorter path: it fills the same fields in.',
+            connect: 'Sign in with Google',
+            connected: 'Connected as {email}.',
+            connectedAs: 'Connected as {email}',
+            reconnect: 'Reconnect',
+            required: 'Connect a Google account.',
+            failed: 'Google sign-in failed. Please try again.',
+            editNote: 'Already connected — reconnect only to switch account.',
+            advancedToggle: 'Advanced: paste credentials JSON',
+            needsClient:
+              'Signing in with Google uses your own Google app — your consent screen, your quota. Connect one once and every Google pipeline can use it.',
             goToIntegrations: 'Set up in Integrations',
           },
           destinationTitle: 'Destination & schedule',
@@ -277,9 +296,9 @@ export default {
           credentialsTitle: 'Přihlašovací údaje',
           credentialsHelp: 'Uloženo šifrovaně, znovu se nezobrazí.',
           credentialsHelpEdit: 'Ponechte prázdné pro zachování stávajících údajů.',
-          sheetsCredentialsHelp: 'Vložte klíč servisního účtu Google (JSON soubor z Google Cloud konzole) jako {\'{"service_account_key": { … }}\'} a nasdílejte tabulku pro čtení na client_email z klíče.',
           sheetsOAuth: {
             help: 'Schvalte přístup pro čtení k vašim Google Sheets — nemusíte nic stahovat ani nastavovat sdílení.',
+            advancedHelp: 'Vložte klíč servisního účtu Google (JSON soubor z Google Cloud konzole) jako {\'{"service_account_key": { … }}\'} a nasdílejte tabulku pro čtení na client_email z klíče.',
             connect: 'Přihlásit se přes Google',
             connected: 'Připojeno jako {email}.',
             connectedAs: 'Připojeno jako {email}',
@@ -290,6 +309,21 @@ export default {
             advancedToggle: 'Pokročilé: použít servisní účet',
             needsClient:
               'Přihlášení přes Google používá vaši vlastní aplikaci Google — vaši souhlasnou obrazovku, vaši kvótu. Připojte ji jednou a mohou ji používat všechny pipeline Sheets.',
+            goToIntegrations: 'Nastavit v Integracích',
+          },
+          driveOAuth: {
+            help: 'Schvalte přístup k souborům na Google Disku, které tato pipeline načítá — jen k souborům, na které ji nasměrujete, ne k celému Disku.',
+            advancedHelp: 'Nebo vložte přihlašovací údaje zdroje ve formátu JSON ručně. Přihlášení výše je kratší cesta: vyplní stejná pole.',
+            connect: 'Přihlásit se přes Google',
+            connected: 'Připojeno jako {email}.',
+            connectedAs: 'Připojeno jako {email}',
+            reconnect: 'Připojit znovu',
+            required: 'Připojte účet Google.',
+            failed: 'Přihlášení přes Google selhalo. Zkuste to prosím znovu.',
+            editNote: 'Již připojeno — připojte znovu jen pro změnu účtu.',
+            advancedToggle: 'Pokročilé: vložit přihlašovací údaje jako JSON',
+            needsClient:
+              'Přihlášení přes Google používá vaši vlastní aplikaci Google — vaši souhlasnou obrazovku, vaši kvótu. Připojte ji jednou a mohou ji používat všechny pipeline napojené na Google.',
             goToIntegrations: 'Nastavit v Integracích',
           },
           destinationTitle: 'Cíl a plán',

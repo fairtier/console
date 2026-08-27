@@ -4,9 +4,15 @@
 // For a Google source that is a *reference*, not a secret: a workspace
 // connection the customer signed into once, which the pipeline follows so a
 // reconnect happens in one place. The one-shot grant below it is the fallback
-// for a workspace plane that does not serve ConnectionService yet, and the
-// service-account textarea is the fallback below that. Every other source type
-// pastes raw credentials JSON.
+// for a workspace plane that does not serve ConnectionService yet, and the raw
+// textarea is the fallback below that. Every other source type pastes raw
+// credentials JSON.
+//
+// "A Google source" is google_sheets AND duckdb with the gdrive extension —
+// which is why the branch tests the flow's scope rather than the source type.
+// The two want different words for the same control: one reads a spreadsheet,
+// the other reads files in Drive, and telling a Drive customer to share a
+// spreadsheet with a service account would be nonsense.
 //
 // The flow itself is useGoogleConnect's, owned by the wizard: applyDraft has to
 // clear a sign-in while this card is not even mounted, so the composable cannot
@@ -35,6 +41,14 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+
+// Sheets and Drive differ in what they ask for, so they differ in what they
+// say. Only the strings that would be wrong for the other one are switched;
+// everything shared (connect, reconnect, connected as…) stays one string.
+const copy = computed(() => {
+    const ns = props.google.scope.value === 'drive' ? 'driveOAuth' : 'sheetsOAuth'
+    return (key: string) => t(`pipelinesUi.wizard.configure.${ns}.${key}`)
+})
 
 // The connection picker's options. A single control carries three different
 // answers — see useGoogleConnect's credentialChoice, which unpacks the DETACH
@@ -77,8 +91,9 @@ watch(
             {{ isEdit ? t('pipelinesUi.wizard.configure.credentialsHelpEdit') : t('pipelinesUi.wizard.configure.credentialsHelp') }}
         </div>
 
-        <!-- google_sheets: Sign in with Google (default) + service account (advanced) -->
-        <template v-if="source.googleOAuth">
+        <!-- Google-backed source (google_sheets, duckdb/gdrive): Sign in with
+             Google by default, raw credentials as the advanced fallback. -->
+        <template v-if="google.scope.value">
             <!-- OAuth (hidden when the server has no Google OAuth configured) -->
             <div v-if="google.available.value !== false" class="mb-[14px]">
                 <!-- Workspace connection picker (preferred): the pipeline
@@ -118,6 +133,13 @@ watch(
                     <p v-if="google.error.value" class="mt-2 text-xs" style="color: var(--err)">
                         {{ google.error.value }}
                     </p>
+                    <!-- The server's own refusal — "this account is not
+                         authorized for Google Drive" — belongs on the control
+                         that chose the account, not in a toast that scrolls
+                         away. -->
+                    <p v-if="fieldErrors.connectionId" class="mt-2 text-xs" style="color: var(--err)">
+                        {{ fieldErrors.connectionId }}
+                    </p>
                 </div>
                 <div
                     v-else-if="google.connected.value"
@@ -149,7 +171,7 @@ watch(
                     <Icon name="info" :size="16" class="mt-0.5 flex-none" :style="{ color: 'var(--ink-3)' }" />
                     <div class="min-w-0 flex-1">
                         <div class="mb-[9px] text-[13px] leading-[1.55]" style="color: var(--ink)">
-                            {{ t('pipelinesUi.wizard.configure.sheetsOAuth.needsClient') }}
+                            {{ copy('needsClient') }}
                         </div>
                         <RouterLink
                             :to="{ name: 'integrations' }"
@@ -163,7 +185,7 @@ watch(
                 </div>
                 <div v-else>
                     <p class="mb-2.5 text-[12.5px] leading-[1.55]" style="color: var(--ink-2)">
-                        {{ t('pipelinesUi.wizard.configure.sheetsOAuth.help') }}
+                        {{ copy('help') }}
                     </p>
                     <button
                         type="button"
@@ -188,11 +210,11 @@ watch(
             <!-- Advanced: service account (open by default only when OAuth is unavailable) -->
             <details :open="google.available.value === false" class="border-t pt-3" style="border-color: var(--line)">
                 <summary class="cursor-pointer list-none text-[12.5px] font-semibold" style="color: var(--ink-2)">
-                    {{ t('pipelinesUi.wizard.configure.sheetsOAuth.advancedToggle') }}
+                    {{ copy('advancedToggle') }}
                 </summary>
                 <div class="mt-3">
                     <div class="mb-2.5 text-[12.5px] leading-[1.55]" style="color: var(--ink-2)">
-                        {{ t('pipelinesUi.wizard.configure.sheetsCredentialsHelp') }}
+                        {{ copy('advancedHelp') }}
                     </div>
                     <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">
                         {{ t('pipelines.sourceCredentials') }}

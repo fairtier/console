@@ -48,6 +48,16 @@ export interface PipelineForm {
     schedule: string
 }
 
+/**
+ * Which Google authorization a source needs to read its data.
+ *
+ * Not a boolean, because *which* one matters: the consent asks for exactly
+ * what the source reads, so a Sheets pipeline never puts a "see your Google
+ * Drive" permission in front of the user. '' means the source does not sign in
+ * with Google at all.
+ */
+export type GoogleScope = '' | 'sheets' | 'drive'
+
 /** Badge presentation for the pipelines list. */
 export interface SourceBadge {
     abbr: string
@@ -77,8 +87,16 @@ export interface PipelineSource {
     schedulable: boolean
     /** Its data arrives by upload, so the wizard shows the file drop. */
     fileDrop: boolean
-    /** Authenticates by signing in with Google. */
-    googleOAuth: boolean
+    /**
+     * Which Google authorization this source needs, given its config — '' for
+     * the sources that do not sign in with Google.
+     *
+     * A function of the config rather than a flag, because for `duckdb` the
+     * answer lives inside it: the gdrive extension reads Google Drive, mysql
+     * reads a database and must never trigger a Google consent. Every other
+     * type ignores the argument.
+     */
+    googleScope(config: Record<string, unknown>): GoogleScope
 
     // --- Placeholders for the raw editors. ---
     /**

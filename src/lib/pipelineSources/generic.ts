@@ -24,7 +24,7 @@ export function genericSource(
         credentials: true,
         schedulable: true,
         fileDrop: false,
-        googleOAuth: false,
+        googleScope: () => '',
         // A type we know the shape of says so; a type we do not defaults to
         // `{}`, which claims nothing. Never another type's example.
         configPlaceholder: placeholders.config ?? '{}',

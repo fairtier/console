@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ConnectError, Code } from '@connectrpc/connect'
 import { useConnectionsStore } from '../stores/connections'
-import { connectGoogleSheets, OAuthUnavailableError, OAuthClientNotConfiguredError } from '../api/googleOAuth'
+import { connectGoogle, OAuthUnavailableError, OAuthClientNotConfiguredError } from '../api/googleOAuth'
 import { errorMessage } from '../api/errors'
 import Icon from './ui/Icon.vue'
 import Spinner from './ui/Spinner.vue'
@@ -48,8 +48,13 @@ async function connect() {
   busy.value = true
   needsApp.value = false
   try {
-    // Popup must open inside the click gesture; connectGoogleSheets handles that.
-    const grant = await connectGoogleSheets()
+    // Popup must open inside the click gesture; connectGoogle handles that.
+    //
+    // The base consent only: connecting an account here says nothing about
+    // what it will be used for, and a Drive permission asked of someone who
+    // came to connect Sheets is a permission they have every reason to
+    // refuse. A Drive pipeline widens it from the wizard, on the same account.
+    const grant = await connectGoogle()
     await store.createFromGoogleGrant(grant.grant_id)
     toast.success(t('connections.toast.connected', { email: grant.email }))
   } catch (err) {

@@ -21,6 +21,7 @@ import {
     buildSourceConfig,
     credentialsProvided,
     formFieldFor,
+    googleScopeFor,
     isValidJson,
     unpackSourceConfig,
 } from '../lib/pipelineConfig'
@@ -125,8 +126,11 @@ const sourceOptions = computed(() => {
 // and the connection picker all live in the composable, which writes into the
 // form: a connection, a one-shot grant and a pasted service-account key are
 // three ways to say the same thing, so setting one has to clear the other two.
-const googleOAuth = computed(() => source.value.googleOAuth)
-const google = useGoogleConnect(form, googleOAuth, isEdit)
+// What this source needs from Google, which for duckdb depends on the
+// extension its config names: gdrive reads Drive, mysql reads a database and
+// must never put a Google consent in front of the user.
+const googleScope = computed(() => googleScopeFor(form))
+const google = useGoogleConnect(form, googleScope, isEdit)
 
 // The pipeline's stored credential state, as the server reports it on edit.
 // attachedConnectionId is '' when the pipeline holds its own credentials.
@@ -165,9 +169,9 @@ function validate(): boolean {
   if (!form.connectionId && !form.oauthGrantId && !isValidJson(form.credentialsRaw)) {
     errors.push(`${t('pipelines.sourceCredentials')}: ${t('pipelines.validation.invalidJson')}`)
   }
-  // On create, a Google Sheets pipeline needs one credential method: a Google
-  // connection, a one-shot grant, or a pasted service-account key.
-  if (source.value.googleOAuth && !isEdit.value && !form.connectionId && !form.oauthGrantId && !form.credentialsRaw.trim()) {
+  // On create, a Google-backed pipeline needs one credential method: a Google
+  // connection, a one-shot grant, or a pasted credential.
+  if (googleScope.value && !isEdit.value && !form.connectionId && !form.oauthGrantId && !form.credentialsRaw.trim()) {
     errors.push(t('pipelinesUi.wizard.configure.sheetsOAuth.required'))
   }
   // A malformed cron would be accepted by the API and then silently never fire

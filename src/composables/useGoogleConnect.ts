@@ -1,11 +1,11 @@
 import { computed, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ConnectError, Code } from '@connectrpc/connect'
-import { connectGoogleSheets, OAuthClientNotConfiguredError, OAuthUnavailableError } from '../api/googleOAuth'
+import { connectGoogle, OAuthClientNotConfiguredError, OAuthUnavailableError } from '../api/googleOAuth'
 import { oauthClientClient } from '../api'
 import { errorMessage } from '../api/errors'
 import { useConnectionsStore } from '../stores/connections'
-import type { PipelineForm } from '../lib/pipelineSources'
+import type { GoogleScope, PipelineForm } from '../lib/pipelineSources'
 import { useToast } from './useToast'
 
 // Three answers, not two, because the user can act on the middle one:
@@ -31,13 +31,18 @@ export const DETACH = '__detach__'
  * the other two.
  *
  * @param form     the wizard's form, mutated in place
- * @param enabled  whether the selected source signs in with Google
+ * @param scope    what the selected source needs from Google ('' = nothing).
+ *                 Not a boolean, because the consent asks for exactly that: a
+ *                 Sheets pipeline must never request the customer's Drive.
  * @param isEdit   whether the wizard is editing an existing pipeline
  */
-export function useGoogleConnect(form: PipelineForm, enabled: Ref<boolean>, isEdit: Ref<boolean>) {
+export function useGoogleConnect(form: PipelineForm, scope: Ref<GoogleScope>, isEdit: Ref<boolean>) {
     const { t } = useI18n()
     const toast = useToast()
     const connectionsStore = useConnectionsStore()
+
+    // The source signs in with Google at all.
+    const enabled = computed(() => scope.value !== '')
 
     const state = ref<OAuthState>('unknown')
     const connecting = ref(false)
@@ -99,7 +104,7 @@ export function useGoogleConnect(form: PipelineForm, enabled: Ref<boolean>, isEd
         error.value = ''
         connecting.value = true
         try {
-            const res = await connectGoogleSheets()
+            const res = await connectGoogle(scope.value === 'drive' ? 'drive' : '')
             let promoted = false
             if (connectionsStore.availability !== 'unavailable') {
                 // Promote the grant to a workspace connection so this sign-in is
@@ -187,7 +192,7 @@ export function useGoogleConnect(form: PipelineForm, enabled: Ref<boolean>, isEd
         { immediate: true },
     )
 
-    return { state, available, connecting, error, connected, connectionOptions, credentialChoice, connect, disconnect }
+    return { state, scope, available, connecting, error, connected, connectionOptions, credentialChoice, connect, disconnect }
 }
 
 /** The flow's public surface, as the wizard hands it to CredentialsCard. */

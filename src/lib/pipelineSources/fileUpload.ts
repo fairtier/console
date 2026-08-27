@@ -15,7 +15,7 @@ export const fileUpload: PipelineSource = {
     // Runs manually: drop a file, hit run.
     schedulable: false,
     fileDrop: true,
-    googleOAuth: false,
+    googleScope: () => '',
 
     // Neither raw editor is ever rendered for this type: the file drop takes
     // the config's place, and the platform holds the credentials.

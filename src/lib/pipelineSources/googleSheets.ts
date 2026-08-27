@@ -13,9 +13,11 @@ export const googleSheets: PipelineSource = {
     credentials: true,
     schedulable: true,
     fileDrop: false,
-    // The one type that authenticates by signing in rather than by pasting a
-    // key. The raw service-account textarea stays as the advanced fallback.
-    googleOAuth: true,
+    // Authenticates by signing in rather than by pasting a key. The raw
+    // service-account textarea stays as the advanced fallback. Sheets only:
+    // reading a spreadsheet by id needs no Drive access, which is what keeps
+    // the customer's own Google app clear of a restricted scope.
+    googleScope: () => 'sheets',
 
     configPlaceholder: '{\n  "spreadsheet_url_or_id": "…",\n  "range_names": ["Sheet1"]\n}',
     // For a Google source the raw editor is the service-account fallback,

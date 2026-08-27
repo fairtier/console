@@ -1,10 +1,21 @@
-// "Sign in with Google" helper for Google Sheets pipeline sources. These are
-// plain HTTP endpoints (not ConnectRPC): /oauth/google/start returns the Google
+// "Sign in with Google" helper for the Google-backed pipeline sources — Sheets,
+// and Drive files read through duckdb/gdrive. These are plain HTTP endpoints (not ConnectRPC): /oauth/google/start returns the Google
 // consent URL, and the popup lands on /oauth/google/callback which postMessages
 // the resulting grant back here. The refresh token never reaches the browser —
 // we only ever receive a short-lived grant_id the backend redeems on save.
 
 import { workspaceApiBase, workspaceAuthToken } from './transport'
+
+/**
+ * What the consent asks for beyond signing in and reading Sheets. '' is the
+ * base set; 'drive' adds access to the Drive files the pipeline names.
+ *
+ * The caller decides, so a Sheets pipeline never asks a customer for their
+ * Drive. The server refuses a value it does not know rather than quietly
+ * falling back — a token missing the access that was asked for fails much
+ * later, in a scheduled run on the box.
+ */
+export type GoogleCapability = '' | 'drive'
 
 /** Result handed back by the callback popup. */
 export interface GoogleOAuthResult {
@@ -31,12 +42,13 @@ function apiBase(): string {
 }
 
 /** Fetches a fresh Google consent URL for the authenticated user. */
-export async function startGoogleOAuth(): Promise<string> {
+export async function startGoogleOAuth(capability: GoogleCapability = ''): Promise<string> {
     const token = workspaceAuthToken()
     const headers: Record<string, string> = {}
     if (token) headers['Authorization'] = `Bearer ${token}`
 
-    const resp = await fetch(`${apiBase()}/oauth/google/start`, { headers })
+    const query = capability ? `?capability=${encodeURIComponent(capability)}` : ''
+    const resp = await fetch(`${apiBase()}/oauth/google/start${query}`, { headers })
     if (resp.status === 501) {
         throw new OAuthUnavailableError('Sign in with Google is not enabled on this server')
     }
@@ -64,8 +76,14 @@ export async function startGoogleOAuth(): Promise<string> {
  * Opens the Google consent popup and resolves once the callback posts the grant
  * back. The popup is opened synchronously (inside the click gesture) to avoid
  * popup blockers, then navigated to the consent URL after it is fetched.
+ *
+ * `capability` widens the consent to what the source actually reads. Widening
+ * is additive on Google's side (include_granted_scopes), so connecting the same
+ * account again for Drive keeps the Sheets access it already granted — which is
+ * why "reconnect" is the honest fix for an account connected before Drive was
+ * ever asked for.
  */
-export function connectGoogleSheets(): Promise<GoogleOAuthResult> {
+export function connectGoogle(capability: GoogleCapability = ''): Promise<GoogleOAuthResult> {
     const popup = window.open('', 'fairtier-google-oauth', 'width=520,height=680')
 
     return new Promise<GoogleOAuthResult>((resolve, reject) => {
@@ -105,7 +123,7 @@ export function connectGoogleSheets(): Promise<GoogleOAuthResult> {
             if (popup.closed) finish(() => reject(new Error('Sign-in was cancelled')))
         }, 500)
 
-        startGoogleOAuth()
+        startGoogleOAuth(capability)
             .then((url) => {
                 if (!settled) popup.location.href = url
             })

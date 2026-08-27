@@ -8,7 +8,7 @@
 // field that caused it.
 
 import { sourceFor } from './pipelineSources'
-import type { PipelineForm } from './pipelineSources'
+import type { GoogleScope, PipelineForm } from './pipelineSources'
 
 /**
  * isValidJson treats blank as valid — an empty credentials or config box means
@@ -40,6 +40,30 @@ export function buildSourceConfig(form: PipelineForm, advancedJson: boolean): un
 }
 
 /**
+ * googleScopeFor answers what the form's source needs from Google right now:
+ * '' (nothing), 'sheets', or 'drive'.
+ *
+ * It parses the raw config because for `duckdb` the answer is inside it — the
+ * gdrive extension reads Drive, mysql reads a database. A config still being
+ * typed is not an error here: an unparseable one simply claims nothing, and
+ * the sign-in appears the moment it becomes valid JSON naming the extension.
+ */
+export function googleScopeFor(form: PipelineForm): GoogleScope {
+    const source = sourceFor(form.sourceType)
+    let parsed: Record<string, unknown> = {}
+    const raw = form.sourceConfigRaw.trim()
+    if (raw) {
+        try {
+            const v: unknown = JSON.parse(raw)
+            if (v && typeof v === 'object' && !Array.isArray(v)) parsed = v as Record<string, unknown>
+        } catch {
+            // Mid-edit; the guided types ignore the argument anyway.
+        }
+    }
+    return source.googleScope(parsed)
+}
+
+/**
  * buildCredentials produces the source_credentials to save.
  *
  * For a Google source the preferred answer is a *reference*, not a secret: the
@@ -53,11 +77,14 @@ export function buildSourceConfig(form: PipelineForm, advancedJson: boolean): un
  * Throws on unparseable JSON, like buildSourceConfig.
  */
 export function buildCredentials(form: PipelineForm): unknown {
-    const source = sourceFor(form.sourceType)
-    if (source.googleOAuth && form.connectionId) {
+    // One envelope for every Google-backed type: google_sheets and
+    // duckdb/gdrive both carry the credential under "oauth", which is what
+    // lets one sign-in feed either.
+    const usesGoogle = googleScopeFor(form) !== ''
+    if (usesGoogle && form.connectionId) {
         return { oauth: { connection_id: form.connectionId } }
     }
-    if (source.googleOAuth && form.oauthGrantId) {
+    if (usesGoogle && form.oauthGrantId) {
         return { oauth: { grant_id: form.oauthGrantId } }
     }
     const raw = form.credentialsRaw.trim()
@@ -140,6 +167,11 @@ export function formFieldFor(path: string): string {
         case 'secret_access_key':
         case 'service_account_key':
             return 'credentialsRaw'
+        case 'oauth':
+            // The Google credential is chosen in the connection picker, not
+            // typed: "this account is not authorized for Drive" has to land
+            // beside the picker, not inside the collapsed advanced textarea.
+            return 'connectionId'
         default:
             // Everything else (bucket_url, tables_config.*, incremental.*, …)
             // belongs to the source config. SourceCard renders this one

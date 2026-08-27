@@ -223,8 +223,34 @@ describe('google_sheets', () => {
         expect(roundTrip('google_sheets', {})).toEqual({})
     })
 
-    test('is the only source that signs in with Google', () => {
-        expect(SOURCES.filter((s) => s.googleOAuth).map((s) => s.id)).toEqual(['google_sheets'])
+    test('asks for Sheets access, never Drive', () => {
+        // Reading a spreadsheet by id needs no Drive scope, and asking for one
+        // would drag the customer's own Google app into a restricted-scope
+        // review it never needed.
+        expect(sheets.googleScope({})).toBe('sheets')
+    })
+
+    test('is the only source that always signs in with Google', () => {
+        const always = SOURCES.filter((s) => s.googleScope({}) !== '').map((s) => s.id)
+        expect(always).toEqual(['google_sheets'])
+    })
+})
+
+describe('duckdb', () => {
+    const duckdb = sourceFor('duckdb')
+
+    test('signs in with Google for gdrive, and for nothing else', () => {
+        // The one source whose credentials depend on its config: the gdrive
+        // extension reads the customer's Drive, mysql reads a database and a
+        // Google consent for it would be nonsense.
+        expect(duckdb.googleScope({ extension: 'gdrive' })).toBe('drive')
+        expect(duckdb.googleScope({ extension: 'mysql' })).toBe('')
+        expect(duckdb.googleScope({})).toBe('')
+    })
+
+    test('keeps the raw JSON editor as its whole UI', () => {
+        expect(duckdb.guided).toBe(false)
+        expect(duckdb.isGuidable({ extension: 'gdrive' })).toBe(false)
     })
 })
 
