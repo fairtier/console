@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted, watch } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { pipelineClient } from '../api'
@@ -16,6 +16,7 @@ import VersionHistory from '../components/pipeline/VersionHistory.vue'
 import { useToast } from '../composables/useToast'
 import { useCronText } from '../composables/useCronText'
 import { useGoogleConnect } from '../composables/useGoogleConnect'
+import { useWorkspaceStore } from '../stores/workspace'
 import {
     buildCredentials,
     buildSourceConfig,
@@ -25,7 +26,14 @@ import {
     isValidJson,
     unpackSourceConfig,
 } from '../lib/pipelineConfig'
-import { SOURCES, sourceFor, type PipelineForm, type RestResource } from '../lib/pipelineSources'
+import {
+    SOURCE_GROUPS,
+    sourceForKey,
+    visibleSources,
+    type DuckTable,
+    type PipelineForm,
+    type RestResource,
+} from '../lib/pipelineSources'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -57,7 +65,8 @@ const isEdit = computed(() => editId.value !== '')
 // --- Configure step (the real, functional path) ---
 const form = reactive<PipelineForm>({
   name: '',
-  sourceType: 'rest_api',
+  // The picker's variant key, not the proto source_type — see PipelineForm.
+  sourceKey: 'rest_api',
   // rest_api guided fields
   baseUrl: '',
   resources: [] as RestResource[],
@@ -66,6 +75,19 @@ const form = reactive<PipelineForm>({
   // google_sheets guided fields
   spreadsheet: '',
   rangeNames: [] as string[],
+  // duckdb: a database behind an ATTACH template (mysql, mssql). Only the
+  // password is a credential; the rest is the pipeline definition.
+  dbHost: '',
+  dbPort: '',
+  dbDatabase: '',
+  dbUser: '',
+  dbPassword: '',
+  tables: [] as DuckTable[],
+  // duckdb: a document or file read by a table function (pdf, webbed, httpfs,
+  // gdrive). readerUrl holds a Drive *file id* for the Drive variant.
+  readerUrl: '',
+  readerFn: '',
+  readerTable: '',
   // google_sheets: a workspace-level Google connection reference. The
   // preferred credential — credentials are sent as {oauth:{connection_id}} so
   // the pipeline follows the connection's lifecycle (rotate/disconnect once,
@@ -104,19 +126,46 @@ const loadingEdit = ref(false)
 // raw JSON, credentials or none, schedule or manual, file drop, Google
 // sign-in — is a capability the registry answers (src/lib/pipelineSources).
 // An unknown source_type gets a generic entry rather than nothing.
-const source = computed(() => sourceFor(form.sourceType))
+const source = computed(() => sourceForKey(form.sourceKey))
 
-// The source-type picker, driven by the registry rather than a hardcoded list.
+// True while a guided form is what is on screen — which is what decides
+// whether the form's own fields or the raw JSON editors are the source of
+// truth, for the config and for the credentials alike.
+const guidedMode = computed(() => source.value.guided && !advancedJson.value)
+
+// The box describes itself, including which DuckDB extensions it accepts, so
+// the picker offers a tile only where the save would succeed. Undefined on a
+// box too old to say, which the registry reads as "offer everything".
+const workspace = useWorkspaceStore()
+
+// The source picker, driven by the registry rather than a hardcoded list.
+//
+// It lists *systems the customer has* — MySQL, a PDF, a file in Drive — in
+// sections, not the transports underneath them. Several rows save the same
+// proto source_type; the registry keeps the two apart.
 const sourceOptions = computed(() => {
-  const opts = SOURCES.map((s) => ({ value: s.id, label: t(s.labelKey) }))
+  const available = visibleSources(workspace.duckdbExtensions)
+  const opts = SOURCE_GROUPS.flatMap((group) =>
+    available
+      .filter((s) => s.group === group)
+      .map((s) => ({
+        value: s.key,
+        label: t(s.labelKey),
+        group: t(`pipelinesUi.wizard.configure.sourceGroups.${group}`),
+      })),
+  )
   // A pipeline can hold a source_type this build has never heard of — a newer
   // workspace-api, a self-hoster's own source. ui/Select shows an unmatched
   // value as its placeholder rather than as the first option (which is how the
   // native <select> silently rewrote such a pipeline to rest_api on save), but
   // a picker that cannot name the type the user already has is still wrong.
   // So the current type is always selectable, named by itself.
-  if (form.sourceType && !SOURCES.some((s) => s.id === form.sourceType)) {
-    opts.push({ value: form.sourceType, label: form.sourceType })
+  if (form.sourceKey && !opts.some((o) => o.value === form.sourceKey)) {
+    opts.push({
+      value: form.sourceKey,
+      label: source.value.labelKey ? t(source.value.labelKey) : form.sourceKey,
+      group: t('pipelinesUi.wizard.configure.sourceGroups.advanced'),
+    })
   }
   return opts
 })
@@ -140,14 +189,22 @@ const hasStoredCredentials = ref(false)
 // Set once a file_upload pipeline exists, which is what opens the Files step.
 const createdPipelineId = ref('')
 
-// Selecting a source type applies whatever that type declares as its
-// defaults (file_upload: no credentials, no schedule, replace — the platform
-// injects the storage credentials, and the pipeline runs when the user hits
-// run after dropping a file). Create only: an edit is already configured.
-watch(() => form.sourceType, (type) => {
-  const next = sourceFor(type)
-  if (next.defaults && !isEdit.value) Object.assign(form, next.defaults)
-})
+// Selecting a source in the picker applies whatever that source declares as
+// its defaults (file_upload: no credentials, no schedule, replace; a duckdb
+// database: its dialect's port). Create only — an edit is already configured.
+//
+// A handler rather than a watcher on form.sourceKey, because the key also
+// changes when a stored or drafted config is unpacked onto the form, and a
+// watcher would fire *after* that and overwrite the very fields it just
+// filled. Defaults belong to the act of choosing, not to the value.
+function selectSource(key: string) {
+  form.sourceKey = key
+  const next = sourceForKey(key)
+  // Cloned, because a default can be an array (a database's empty table list)
+  // and the form mutates what it is given: assigning the registry's own object
+  // would make the next pipeline start with the previous one's tables.
+  if (next.defaults && !isEdit.value) Object.assign(form, structuredClone(next.defaults))
+}
 
 // --- Schedule validity (src/lib/cron.ts) ---
 // A malformed cron would be accepted by the API and then silently never fire
@@ -159,10 +216,16 @@ const scheduleError = computed(() => cronText.error(form.schedule))
 function validate(): boolean {
   const errors: string[] = []
   if (!form.name.trim()) errors.push(t('pipelines.validation.nameRequired'))
-  if (!form.sourceType) errors.push(t('pipelines.validation.sourceTypeRequired'))
+  if (!form.sourceKey) errors.push(t('pipelines.validation.sourceTypeRequired'))
   if (!form.datasetName.trim()) errors.push(t('pipelines.validation.datasetRequired'))
   if ((advancedJson.value || !source.value.guided) && !isValidJson(form.sourceConfigRaw)) {
     errors.push(`${t('pipelines.sourceConfig')}: ${t('pipelines.validation.invalidJson')}`)
+  }
+  // What the guided form itself knows it cannot save — a reader with no file,
+  // a database with no tables. The server refuses these too; discovering that
+  // through a round trip and a toast is the slow way to be told.
+  if (guidedMode.value) {
+    for (const key of source.value.formErrors?.(form) ?? []) errors.push(t(key))
   }
   // A connected Google account uses the connection/grant, not the raw
   // textarea, so only validate the service-account JSON when neither is set.
@@ -188,7 +251,7 @@ async function submit() {
   let sourceCredentials: string
   try {
     sourceConfig = JSON.stringify(buildSourceConfig(form, advancedJson.value))
-    sourceCredentials = JSON.stringify(buildCredentials(form))
+    sourceCredentials = JSON.stringify(buildCredentials(form, advancedJson.value))
   } catch {
     formError.value = t('pipelines.validation.invalidJson')
     return
@@ -200,11 +263,13 @@ async function submit() {
       await pipelineClient.updatePipeline({
         id: editId.value,
         name: form.name.trim(),
-        sourceType: form.sourceType,
+        // The proto type, never the picker's key: 'duckdb/mysql' is a Console
+        // word for `source_type: "duckdb"`.
+        sourceType: source.value.id,
         sourceConfig,
         // Empty credentials = keep existing (server contract). A reconnected
         // Google account or a re-pasted key counts as new credentials.
-        sourceCredentials: credentialsProvided(form) ? sourceCredentials : '',
+        sourceCredentials: credentialsProvided(form, advancedJson.value) ? sourceCredentials : '',
         // ...and clearCredentials is the only way to say "drop them", which
         // keep-existing otherwise makes inexpressible. The two are mutually
         // exclusive; the picker cannot produce both at once.
@@ -219,7 +284,7 @@ async function submit() {
     } else {
       const resp = await pipelineClient.createPipeline({
         name: form.name.trim(),
-        sourceType: form.sourceType,
+        sourceType: source.value.id,
         sourceConfig,
         sourceCredentials,
         datasetName: form.datasetName.trim(),
@@ -253,6 +318,9 @@ async function submit() {
 // the two used to do it with near-identical copies that had drifted apart.
 function applySourceConfig(sourceType: string, sourceConfig: string) {
   const unpacked = unpackSourceConfig(sourceType, sourceConfig)
+  // The config decides the tile: a duckdb pipeline naming the mysql extension
+  // opens on MySQL, not on the advanced JSON entry.
+  form.sourceKey = unpacked.key
   Object.assign(form, unpacked.fields)
   form.sourceConfigRaw = unpacked.raw
   advancedJson.value = unpacked.advanced
@@ -266,7 +334,6 @@ async function loadForEdit() {
     const p = resp.pipeline
     if (!p) return
     form.name = p.name
-    form.sourceType = p.sourceType
     form.datasetName = p.datasetName
     form.schedule = p.schedule
     form.writeDisposition = p.writeDisposition || 'append'
@@ -287,6 +354,10 @@ async function loadForEdit() {
 }
 
 onMounted(() => {
+  // The picker needs the box's capabilities. Deduplicated in the store, so
+  // asking here costs nothing when the layout already has them — and means a
+  // deep link straight to the wizard does not race them.
+  void workspace.ensureLoaded()
   if (isEdit.value) {
     current.value = STEP_CONFIGURE
     loadForEdit()
@@ -310,15 +381,17 @@ function applyDraft(d: {
   mergeStrategy: string
 }) {
   form.name = d.name
-  form.sourceType = d.sourceType || 'rest_api'
   form.datasetName = d.datasetName
   form.schedule = d.schedule
   form.writeDisposition = d.writeDisposition || 'append'
   form.mergeStrategy = d.mergeStrategy
   // Credentials are never drafted — the user fills them in Configure.
   form.credentialsRaw = ''
+  form.dbPassword = ''
   google.disconnect()
-  applySourceConfig(form.sourceType, d.sourceConfig)
+  // Resolves the variant too: a drafted {source_type: duckdb, extension:
+  // mysql} lands on the MySQL form, which is the path most users arrive by.
+  applySourceConfig(d.sourceType || 'rest_api', d.sourceConfig)
 }
 
 function goBack() {
@@ -369,6 +442,7 @@ function goBack() {
           :field-errors="fieldErrors"
           :is-edit="isEdit"
           :pipeline-id="editId"
+          @select-source="selectSource"
         />
 
         <!-- Credentials. file_upload needs none: the platform uses the
@@ -379,6 +453,7 @@ function goBack() {
           :source="source"
           :google="google"
           :is-edit="isEdit"
+          :advanced-json="advancedJson"
           :attached-connection-id="attachedConnectionId"
           :has-stored-credentials="hasStoredCredentials"
           :field-errors="fieldErrors"

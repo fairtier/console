@@ -5,12 +5,17 @@ import type { PipelineForm, PipelineSource } from './types'
 const GUIDED_KEYS = new Set(['spreadsheet_url_or_id', 'range_names'])
 
 export const googleSheets: PipelineSource = {
+    key: 'google_sheets',
     id: 'google_sheets',
+    group: 'google',
     labelKey: 'pipelines.sourceTypes.google_sheets',
     badge: { abbr: 'GS', bg: 'var(--ok-soft)', fg: 'var(--ok-ink)' },
 
     guided: true,
     credentials: true,
+    // The credential is a Google connection, which googleScope turns on — not
+    // a named field this card could render.
+    credentialFields: [],
     schedulable: true,
     fileDrop: false,
     // Authenticates by signing in rather than by pasting a key. The raw

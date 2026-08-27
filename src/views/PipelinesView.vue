@@ -13,6 +13,7 @@ import { useToast } from '../composables/useToast'
 import { useConfirm } from '../composables/useConfirm'
 import { useCronText } from '../composables/useCronText'
 import { useExplain } from '../composables/useExplain'
+import { parseConfigObject } from '../lib/pipelineConfig'
 import { sourceFor } from '../lib/pipelineSources'
 import ExplainPanel from '../components/ExplainPanel.vue'
 
@@ -69,8 +70,12 @@ async function loadPipelines(silent = false) {
 function sourceMeta(type: string) {
   return sourceFor(type).badge
 }
-function sourceLabel(type: string): string {
-  const { labelKey } = sourceFor(type)
+// The label reads the config too, so a duckdb pipeline says what it actually
+// reads — "MySQL", "Google Drive file" — rather than naming the extension
+// mechanism it happens to travel through. The badge stays DDB either way:
+// that IS the shared thing about them.
+function sourceLabel(type: string, sourceConfig: string): string {
+  const { labelKey } = sourceFor(type, parseConfigObject(sourceConfig))
   return labelKey ? t(labelKey) : type
 }
 
@@ -259,7 +264,7 @@ async function deletePipeline(id: string) {
           >{{ sourceMeta(p.sourceType).abbr }}</div>
           <div style="min-width:0;">
             <div style="font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ p.name }}</div>
-            <div style="font-size:11.5px; color:var(--ink-3);">{{ sourceLabel(p.sourceType) }}</div>
+            <div style="font-size:11.5px; color:var(--ink-3);">{{ sourceLabel(p.sourceType, p.sourceConfig) }}</div>
           </div>
         </div>
 

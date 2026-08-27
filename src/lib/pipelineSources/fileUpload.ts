@@ -1,7 +1,9 @@
 import type { PipelineSource } from './types'
 
 export const fileUpload: PipelineSource = {
+    key: 'file_upload',
     id: 'file_upload',
+    group: 'files',
     labelKey: 'pipelines.sourceTypes.file_upload',
     badge: { abbr: 'UP', bg: 'var(--warn-soft)', fg: 'var(--warn-ink)' },
 
@@ -12,6 +14,7 @@ export const fileUpload: PipelineSource = {
     // The platform injects the workspace's own storage credentials
     // server-side, so there is nothing for the user to supply.
     credentials: false,
+    credentialFields: [],
     // Runs manually: drop a file, hit run.
     schedulable: false,
     fileDrop: true,

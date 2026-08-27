@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { labelFor, moveActive, panelPosition, selectedIndex, typeaheadIndex } from './select'
+import { labelFor, moveActive, panelPosition, selectedIndex, startsGroup, typeaheadIndex } from './select'
 import type { SelectOption } from './select'
 
 const OPTS: SelectOption<string>[] = [
@@ -144,5 +144,26 @@ describe('panelPosition', () => {
         const p = panelPosition(wide, 100, viewport)
         expect(p.width).toBe(1000 - 16)
         expect(p.left).toBe(8)
+    })
+})
+
+describe('startsGroup', () => {
+    // The source picker lists systems in sections. A heading is presentation
+    // only — it must never become an option, or every index here (keyboard
+    // navigation, typeahead, the selected row) would be off by the number of
+    // headings above it.
+    const GROUPED: SelectOption<string>[] = [
+        { value: 'sql_database', label: 'PostgreSQL', group: 'Databases' },
+        { value: 'duckdb/mysql', label: 'MySQL', group: 'Databases' },
+        { value: 'duckdb/pdf', label: 'PDF document', group: 'Files & documents' },
+        { value: 'rest_api', label: 'REST API', group: 'APIs' },
+    ]
+
+    test('marks the first option of each section, and only it', () => {
+        expect(GROUPED.map((_, i) => startsGroup(GROUPED, i))).toEqual([true, false, true, true])
+    })
+
+    test('an ungrouped list has no headings at all', () => {
+        expect(OPTS.map((_, i) => startsGroup(OPTS, i))).toEqual([false, false, false, false, false])
     })
 })

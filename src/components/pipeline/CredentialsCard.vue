@@ -14,6 +14,12 @@
 // the other reads files in Drive, and telling a Drive customer to share a
 // spreadsheet with a service account would be nonsense.
 //
+// A source that names its credentials — a database's one password — gets those
+// fields instead of the textarea: `source.credentialFields`, packed into
+// `attach_params.password` by buildCredentials. And a source that needs none at
+// all (a PDF at a public URL) is not shown this card at all, which is the
+// wizard's decision, made from `source.credentials`.
+//
 // The flow itself is useGoogleConnect's, owned by the wizard: applyDraft has to
 // clear a sign-in while this card is not even mounted, so the composable cannot
 // live here. This card renders it and owns the one coupling that belongs to a
@@ -33,6 +39,10 @@ const props = defineProps<{
     source: PipelineSource
     google: GoogleConnect
     isEdit: boolean
+    /** Advanced JSON: the raw textarea takes over from the named fields, the
+     *  way it takes over from the guided config form. A hand-written ATTACH
+     *  template can carry placeholders no named field knows about. */
+    advancedJson: boolean
     /** On edit: the connection the pipeline is attached to, '' if it holds its own. */
     attachedConnectionId: string
     /** On edit: whether the server is keeping any credential for this pipeline. */
@@ -41,6 +51,13 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+
+// The named credential fields this source declares, when the guided form is
+// what is on screen. Empty for every source that takes a whole JSON object, a
+// Google connection, or nothing at all.
+const namedFields = computed(() =>
+    props.source.guided && !props.advancedJson ? props.source.credentialFields : [],
+)
 
 // Sheets and Drive differ in what they ask for, so they differ in what they
 // say. Only the strings that would be wrong for the other one are switched;
@@ -243,6 +260,30 @@ watch(
                     </p>
                 </div>
             </details>
+        </template>
+
+        <!-- A source that names its credentials: one labelled field each,
+             instead of a JSON object the user has to know the shape of. -->
+        <template v-else-if="namedFields.length">
+            <div v-for="f in namedFields" :key="f.field" class="mb-1">
+                <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">
+                    {{ t(f.labelKey) }}
+                </label>
+                <input
+                    v-model="form[f.field]"
+                    type="password"
+                    autocomplete="new-password"
+                    :placeholder="isEdit ? t('pipelinesUi.wizard.configure.credentialsKeep') : ''"
+                    class="h-10 w-full rounded-[10px] border px-[13px] font-mono text-[13px] outline-none"
+                    style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
+                />
+                <p v-if="fieldErrors[f.field]" class="mt-1.5 text-xs" style="color: var(--err)">
+                    {{ fieldErrors[f.field] }}
+                </p>
+            </div>
+            <p class="mt-2 text-xs leading-[1.5]" style="color: var(--ink-3)">
+                {{ t('pipelinesUi.wizard.configure.duckdb.passwordHint') }}
+            </p>
         </template>
 
         <!-- All other source types: raw credentials JSON -->

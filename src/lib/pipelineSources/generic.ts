@@ -1,4 +1,4 @@
-import type { PipelineSource, SourceBadge } from './types'
+import type { PipelineSource, SourceBadge, SourceGroup } from './types'
 
 /**
  * genericSource builds an entry for a source type the console can list and
@@ -15,13 +15,19 @@ export function genericSource(
     labelKey: string,
     badge: SourceBadge,
     placeholders: { config?: string; credentials?: string } = {},
+    group: SourceGroup = 'advanced',
 ): PipelineSource {
     return {
+        // A type with no variants is its own key. Only the duckdb family
+        // splits the two, and its base entry keeps this identity.
+        key: id,
         id,
+        group,
         labelKey,
         badge,
         guided: false,
         credentials: true,
+        credentialFields: [],
         schedulable: true,
         fileDrop: false,
         googleScope: () => '',

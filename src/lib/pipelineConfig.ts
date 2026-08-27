@@ -7,8 +7,30 @@
 // config back into the form, and routing a server validation error to the
 // field that caused it.
 
-import { sourceFor } from './pipelineSources'
-import type { GoogleScope, PipelineForm } from './pipelineSources'
+import { sourceFor, sourceForKey } from './pipelineSources'
+import type { GoogleScope, PipelineForm, PipelineSource } from './pipelineSources'
+
+/**
+ * parseConfigObject turns a stored source_config string into an object, or null
+ * when it is not one. Used wherever a *variant* has to be resolved from a
+ * config — the wizard on edit, the pipelines list for its label.
+ */
+export function parseConfigObject(sourceConfig: string): Record<string, unknown> | null {
+    if (!sourceConfig.trim()) return null
+    try {
+        const v: unknown = JSON.parse(sourceConfig)
+        if (v && typeof v === 'object' && !Array.isArray(v)) return v as Record<string, unknown>
+    } catch {
+        // A config we cannot read resolves to the base entry, which renders it
+        // in the JSON editor — the same place a valid but unguidable one goes.
+    }
+    return null
+}
+
+/** The source the form is currently editing, resolved from the picker's key. */
+export function sourceForForm(form: PipelineForm): PipelineSource {
+    return sourceForKey(form.sourceKey)
+}
 
 /**
  * isValidJson treats blank as valid — an empty credentials or config box means
@@ -31,7 +53,7 @@ export function isValidJson(s: string): boolean {
  * validation error rather than saving something the box cannot read.
  */
 export function buildSourceConfig(form: PipelineForm, advancedJson: boolean): unknown {
-    const source = sourceFor(form.sourceType)
+    const source = sourceForForm(form)
     if (advancedJson || !source.guided) {
         const raw = form.sourceConfigRaw.trim()
         return raw ? JSON.parse(raw) : {}
@@ -49,7 +71,7 @@ export function buildSourceConfig(form: PipelineForm, advancedJson: boolean): un
  * the sign-in appears the moment it becomes valid JSON naming the extension.
  */
 export function googleScopeFor(form: PipelineForm): GoogleScope {
-    const source = sourceFor(form.sourceType)
+    const source = sourceForForm(form)
     let parsed: Record<string, unknown> = {}
     const raw = form.sourceConfigRaw.trim()
     if (raw) {
@@ -76,7 +98,12 @@ export function googleScopeFor(form: PipelineForm): GoogleScope {
  *
  * Throws on unparseable JSON, like buildSourceConfig.
  */
-export function buildCredentials(form: PipelineForm): unknown {
+export function buildCredentials(form: PipelineForm, advancedJson = false): unknown {
+    // A source that takes no credentials sends none, whatever another type
+    // left in the raw box: file_upload (the platform injects the workspace's
+    // own storage credentials) and the public-URL readers have no card at all,
+    // so there is no field the user could have meant this by.
+    if (!sourceForForm(form).credentials) return {}
     // One envelope for every Google-backed type: google_sheets and
     // duckdb/gdrive both carry the credential under "oauth", which is what
     // lets one sign-in feed either.
@@ -87,8 +114,41 @@ export function buildCredentials(form: PipelineForm): unknown {
     if (usesGoogle && form.oauthGrantId) {
         return { oauth: { grant_id: form.oauthGrantId } }
     }
+    // A guided source that names its credentials (a database's password) packs
+    // them by path — `attach_params.password`, the shape the worker fills the
+    // ATTACH template from. Advanced JSON hands the whole card back to the
+    // textarea, config and credentials together: a hand-written template can
+    // carry placeholders no named field knows about.
+    const named = namedCredentials(form, advancedJson)
+    if (named) return named
     const raw = form.credentialsRaw.trim()
     return raw ? JSON.parse(raw) : {}
+}
+
+/**
+ * namedCredentials packs the guided form's declared credential fields into the
+ * nested object their `path` names, or null when this source declares none —
+ * or when every one of them was left blank, which on update is how the user
+ * says "keep what is stored".
+ */
+function namedCredentials(form: PipelineForm, advancedJson: boolean): Record<string, unknown> | null {
+    const source = sourceForForm(form)
+    if (advancedJson || !source.guided || source.credentialFields.length === 0) return null
+    const out: Record<string, unknown> = {}
+    let any = false
+    for (const field of source.credentialFields) {
+        const value = form[field.field].trim()
+        if (!value) continue
+        any = true
+        const segments = field.path.split('.')
+        let node = out
+        for (const segment of segments.slice(0, -1)) {
+            node[segment] ??= {}
+            node = node[segment] as Record<string, unknown>
+        }
+        node[segments[segments.length - 1]!] = value
+    }
+    return any ? out : null
 }
 
 /**
@@ -97,12 +157,21 @@ export function buildCredentials(form: PipelineForm): unknown {
  * mean "keep what is stored", so answering true for an untouched form would
  * overwrite a working credential with {}.
  */
-export function credentialsProvided(form: PipelineForm): boolean {
-    return !!form.connectionId || !!form.oauthGrantId || form.credentialsRaw.trim() !== ''
+export function credentialsProvided(form: PipelineForm, advancedJson = false): boolean {
+    if (!sourceForForm(form).credentials) return false
+    if (form.connectionId || form.oauthGrantId || form.credentialsRaw.trim()) return true
+    return namedCredentials(form, advancedJson) !== null
 }
 
 /** What a stored source_config unpacks into. */
 export interface UnpackedConfig {
+    /**
+     * The picker key the config resolved to — 'duckdb/mysql' for a duckdb
+     * config naming the mysql extension. The caller writes it to
+     * form.sourceKey, which is how an edit and a draft land on the right tile
+     * instead of on the advanced JSON one.
+     */
+    key: string
     /** Guided form fields to merge into the wizard's form. */
     fields: Partial<PipelineForm>
     /** Pretty-printed config for the JSON editor, kept whichever mode wins. */
@@ -124,17 +193,22 @@ export interface UnpackedConfig {
  * so saving round-trips it but never switches the wizard into JSON mode.
  */
 export function unpackSourceConfig(sourceType: string, sourceConfig: string): UnpackedConfig {
-    const source = sourceFor(sourceType)
-    let parsed: Record<string, unknown> | null = null
-    try {
-        parsed = sourceConfig ? (JSON.parse(sourceConfig) as Record<string, unknown>) : {}
-    } catch {
-        parsed = null
-    }
+    const parsed = sourceConfig ? parseConfigObject(sourceConfig) : {}
+    // The config decides which variant this is: a duckdb pipeline naming the
+    // mysql extension is the MySQL tile. Without this a drafted or stored
+    // config would land in the JSON box and the guided forms would be
+    // invisible to everyone who did not pick the tile by hand first.
+    const source = sourceFor(sourceType, parsed)
     if (source.guided && parsed && source.isGuidable(parsed)) {
-        return { fields: source.toForm(parsed), raw: JSON.stringify(parsed, null, 2), advanced: false }
+        return {
+            key: source.key,
+            fields: source.toForm(parsed),
+            raw: JSON.stringify(parsed, null, 2),
+            advanced: false,
+        }
     }
     return {
+        key: source.key,
         fields: {},
         raw: sourceConfig ? JSON.stringify(parsed ?? {}, null, 2) : '',
         advanced: !source.fileDrop,
@@ -172,6 +246,25 @@ export function formFieldFor(path: string): string {
             // typed: "this account is not authorized for Drive" has to land
             // beside the picker, not inside the collapsed advanced textarea.
             return 'connectionId'
+        // --- duckdb ---
+        case 'extension':
+            // Chosen by picking a system, so the refusal belongs at the picker
+            // — "this box does not accept the mysql extension" under a MySQL
+            // tile, not inside a config the user never typed.
+            return 'sourceKey'
+        case 'attach':
+            // Generated from host/port/user/database; the group they form is
+            // the closest thing to a field it has.
+            return 'attach'
+        case 'tables':
+        case 'tables.name':
+        case 'tables.query':
+        case 'tables.cursor_column':
+        case 'tables.primary_key':
+            return 'tables'
+        case 'attach_params':
+        case 'attach_params.password':
+            return 'dbPassword'
         default:
             // Everything else (bucket_url, tables_config.*, incremental.*, …)
             // belongs to the source config. SourceCard renders this one

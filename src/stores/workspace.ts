@@ -33,6 +33,13 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     const dltEnabled = ref(false)
     const filedropEnabled = ref(false)
     const googleOauthEnabled = ref(false)
+    /**
+     * Which DuckDB extensions this box accepts in a `duckdb` pipeline, or
+     * undefined when it is too old to say. The pipeline wizard renders the
+     * intersection with the tiles it has forms for; undefined means offer them
+     * all, which is what it did before boxes advertised this.
+     */
+    const duckdbExtensions = ref<string[] | undefined>(undefined)
     const connectionDetails = ref<ConnectionDetails | null>(null)
     const isLoading = ref(false)
     const error = ref<string | null>(null)
@@ -72,6 +79,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
             duckflightEnabled.value = doc.capabilities.duckflight
             filedropEnabled.value = doc.capabilities.filedrop
             googleOauthEnabled.value = doc.capabilities.google_oauth
+            duckdbExtensions.value = doc.capabilities.duckdb_extensions
             dltEnabled.value = true
             connectionDetails.value = {
                 lakekeeperUrl: doc.lakekeeper_url ?? '',
@@ -96,6 +104,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         dltEnabled,
         filedropEnabled,
         googleOauthEnabled,
+        duckdbExtensions,
         connectionDetails,
         isLoading,
         error,

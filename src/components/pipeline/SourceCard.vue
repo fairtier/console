@@ -23,11 +23,19 @@ const props = defineProps<{
     pipelineId: string
 }>()
 
+// Choosing a source is an event, not a two-way binding on the form: selecting
+// one applies its defaults, and only the owner of the form can say what a
+// *choice* means as against a value that merely changed (an edit prefill, an
+// AI draft).
+const emit = defineEmits<{ selectSource: [string] }>()
+
 const advancedJson = defineModel<boolean>('advancedJson', { required: true })
 
 const { t } = useI18n()
 
-const guidedForm = computed(() => (props.source.guided ? SOURCE_FORMS[props.source.id] : undefined))
+// By variant key, not by proto type: 'duckdb/mysql' and 'duckdb/gdrive' are
+// one source_type and two entirely different forms.
+const guidedForm = computed(() => (props.source.guided ? SOURCE_FORMS[props.source.key] : undefined))
 </script>
 
 <template>
@@ -65,7 +73,17 @@ const guidedForm = computed(() => (props.source.guided ? SOURCE_FORMS[props.sour
                 <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">
                     {{ t('pipelines.sourceType') }}
                 </label>
-                <Select v-model="form.sourceType" :options="options" />
+                <Select
+                    :model-value="form.sourceKey"
+                    :options="options"
+                    @update:model-value="emit('selectSource', $event)"
+                />
+                <!-- "this box does not accept that extension" belongs at the
+                     control that chose it, not inside a config the user never
+                     typed. -->
+                <p v-if="fieldErrors.sourceKey" class="mt-1.5 text-xs" style="color: var(--err)">
+                    {{ fieldErrors.sourceKey }}
+                </p>
             </div>
 
             <!-- The selected type's guided form, if it has one and the user has

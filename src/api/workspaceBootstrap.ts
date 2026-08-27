@@ -24,6 +24,16 @@ export interface WorkspaceCapabilities {
     duckflight: boolean
     filedrop: boolean
     google_oauth: boolean
+    /**
+     * The DuckDB extensions a `duckdb` pipeline may name here (workspace-api
+     * v0.34+). The source picker offers one tile per system it has a form for
+     * whose extension is in this list.
+     *
+     * Optional because an older box omits it, and the honest reading of an
+     * absent list is "this box did not say", not "this box accepts nothing":
+     * the picker then offers everything, as it did before the field existed.
+     */
+    duckdb_extensions?: string[]
 }
 
 export interface WorkspaceBootstrap {

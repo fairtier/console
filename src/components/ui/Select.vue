@@ -17,6 +17,7 @@ import {
     moveActive,
     panelPosition,
     selectedIndex,
+    startsGroup,
     typeaheadIndex,
     type NavKey,
     type PanelPosition,
@@ -95,7 +96,10 @@ function choose(index: number) {
 
 function scrollActiveIntoView() {
     if (active.value < 0) return
-    const row = list.value?.children[active.value] as HTMLElement | undefined
+    // By data-index, not by child position: group headings are list children
+    // too, so the two stopped being the same number the moment the source
+    // picker grew sections.
+    const row = list.value?.querySelector(`[data-index="${active.value}"]`) as HTMLElement | null
     row?.scrollIntoView({ block: 'nearest' })
 }
 
@@ -247,31 +251,42 @@ onBeforeUnmount(() => {
                     boxShadow: 'var(--shadow-lg)',
                 }"
             >
-                <li
-                    v-for="(opt, i) in options"
-                    :key="String(opt.value)"
-                    role="option"
-                    :aria-selected="opt.value === model"
-                    :aria-disabled="opt.disabled || undefined"
-                    class="flex items-center justify-between gap-2 rounded-[7px] px-2.5 py-[7px]"
-                    :class="[text, opt.disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer']"
-                    :style="{
-                        background: i === active && !opt.disabled ? 'var(--inset)' : 'transparent',
-                        color: opt.value === model ? 'var(--accent-soft-ink)' : 'var(--ink)',
-                        fontWeight: opt.value === model ? 600 : 400,
-                    }"
-                    @pointerenter="opt.disabled || (active = i)"
-                    @click="choose(i)"
-                >
-                    <span class="truncate">{{ opt.label }}</span>
-                    <Icon
-                        v-if="opt.value === model"
-                        name="check"
-                        :size="14"
-                        class="flex-none"
-                        :style="{ color: 'var(--accent)' }"
-                    />
-                </li>
+                <template v-for="(opt, i) in options" :key="String(opt.value)">
+                    <!-- A section heading: not an option, so it is skipped by
+                         the keyboard, by typeahead and by every index here. -->
+                    <li
+                        v-if="startsGroup(options, i)"
+                        role="presentation"
+                        class="px-2.5 pt-2 pb-1 text-[11px] font-bold tracking-wide uppercase"
+                        :style="{ color: 'var(--ink-3)' }"
+                    >
+                        {{ opt.group }}
+                    </li>
+                    <li
+                        :data-index="i"
+                        role="option"
+                        :aria-selected="opt.value === model"
+                        :aria-disabled="opt.disabled || undefined"
+                        class="flex items-center justify-between gap-2 rounded-[7px] px-2.5 py-[7px]"
+                        :class="[text, opt.disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer']"
+                        :style="{
+                            background: i === active && !opt.disabled ? 'var(--inset)' : 'transparent',
+                            color: opt.value === model ? 'var(--accent-soft-ink)' : 'var(--ink)',
+                            fontWeight: opt.value === model ? 600 : 400,
+                        }"
+                        @pointerenter="opt.disabled || (active = i)"
+                        @click="choose(i)"
+                    >
+                        <span class="truncate">{{ opt.label }}</span>
+                        <Icon
+                            v-if="opt.value === model"
+                            name="check"
+                            :size="14"
+                            class="flex-none"
+                            :style="{ color: 'var(--accent)' }"
+                        />
+                    </li>
+                </template>
             </ul>
         </Teleport>
     </div>

@@ -1,18 +1,27 @@
 import { describe, expect, test } from 'bun:test'
-import { SOURCES, sourceFor, toRestResource } from './index'
+import { SOURCES, sourceFor, sourceForKey, toRestResource, visibleSources } from './index'
 import type { PipelineForm } from './types'
 
 /** A blank wizard form, as the view initializes it. */
 function blankForm(over: Partial<PipelineForm> = {}): PipelineForm {
     return {
         name: '',
-        sourceType: 'rest_api',
+        sourceKey: 'rest_api',
         baseUrl: '',
         resources: [],
         authMethod: 'bearer',
         pagination: 'none',
         spreadsheet: '',
         rangeNames: [],
+        dbHost: '',
+        dbPort: '',
+        dbDatabase: '',
+        dbUser: '',
+        dbPassword: '',
+        tables: [],
+        readerUrl: '',
+        readerFn: '',
+        readerTable: '',
         connectionId: '',
         detach: false,
         oauthGrantId: '',
@@ -27,10 +36,15 @@ function blankForm(over: Partial<PipelineForm> = {}): PipelineForm {
     }
 }
 
-/** toForm → toConfig, the trip a config makes when opened and saved again. */
+/**
+ * toForm → toConfig, the trip a config makes when opened and saved again.
+ *
+ * Resolved through the config, so a duckdb config lands on the variant that
+ * owns it rather than on the family's advanced entry.
+ */
 function roundTrip(type: string, parsed: Record<string, unknown>): Record<string, unknown> {
-    const source = sourceFor(type)
-    return source.toConfig(blankForm({ sourceType: type, ...source.toForm(parsed) }))
+    const source = sourceFor(type, parsed)
+    return source.toConfig(blankForm({ sourceKey: source.key, ...source.toForm(parsed) }))
 }
 
 describe('the registry', () => {
@@ -47,10 +61,54 @@ describe('the registry', () => {
         expect(unknown.labelKey).toBe('')
     })
 
-    test('every listed source has a distinct id and a label key', () => {
-        const ids = SOURCES.map((s) => s.id)
-        expect(new Set(ids).size).toBe(ids.length)
+    test('every listed source has a distinct key and a label key', () => {
+        // Distinct *keys*, not ids: several duckdb variants share one proto
+        // source_type on purpose. Two entries with the same key would make the
+        // picker ambiguous and SOURCE_FORMS pick one at random.
+        const keys = SOURCES.map((s) => s.key)
+        expect(new Set(keys).size).toBe(keys.length)
         for (const s of SOURCES) expect(s.labelKey).toStartWith('pipelines.sourceTypes.')
+    })
+
+    test('a variant is claimed by its config, and only by its config', () => {
+        // The resolution the whole family rests on: what the customer picked
+        // has to be recoverable from what was saved, or an edit reopens on the
+        // advanced JSON entry and the guided forms are invisible.
+        expect(sourceFor('duckdb', { extension: 'mysql' }).key).toBe('duckdb/mysql')
+        expect(sourceFor('duckdb', { extension: 'gdrive' }).key).toBe('duckdb/gdrive')
+        // An extension no variant knows: the base entry, not nothing.
+        expect(sourceFor('duckdb', { extension: 'oracle_scanner' }).key).toBe('duckdb')
+        // And a caller with no config at hand (the pipelines-list badge).
+        expect(sourceFor('duckdb').key).toBe('duckdb')
+    })
+
+    test('the picker key is what resolves a source, and an unknown one still answers', () => {
+        expect(sourceForKey('duckdb/pdf').id).toBe('duckdb')
+        expect(sourceForKey('rest_api').id).toBe('rest_api')
+        // A source_type from a newer box arrives as its own key.
+        expect(sourceForKey('clickhouse').id).toBe('clickhouse')
+        expect(sourceForKey('clickhouse').guided).toBe(false)
+    })
+
+    test('the picker offers only extensions this box accepts', () => {
+        // The fourth parity leg this avoids: the box serves its allowlist, the
+        // Console renders the intersection. A tile the box would refuse on save
+        // is a promise the product cannot keep.
+        const keys = visibleSources(['mysql', 'gdrive']).map((s) => s.key)
+        expect(keys).toContain('duckdb/mysql')
+        expect(keys).toContain('duckdb/gdrive')
+        expect(keys).not.toContain('duckdb/mssql')
+        expect(keys).not.toContain('duckdb/pdf')
+        // Everything that needs no extension is untouched...
+        expect(keys).toContain('rest_api')
+        expect(keys).toContain('duckdb')
+        // ...and a box too old to say gets the whole list, as before.
+        expect(visibleSources(undefined)).toEqual(SOURCES)
+    })
+
+    test('every source belongs to a section the picker renders', () => {
+        const groups = new Set(['databases', 'files', 'google', 'apis', 'advanced'])
+        for (const s of SOURCES) expect(groups.has(s.group)).toBe(true)
     })
 
     test('shows its own shape in the raw editors, never another type\'s', () => {
@@ -230,27 +288,216 @@ describe('google_sheets', () => {
         expect(sheets.googleScope({})).toBe('sheets')
     })
 
-    test('is the only source that always signs in with Google', () => {
-        const always = SOURCES.filter((s) => s.googleScope({}) !== '').map((s) => s.id)
-        expect(always).toEqual(['google_sheets'])
+    test('only the two Google sources sign in, and each for its own access', () => {
+        // A Sheets pipeline must never put a "see your Google Drive"
+        // permission in front of a customer, and a MySQL one must never put a
+        // Google consent in front of them at all.
+        const always = SOURCES.filter((s) => s.googleScope({}) !== '').map((s) => [s.key, s.googleScope({})])
+        expect(always).toEqual([
+            ['google_sheets', 'sheets'],
+            ['duckdb/gdrive', 'drive'],
+        ])
     })
 })
 
-describe('duckdb', () => {
+describe('duckdb (the advanced entry)', () => {
     const duckdb = sourceFor('duckdb')
 
     test('signs in with Google for gdrive, and for nothing else', () => {
-        // The one source whose credentials depend on its config: the gdrive
-        // extension reads the customer's Drive, mysql reads a database and a
-        // Google consent for it would be nonsense.
+        // Still config-dependent here: a hand-written gdrive config signs in
+        // rather than asking for a pasted refresh token.
         expect(duckdb.googleScope({ extension: 'gdrive' })).toBe('drive')
         expect(duckdb.googleScope({ extension: 'mysql' })).toBe('')
         expect(duckdb.googleScope({})).toBe('')
     })
 
-    test('keeps the raw JSON editor as its whole UI', () => {
+    test('is the raw JSON editor, which is what reaching it means', () => {
         expect(duckdb.guided).toBe(false)
         expect(duckdb.isGuidable({ extension: 'gdrive' })).toBe(false)
+    })
+})
+
+describe('duckdb databases', () => {
+    const mysql = sourceForKey('duckdb/mysql')
+    const mssql = sourceForKey('duckdb/mssql')
+
+    test('saves the proto source_type, never the picker key', () => {
+        expect(mysql.id).toBe('duckdb')
+        expect(mysql.requiresExtension).toBe('mysql')
+    })
+
+    test('a MySQL form renders the extension ATTACH syntax, password apart', () => {
+        const cfg = mysql.toConfig(
+            blankForm({
+                sourceKey: 'duckdb/mysql',
+                dbHost: 'db.internal',
+                dbPort: '3306',
+                dbUser: 'readonly',
+                dbDatabase: 'shop',
+                dbPassword: 'never-in-here',
+                tables: [{ name: 'orders', query: '', cursorColumn: 'updated_at', primaryKey: 'id' }],
+            }),
+        )
+        expect(cfg).toEqual({
+            extension: 'mysql',
+            attach: 'host=db.internal port=3306 user=readonly database=shop password={password}',
+            tables: [{ name: 'orders', cursor_column: 'updated_at', primary_key: 'id' }],
+        })
+        // The password is a credential; it must never reach source_config.
+        expect(JSON.stringify(cfg)).not.toContain('never-in-here')
+    })
+
+    test('SQL Server renders its own dialect, not MySQL\'s', () => {
+        const cfg = mssql.toConfig(
+            blankForm({
+                sourceKey: 'duckdb/mssql',
+                dbHost: 'sql.internal',
+                dbPort: '1433',
+                dbUser: 'sa',
+                dbDatabase: 'shop',
+                tables: [{ name: 'orders', query: '', cursorColumn: '', primaryKey: '' }],
+            }),
+        ) as Record<string, string>
+        expect(cfg.attach).toBe('Server=sql.internal,1433;Database=shop;User Id=sa;Password={password}')
+    })
+
+    test('a generated config survives the round trip unchanged', () => {
+        for (const [key, cfg] of [
+            [
+                'duckdb/mysql',
+                {
+                    extension: 'mysql',
+                    attach: 'host=db.internal port=3306 user=readonly database=shop password={password}',
+                    tables: [{ name: 'orders', cursor_column: 'updated_at', primary_key: 'id' }],
+                },
+            ],
+            [
+                'duckdb/mssql',
+                {
+                    extension: 'mssql',
+                    attach: 'Server=sql.internal,1433;Database=shop;User Id=sa;Password={password}',
+                    tables: [{ name: 'orders' }],
+                },
+            ],
+        ] as [string, Record<string, unknown>][]) {
+            const source = sourceForKey(key)
+            expect(source.isGuidable(cfg)).toBe(true)
+            expect(source.toConfig(blankForm({ sourceKey: key, ...source.toForm(cfg) }))).toEqual(cfg)
+        }
+    })
+
+    test('a template the form cannot hold opens in the JSON editor instead', () => {
+        // Everything here is a real MySQL option with no control on the form.
+        // Guessing at them would drop them silently on save.
+        expect(mysql.isGuidable({ extension: 'mysql', attach: 'host=db ssl_mode=REQUIRED password={password}' })).toBe(false)
+        // A literal password would be plaintext in the box repo.
+        expect(mysql.isGuidable({ extension: 'mysql', attach: 'host=db password=hunter2' })).toBe(false)
+        // A table carrying a key the form has no control for.
+        expect(
+            mysql.isGuidable({
+                extension: 'mysql',
+                attach: 'host=db password={password}',
+                tables: [{ name: 'orders', initial_value: 5 }],
+            }),
+        ).toBe(false)
+        // ...and another extension's config is never this variant's.
+        expect(mysql.isGuidable({ extension: 'mssql', attach: 'Password={password}' })).toBe(false)
+    })
+
+    test('the password never comes back from the server into the form', () => {
+        const fields = mysql.toForm({
+            extension: 'mysql',
+            attach: 'host=db.internal password={password}',
+            tables: [{ name: 'orders' }],
+        })
+        expect(fields.dbPassword).toBe('')
+        expect(fields.dbHost).toBe('db.internal')
+    })
+
+    test('names what the save would refuse, before the save', () => {
+        const empty = blankForm({ sourceKey: 'duckdb/mysql' })
+        expect(mysql.formErrors?.(empty)).toEqual([
+            'pipelines.validation.hostRequired',
+            'pipelines.validation.databaseRequired',
+            'pipelines.validation.tablesRequired',
+        ])
+    })
+})
+
+describe('duckdb readers', () => {
+    const pdf = sourceForKey('duckdb/pdf')
+    const gdrive = sourceForKey('duckdb/gdrive')
+
+    test('a PDF at a URL becomes one table with a generated query', () => {
+        const cfg = pdf.toConfig(
+            blankForm({
+                sourceKey: 'duckdb/pdf',
+                readerUrl: 'https://example.com/report.pdf',
+                readerFn: 'read_pdf',
+                readerTable: 'report_pages',
+            }),
+        )
+        expect(cfg).toEqual({
+            extension: 'pdf',
+            tables: [{ name: 'report_pages', query: "SELECT * FROM read_pdf('https://example.com/report.pdf')" }],
+        })
+        expect(pdf.isGuidable(cfg as Record<string, unknown>)).toBe(true)
+    })
+
+    test('a hand-edited query keeps the pipeline in the JSON editor', () => {
+        expect(
+            pdf.isGuidable({
+                extension: 'pdf',
+                tables: [{ name: 'pages', query: "SELECT page, text FROM read_pdf('https://x/a.pdf') WHERE page < 3" }],
+            }),
+        ).toBe(false)
+        // A reader function this variant does not offer is not this form's.
+        expect(
+            pdf.isGuidable({ extension: 'pdf', tables: [{ name: 'pages', query: "SELECT * FROM read_html('https://x')" }] }),
+        ).toBe(false)
+        // More than one table needs the editor: the form has one address.
+        expect(
+            pdf.isGuidable({
+                extension: 'pdf',
+                tables: [
+                    { name: 'a', query: "SELECT * FROM read_pdf('https://x/a.pdf')" },
+                    { name: 'b', query: "SELECT * FROM read_pdf('https://x/b.pdf')" },
+                ],
+            }),
+        ).toBe(false)
+    })
+
+    test('Drive addresses a file by id, and takes the id out of a pasted link', () => {
+        const cfg = gdrive.toConfig(
+            blankForm({
+                sourceKey: 'duckdb/gdrive',
+                readerUrl: 'https://drive.google.com/file/d/1a2b3c/view?usp=sharing',
+                readerFn: 'read_csv',
+                readerTable: 'invoices',
+            }),
+        )
+        expect(cfg).toEqual({
+            extension: 'gdrive',
+            tables: [{ name: 'invoices', query: "SELECT * FROM read_csv('gdrive://id:1a2b3c')" }],
+        })
+        expect(gdrive.toForm(cfg as Record<string, unknown>).readerUrl).toBe('1a2b3c')
+    })
+
+    test('Drive offers only the readers a gdrive pipeline can actually run', () => {
+        // The worker LOADs exactly one extension, and DuckDB does not autoload
+        // a community extension's functions (verified against duckdb 1.5.5:
+        // read_pdf with only gdrive loaded does not exist). Offering "PDF" here
+        // would draft a pipeline that saves and then fails on the box.
+        const fns = (gdrive.reader?.functions ?? []).map((f) => f.fn)
+        expect(fns).toEqual(['read_csv', 'read_parquet', 'read_json'])
+    })
+
+    test('a public URL is not asked for credentials at all', () => {
+        // The card used to appear over a public PDF with `{"api_key": "…"}`
+        // in it, leaving the user to guess that empty was allowed.
+        expect(pdf.credentials).toBe(false)
+        expect(gdrive.credentials).toBe(true)
+        expect(gdrive.googleScope({})).toBe('drive')
     })
 })
 

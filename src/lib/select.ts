@@ -15,6 +15,29 @@ export interface SelectOption<T extends SelectValue = SelectValue> {
     value: T
     label: string
     disabled?: boolean
+    /**
+     * Section heading this option belongs under, e.g. "Databases".
+     *
+     * Presentation only: a heading is rendered above the first option carrying
+     * a new one (see `startsGroup`), and never becomes an option itself — so
+     * indices, keyboard navigation and typeahead stay defined over the option
+     * list alone, exactly as they are without groups.
+     */
+    group?: string
+}
+
+/**
+ * startsGroup reports whether option `i` should be preceded by its group
+ * heading: it has one, and it is not the same as its predecessor's.
+ *
+ * The caller passes options already ordered by group; a list that interleaves
+ * them would render the same heading twice, which is a sorting bug the picker
+ * should show rather than hide.
+ */
+export function startsGroup<T extends SelectValue>(options: SelectOption<T>[], i: number): boolean {
+    const group = options[i]?.group
+    if (!group) return false
+    return i === 0 || options[i - 1]?.group !== group
 }
 
 /**

@@ -17,13 +17,36 @@ export interface RestResource {
 }
 
 /**
+ * One `tables[]` entry of a `duckdb` config, as the guided form edits it.
+ *
+ * Only the keys the form has controls for. A config carrying more (an
+ * `initial_value`, a key a newer box knows) is not guidable and opens in the
+ * JSON editor instead — the rule every guided form here follows.
+ */
+export interface DuckTable {
+    name: string
+    /** Empty = the worker's default, SELECT * FROM src."<name>". */
+    query: string
+    cursorColumn: string
+    primaryKey: string
+}
+
+/**
  * The wizard's form, in full. Source modules read and write it through
  * `toConfig`/`toForm`/`defaults`, which is why it is declared here rather
  * than in the view: the registry's interface is defined over this shape.
  */
 export interface PipelineForm {
     name: string
-    sourceType: string
+    /**
+     * The picker's value: a *variant* key, not the proto `source_type`.
+     *
+     * They are the same string for every source that is one thing
+     * ('rest_api'), and differ for the ones that are many: 'duckdb/mysql' and
+     * 'duckdb/gdrive' both save `source_type: "duckdb"`. What goes on the wire
+     * is `sourceForKey(form.sourceKey).id`, never this.
+     */
+    sourceKey: string
     // rest_api guided fields
     baseUrl: string
     resources: RestResource[]
@@ -32,6 +55,21 @@ export interface PipelineForm {
     // google_sheets guided fields
     spreadsheet: string
     rangeNames: string[]
+    // duckdb database fields (mysql, mssql). Everything but the password is
+    // plaintext in the box repo, on purpose — see PipelineSource.database.
+    dbHost: string
+    dbPort: string
+    dbDatabase: string
+    dbUser: string
+    dbPassword: string
+    // duckdb tables, for the database forms. Shared with nothing else: the
+    // rest_api `resources` list is a different shape and reading one as the
+    // other is how a form silently drops half a config.
+    tables: DuckTable[]
+    // duckdb reader fields (pdf, webbed, httpfs, gdrive)
+    readerUrl: string
+    readerFn: string
+    readerTable: string
     // google_sheets credential references (see the view for the full story)
     connectionId: string
     detach: boolean
@@ -58,6 +96,62 @@ export interface PipelineForm {
  */
 export type GoogleScope = '' | 'sheets' | 'drive'
 
+/**
+ * Where a source sits in the picker.
+ *
+ * The picker lists *systems the customer has*, not our transports: MySQL sits
+ * next to PostgreSQL under Databases even though one is a dlt source and the
+ * other a DuckDB extension, because that difference is ours and not theirs.
+ * 'advanced' is the raw-JSON end of the list — the base entry of a variant
+ * family, and where a source type this build has never heard of lands.
+ */
+export type SourceGroup = 'databases' | 'files' | 'google' | 'apis' | 'advanced'
+
+/** One reader function offered by a document/file source's "Read as" picker. */
+export interface ReaderFunction {
+    /** The DuckDB table function, e.g. 'read_pdf'. */
+    fn: string
+    labelKey: string
+}
+
+/**
+ * What a reader-style duckdb source (pdf, webbed, httpfs, gdrive) needs from
+ * the form: how the file is addressed, and which reader functions may read it.
+ *
+ * The reader list is data rather than markup so the generated query can be
+ * round-tripped in a unit test — a generated `query` is exactly the kind of
+ * string that drifts from the parser meant to read it back.
+ */
+export interface ReaderSpec {
+    /** 'url' takes an http(s) URL; 'drive' takes a Google Drive file id. */
+    address: 'url' | 'drive'
+    /** Offered in order; the first is the default for a new pipeline. */
+    functions: ReaderFunction[]
+}
+
+/** What a database-style duckdb source (mysql, mssql) needs from the form. */
+export interface DatabaseSpec {
+    /** Prefilled in the port field when the type is selected. */
+    defaultPort: string
+}
+
+/**
+ * A credential the guided form asks for by name, instead of by JSON textarea.
+ *
+ * Declared per source because the answer differs completely: a database wants
+ * one password, a PDF at a public URL wants nothing at all (and used to be
+ * shown a Credentials card with `{"api_key": "…"}` in it), and a Google source
+ * wants a connection — which is the picker `googleScope` already turns on, not
+ * a field.
+ */
+export interface CredentialField {
+    /** The PipelineForm key it binds to. */
+    field: 'dbPassword'
+    labelKey: string
+    /** Where it lands in source_credentials, e.g. 'attach_params.password'. */
+    path: string
+}
+
 /** Badge presentation for the pipelines list. */
 export interface SourceBadge {
     abbr: string
@@ -71,8 +165,35 @@ export interface SourceBadge {
  * not another branch in the wizard.
  */
 export interface PipelineSource {
-    /** The proto `source_type` value. */
+    /**
+     * The registry's and the picker's identity — 'rest_api', 'duckdb/mysql'.
+     *
+     * Distinct from `id` because one proto source_type can be several things
+     * the customer would name differently. Nobody has a DuckDB engine; they
+     * have a MySQL database, a PDF, a file in Drive.
+     */
+    key: string
+    /** The proto `source_type` value — what `submit()` actually sends. */
     id: string
+    /** Which section of the picker this appears under. */
+    group: SourceGroup
+    /**
+     * Claims a stored config for this variant, e.g. `cfg.extension === 'mysql'`.
+     *
+     * A family's base entry has no `match` and is the fallback: an extension
+     * with no form of its own still opens, still edits, still saves — through
+     * the JSON editor, the same contract `sourceFor` keeps for an unknown type.
+     */
+    match?(parsed: Record<string, unknown>): boolean
+    /**
+     * The DuckDB extension this variant needs the box to accept, if any.
+     *
+     * The box serves its allowlist in the bootstrap document, and the picker
+     * offers the intersection — so adding an extension stays a three-repo
+     * change (worker ↔ validator ↔ drafter) rather than a four-repo one, and a
+     * box ahead of its Console is a non-event.
+     */
+    requiresExtension?: string
     /** i18n key for the human label, or '' for a type we have no string for. */
     labelKey: string
     badge: SourceBadge
@@ -127,6 +248,23 @@ export interface PipelineSource {
     /** Build the source_config object from the guided form fields. */
     toConfig(form: PipelineForm): Record<string, unknown>
 
+    /**
+     * Guided-form problems the server would refuse, named before the save —
+     * i18n keys, in the order they should be shown.
+     *
+     * The guided forms can produce a config the validator rejects (a reader
+     * with no file, a database with no tables), and the discovery mechanism
+     * for that must not be a round trip and a toast.
+     */
+    formErrors?(form: PipelineForm): string[]
+
     /** Fields forced when the user selects this type while creating. */
     defaults?: Partial<PipelineForm>
+
+    /** Named credential fields the guided form asks for; [] means none. */
+    credentialFields: CredentialField[]
+    /** Present on the reader-style duckdb variants (pdf, webbed, httpfs, gdrive). */
+    reader?: ReaderSpec
+    /** Present on the database-style duckdb variants (mysql, mssql). */
+    database?: DatabaseSpec
 }

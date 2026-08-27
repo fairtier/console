@@ -13,13 +13,22 @@ import type { PipelineForm } from './pipelineSources'
 function blankForm(over: Partial<PipelineForm> = {}): PipelineForm {
     return {
         name: '',
-        sourceType: 'rest_api',
+        sourceKey: 'rest_api',
         baseUrl: '',
         resources: [],
         authMethod: 'bearer',
         pagination: 'none',
         spreadsheet: '',
         rangeNames: [],
+        dbHost: '',
+        dbPort: '',
+        dbDatabase: '',
+        dbUser: '',
+        dbPassword: '',
+        tables: [],
+        readerUrl: '',
+        readerFn: '',
+        readerTable: '',
         connectionId: '',
         detach: false,
         oauthGrantId: '',
@@ -58,22 +67,22 @@ describe('buildSourceConfig', () => {
     })
 
     test('a type with no guided form uses the raw editor whatever the toggle says', () => {
-        const form = blankForm({ sourceType: 'sql_database', sourceConfigRaw: '{"table_names":["t"]}' })
+        const form = blankForm({ sourceKey: 'sql_database', sourceConfigRaw: '{"table_names":["t"]}' })
         expect(buildSourceConfig(form, false)).toEqual({ table_names: ['t'] })
     })
 
     test('an empty raw editor means an empty config, not a parse error', () => {
-        expect(buildSourceConfig(blankForm({ sourceType: 'filesystem' }), false)).toEqual({})
+        expect(buildSourceConfig(blankForm({ sourceKey: 'filesystem' }), false)).toEqual({})
     })
 
     test('throws on unparseable JSON rather than saving something the box cannot read', () => {
-        const form = blankForm({ sourceType: 'filesystem', sourceConfigRaw: '{oops' })
+        const form = blankForm({ sourceKey: 'filesystem', sourceConfigRaw: '{oops' })
         expect(() => buildSourceConfig(form, false)).toThrow()
     })
 })
 
 describe('buildCredentials', () => {
-    const sheets = (over: Partial<PipelineForm> = {}) => blankForm({ sourceType: 'google_sheets', ...over })
+    const sheets = (over: Partial<PipelineForm> = {}) => blankForm({ sourceKey: 'google_sheets', ...over })
 
     test('a Google connection is sent as a reference, not a secret', () => {
         // The point of the connection: the backend resolves the refresh token
@@ -116,7 +125,7 @@ describe('buildCredentials', () => {
         // duckdb since workspace-api v0.32.0, but the Console could only offer
         // a JSON box to paste a refresh token into.
         const form = blankForm({
-            sourceType: 'duckdb',
+            sourceKey: 'duckdb',
             sourceConfigRaw: '{"extension":"gdrive","tables":[{"name":"invoices","query":"SELECT 1"}]}',
             connectionId: 'conn-1',
         })
@@ -125,7 +134,7 @@ describe('buildCredentials', () => {
 
     test('a duckdb pipeline on another extension never sends one', () => {
         const form = blankForm({
-            sourceType: 'duckdb',
+            sourceKey: 'duckdb',
             sourceConfigRaw: '{"extension":"mysql","attach":"host=db"}',
             connectionId: 'conn-1',
             credentialsRaw: '{"attach_params":{"password":"p"}}',
@@ -134,14 +143,56 @@ describe('buildCredentials', () => {
     })
 })
 
+describe('buildCredentials — named fields', () => {
+    const mysql = (over: Partial<PipelineForm> = {}) =>
+        blankForm({ sourceKey: 'duckdb/mysql', dbHost: 'db.internal', dbDatabase: 'shop', ...over })
+
+    test('a declared password lands where the worker fills the template from', () => {
+        expect(buildCredentials(mysql({ dbPassword: 's3cret' }))).toEqual({
+            attach_params: { password: 's3cret' },
+        })
+    })
+
+    test('a blank password sends nothing, which on update means keep existing', () => {
+        expect(buildCredentials(mysql())).toEqual({})
+        expect(credentialsProvided(mysql())).toBe(false)
+        expect(credentialsProvided(mysql({ dbPassword: 's3cret' }))).toBe(true)
+    })
+
+    test('advanced JSON hands the credentials back to the textarea', () => {
+        // A hand-written ATTACH template can carry placeholders no named field
+        // knows about, so the raw editor has to win there — the same rule the
+        // config half follows.
+        const form = mysql({ dbPassword: 'ignored', credentialsRaw: '{"attach_params":{"user":"u","password":"p"}}' })
+        expect(buildCredentials(form, true)).toEqual({ attach_params: { user: 'u', password: 'p' } })
+        expect(buildCredentials(form, false)).toEqual({ attach_params: { password: 'ignored' } })
+    })
+
+    test('a source with no credentials card sends none, whatever is left in the box', () => {
+        // A PDF at a public URL needs nothing, so the wizard shows it no
+        // Credentials card — and what another source type left in the raw
+        // field must not be saved as this pipeline's credentials.
+        const form = blankForm({ sourceKey: 'duckdb/pdf', credentialsRaw: '{"api_key":"left over"}' })
+        expect(buildCredentials(form)).toEqual({})
+        expect(credentialsProvided(form)).toBe(false)
+    })
+})
+
 describe('googleScopeFor', () => {
     test('names what the source reads, so the consent can ask for just that', () => {
-        expect(googleScopeFor(blankForm({ sourceType: 'google_sheets' }))).toBe('sheets')
+        expect(googleScopeFor(blankForm({ sourceKey: 'google_sheets' }))).toBe('sheets')
         expect(googleScopeFor(blankForm())).toBe('')
     })
 
+    test('a duckdb variant knows its own answer without reading the config', () => {
+        // The picker already said which system this is; only the advanced
+        // entry still has to look inside the JSON.
+        expect(googleScopeFor(blankForm({ sourceKey: 'duckdb/gdrive' }))).toBe('drive')
+        expect(googleScopeFor(blankForm({ sourceKey: 'duckdb/mysql' }))).toBe('')
+    })
+
     test('reads the duckdb answer out of its config', () => {
-        const duck = (raw: string) => googleScopeFor(blankForm({ sourceType: 'duckdb', sourceConfigRaw: raw }))
+        const duck = (raw: string) => googleScopeFor(blankForm({ sourceKey: 'duckdb', sourceConfigRaw: raw }))
         expect(duck('{"extension":"gdrive"}')).toBe('drive')
         expect(duck('{"extension":"mysql"}')).toBe('')
     })
@@ -149,7 +200,7 @@ describe('googleScopeFor', () => {
     test('a config still being typed claims nothing rather than throwing', () => {
         // The editor is a textarea: every keystroke is a parse attempt, and
         // most of them are half a config.
-        const duck = (raw: string) => googleScopeFor(blankForm({ sourceType: 'duckdb', sourceConfigRaw: raw }))
+        const duck = (raw: string) => googleScopeFor(blankForm({ sourceKey: 'duckdb', sourceConfigRaw: raw }))
         expect(duck('{"extension": "gdri')).toBe('')
         expect(duck('')).toBe('')
         expect(duck('[1,2]')).toBe('')
@@ -215,6 +266,40 @@ describe('unpackSourceConfig', () => {
         expect(unpackSourceConfig('sql_database', '').raw).toBe('')
     })
 
+    test('a duckdb config opens on the variant that owns it', () => {
+        // The path most users arrive by: an AI draft naming the mysql
+        // extension has to land on the MySQL form, not in a JSON box.
+        const saved = JSON.stringify({
+            extension: 'mysql',
+            attach: 'host=db.internal port=3306 user=readonly database=shop password={password}',
+            tables: [{ name: 'orders', cursor_column: 'updated_at' }],
+        })
+        const out = unpackSourceConfig('duckdb', saved)
+        expect(out.key).toBe('duckdb/mysql')
+        expect(out.advanced).toBe(false)
+        expect(out.fields.dbHost).toBe('db.internal')
+        expect(out.fields.tables).toEqual([
+            { name: 'orders', query: '', cursorColumn: 'updated_at', primaryKey: '' },
+        ])
+    })
+
+    test('a duckdb config no variant can render still names its variant', () => {
+        // The tile stays right even when the form cannot hold the config: the
+        // user sees MySQL and the JSON editor, not "DuckDB extension".
+        const out = unpackSourceConfig(
+            'duckdb',
+            JSON.stringify({ extension: 'mysql', attach: 'host=db ssl_mode=REQUIRED password={password}' }),
+        )
+        expect(out.key).toBe('duckdb/mysql')
+        expect(out.advanced).toBe(true)
+    })
+
+    test('an extension with no form of its own falls to the advanced entry', () => {
+        const out = unpackSourceConfig('duckdb', JSON.stringify({ extension: 'oracle_scanner', tables: [] }))
+        expect(out.key).toBe('duckdb')
+        expect(out.advanced).toBe(true)
+    })
+
     test('the guided form always wins back a config that fits it', () => {
         // The regression this guards: a pipeline saved from the guided form
         // must reopen in the guided form, not fall to advanced JSON.
@@ -251,6 +336,17 @@ describe('formFieldFor', () => {
         expect(formFieldFor('oauth')).toBe('connectionId')
     })
 
+    test('routes the duckdb violations to the controls that caused them', () => {
+        // "extension is not supported" is about the tile the user picked;
+        // "tables[0].name is required" is about a row in the table list.
+        expect(formFieldFor('extension')).toBe('sourceKey')
+        expect(formFieldFor('attach')).toBe('attach')
+        expect(formFieldFor('tables')).toBe('tables')
+        expect(formFieldFor('tables[0].name')).toBe('tables')
+        expect(formFieldFor('tables[2].cursor_column')).toBe('tables')
+        expect(formFieldFor('attach_params')).toBe('dbPassword')
+    })
+
     test('routes the dataset name to the destination field', () => {
         expect(formFieldFor('dataset_name')).toBe('datasetName')
     })
@@ -267,11 +363,15 @@ describe('formFieldFor', () => {
         const known = new Set([
             'baseUrl', 'resources', 'spreadsheet', 'rangeNames',
             'credentialsRaw', 'sourceConfigRaw', 'datasetName', 'connectionId',
+            'sourceKey', 'attach', 'tables', 'dbPassword',
         ])
         const paths = [
             'base_url', 'resources', 'resources[0].name', 'resources[0].endpoint',
             'spreadsheet_url_or_id', 'range_names', 'connection_string', 'access_key_id',
             'secret_access_key', 'service_account_key', 'oauth', 'dataset_name', 'bucket_url',
+            'extension', 'attach', 'tables', 'tables[0].name', 'tables[0].query',
+            'tables[0].cursor_column', 'tables[0].primary_key', 'attach_params',
+            'attach_params.password',
         ]
         for (const p of paths) expect(known.has(formFieldFor(p))).toBe(true)
     })

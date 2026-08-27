@@ -24,12 +24,15 @@ export function toRestResource(r: unknown): RestResource | null {
 }
 
 export const restApi: PipelineSource = {
+    key: 'rest_api',
     id: 'rest_api',
+    group: 'apis',
     labelKey: 'pipelines.sourceTypes.rest_api',
     badge: { abbr: 'API', bg: 'var(--accent-soft)', fg: 'var(--accent-soft-ink)' },
 
     guided: true,
     credentials: true,
+    credentialFields: [],
     schedulable: true,
     fileDrop: false,
     googleScope: () => '',
