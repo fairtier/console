@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file pipeline.proto.
  */
 export const file_pipeline: GenFile = /*@__PURE__*/
-  fileDesc("Cg5waXBlbGluZS5wcm90bxILcGlwZWxpbmUudjEiqQIKCFBpcGVsaW5lEgoKAmlkGAEgASgJEhUKDWN1c3RvbWVyX3NsdWcYAiABKAkSDAoEbmFtZRgDIAEoCRITCgtzb3VyY2VfdHlwZRgEIAEoCRIVCg1zb3VyY2VfY29uZmlnGAUgASgJEhQKDGRhdGFzZXRfbmFtZRgGIAEoCRIQCghzY2hlZHVsZRgHIAEoCRIZChF3cml0ZV9kaXNwb3NpdGlvbhgIIAEoCRIPCgdlbmFibGVkGAkgASgIEhIKCmNyZWF0ZWRfYXQYCiABKAkSEgoKdXBkYXRlZF9hdBgLIAEoCRIWCg5tZXJnZV9zdHJhdGVneRgMIAEoCRITCgtsYXN0X3J1bl9hdBgNIAEoCRIXCg9sYXN0X3J1bl9zdGF0dXMYDiABKAkiqAEKC1BpcGVsaW5lUnVuEgoKAmlkGAEgASgJEhMKC3BpcGVsaW5lX2lkGAIgASgJEg4KBnN0YXR1cxgDIAEoCRISCgpzdGFydGVkX2F0GAQgASgJEhQKDGNvbXBsZXRlZF9hdBgFIAEoCRITCgtyb3dzX2xvYWRlZBgGIAEoAxIVCg1lcnJvcl9tZXNzYWdlGAcgASgJEhIKCmNyZWF0ZWRfYXQYCCABKAkiNAoORmllbGRWaW9sYXRpb24SDQoFZmllbGQYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkiQwoQVmFsaWRhdGlvbkVycm9ycxIvCgp2aW9sYXRpb25zGAEgAygLMhsucGlwZWxpbmUudjEuRmllbGRWaW9sYXRpb24iyAEKFUNyZWF0ZVBpcGVsaW5lUmVxdWVzdBIMCgRuYW1lGAEgASgJEhMKC3NvdXJjZV90eXBlGAIgASgJEhUKDXNvdXJjZV9jb25maWcYAyABKAkSGgoSc291cmNlX2NyZWRlbnRpYWxzGAQgASgJEhQKDGRhdGFzZXRfbmFtZRgFIAEoCRIQCghzY2hlZHVsZRgGIAEoCRIZChF3cml0ZV9kaXNwb3NpdGlvbhgHIAEoCRIWCg5tZXJnZV9zdHJhdGVneRgIIAEoCSJBChZDcmVhdGVQaXBlbGluZVJlc3BvbnNlEicKCHBpcGVsaW5lGAEgASgLMhUucGlwZWxpbmUudjEuUGlwZWxpbmUiFgoUTGlzdFBpcGVsaW5lc1JlcXVlc3QiQQoVTGlzdFBpcGVsaW5lc1Jlc3BvbnNlEigKCXBpcGVsaW5lcxgBIAMoCzIVLnBpcGVsaW5lLnYxLlBpcGVsaW5lIiAKEkdldFBpcGVsaW5lUmVxdWVzdBIKCgJpZBgBIAEoCSKdAQoTR2V0UGlwZWxpbmVSZXNwb25zZRInCghwaXBlbGluZRgBIAEoCzIVLnBpcGVsaW5lLnYxLlBpcGVsaW5lEi0KC3JlY2VudF9ydW5zGAIgAygLMhgucGlwZWxpbmUudjEuUGlwZWxpbmVSdW4SFQoNY29ubmVjdGlvbl9pZBgDIAEoCRIXCg9oYXNfY3JlZGVudGlhbHMYBCABKAgigAIKFVVwZGF0ZVBpcGVsaW5lUmVxdWVzdBIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhMKC3NvdXJjZV90eXBlGAMgASgJEhUKDXNvdXJjZV9jb25maWcYBCABKAkSGgoSc291cmNlX2NyZWRlbnRpYWxzGAUgASgJEhQKDGRhdGFzZXRfbmFtZRgGIAEoCRIQCghzY2hlZHVsZRgHIAEoCRIZChF3cml0ZV9kaXNwb3NpdGlvbhgIIAEoCRIPCgdlbmFibGVkGAkgASgIEhYKDm1lcmdlX3N0cmF0ZWd5GAogASgJEhkKEWNsZWFyX2NyZWRlbnRpYWxzGAsgASgIIkEKFlVwZGF0ZVBpcGVsaW5lUmVzcG9uc2USJwoIcGlwZWxpbmUYASABKAsyFS5waXBlbGluZS52MS5QaXBlbGluZSIjChVEZWxldGVQaXBlbGluZVJlcXVlc3QSCgoCaWQYASABKAkiGAoWRGVsZXRlUGlwZWxpbmVSZXNwb25zZSIkChZUcmlnZ2VyUGlwZWxpbmVSZXF1ZXN0EgoKAmlkGAEgASgJIkAKF1RyaWdnZXJQaXBlbGluZVJlc3BvbnNlEiUKA3J1bhgBIAEoCzIYLnBpcGVsaW5lLnYxLlBpcGVsaW5lUnVuIjIKG0xpc3RQaXBlbGluZVZlcnNpb25zUmVxdWVzdBITCgtwaXBlbGluZV9pZBgBIAEoCSJoCg9QaXBlbGluZVZlcnNpb24SCwoDc2hhGAEgASgJEg8KB21lc3NhZ2UYAiABKAkSEwoLYXV0aG9yX25hbWUYAyABKAkSFAoMYXV0aG9yX2VtYWlsGAQgASgJEgwKBGRhdGUYBSABKAkiTgocTGlzdFBpcGVsaW5lVmVyc2lvbnNSZXNwb25zZRIuCgh2ZXJzaW9ucxgBIAMoCzIcLnBpcGVsaW5lLnYxLlBpcGVsaW5lVmVyc2lvbiJBCh1SZXN0b3JlUGlwZWxpbmVWZXJzaW9uUmVxdWVzdBITCgtwaXBlbGluZV9pZBgBIAEoCRILCgNzaGEYAiABKAkiSQoeUmVzdG9yZVBpcGVsaW5lVmVyc2lvblJlc3BvbnNlEicKCHBpcGVsaW5lGAEgASgLMhUucGlwZWxpbmUudjEuUGlwZWxpbmUiZAoMVXBsb2FkZWRGaWxlEgwKBG5hbWUYASABKAkSDAoEZmlsZRgCIAEoCRISCgpzaXplX2J5dGVzGAMgASgDEhMKC3VwbG9hZGVkX2F0GAQgASgJEg8KB21pc3NpbmcYBSABKAgiLwoYTGlzdFVwbG9hZGVkRmlsZXNSZXF1ZXN0EhMKC3BpcGVsaW5lX2lkGAEgASgJIkUKGUxpc3RVcGxvYWRlZEZpbGVzUmVzcG9uc2USKAoFZmlsZXMYASADKAsyGS5waXBlbGluZS52MS5VcGxvYWRlZEZpbGUiPgoZRGVsZXRlVXBsb2FkZWRGaWxlUmVxdWVzdBITCgtwaXBlbGluZV9pZBgBIAEoCRIMCgRmaWxlGAIgASgJIhwKGkRlbGV0ZVVwbG9hZGVkRmlsZVJlc3BvbnNlIjIKGUdldFBpcGVsaW5lQ29uZmlnc1JlcXVlc3QSFQoNY3VzdG9tZXJfc2x1ZxgBIAEoCSJQChpHZXRQaXBlbGluZUNvbmZpZ3NSZXNwb25zZRIyCglwaXBlbGluZXMYASADKAsyHy5waXBlbGluZS52MS5QaXBlbGluZUNvbmZpZ0l0ZW0ilAIKElBpcGVsaW5lQ29uZmlnSXRlbRIKCgJpZBgBIAEoCRIaChJzb3VyY2VfY3JlZGVudGlhbHMYBSABKAkSEwoLdHJpZ2dlcl9ub3cYCiABKAgSFgoOcGVuZGluZ19ydW5faWQYCyABKAkSEwoLbGFzdF9ydW5fYXQYDCABKAlKBAgCEANKBAgDEARKBAgEEAVKBAgGEAdKBAgHEAhKBAgIEAlKBAgJEApKBAgNEA5SBG5hbWVSC3NvdXJjZV90eXBlUg1zb3VyY2VfY29uZmlnUgxkYXRhc2V0X25hbWVSCHNjaGVkdWxlUhF3cml0ZV9kaXNwb3NpdGlvblIHZW5hYmxlZFIObWVyZ2Vfc3RyYXRlZ3kipQEKGFJlcG9ydFBpcGVsaW5lUnVuUmVxdWVzdBITCgtwaXBlbGluZV9pZBgBIAEoCRIOCgZzdGF0dXMYAiABKAkSEgoKc3RhcnRlZF9hdBgDIAEoCRIUCgxjb21wbGV0ZWRfYXQYBCABKAkSEwoLcm93c19sb2FkZWQYBSABKAMSFQoNZXJyb3JfbWVzc2FnZRgGIAEoCRIOCgZydW5faWQYByABKAkiGwoZUmVwb3J0UGlwZWxpbmVSdW5SZXNwb25zZTK4CQoPUGlwZWxpbmVTZXJ2aWNlElsKDkNyZWF0ZVBpcGVsaW5lEiIucGlwZWxpbmUudjEuQ3JlYXRlUGlwZWxpbmVSZXF1ZXN0GiMucGlwZWxpbmUudjEuQ3JlYXRlUGlwZWxpbmVSZXNwb25zZSIAElgKDUxpc3RQaXBlbGluZXMSIS5waXBlbGluZS52MS5MaXN0UGlwZWxpbmVzUmVxdWVzdBoiLnBpcGVsaW5lLnYxLkxpc3RQaXBlbGluZXNSZXNwb25zZSIAElIKC0dldFBpcGVsaW5lEh8ucGlwZWxpbmUudjEuR2V0UGlwZWxpbmVSZXF1ZXN0GiAucGlwZWxpbmUudjEuR2V0UGlwZWxpbmVSZXNwb25zZSIAElsKDlVwZGF0ZVBpcGVsaW5lEiIucGlwZWxpbmUudjEuVXBkYXRlUGlwZWxpbmVSZXF1ZXN0GiMucGlwZWxpbmUudjEuVXBkYXRlUGlwZWxpbmVSZXNwb25zZSIAElsKDkRlbGV0ZVBpcGVsaW5lEiIucGlwZWxpbmUudjEuRGVsZXRlUGlwZWxpbmVSZXF1ZXN0GiMucGlwZWxpbmUudjEuRGVsZXRlUGlwZWxpbmVSZXNwb25zZSIAEl4KD1RyaWdnZXJQaXBlbGluZRIjLnBpcGVsaW5lLnYxLlRyaWdnZXJQaXBlbGluZVJlcXVlc3QaJC5waXBlbGluZS52MS5UcmlnZ2VyUGlwZWxpbmVSZXNwb25zZSIAEm0KFExpc3RQaXBlbGluZVZlcnNpb25zEigucGlwZWxpbmUudjEuTGlzdFBpcGVsaW5lVmVyc2lvbnNSZXF1ZXN0GikucGlwZWxpbmUudjEuTGlzdFBpcGVsaW5lVmVyc2lvbnNSZXNwb25zZSIAEnMKFlJlc3RvcmVQaXBlbGluZVZlcnNpb24SKi5waXBlbGluZS52MS5SZXN0b3JlUGlwZWxpbmVWZXJzaW9uUmVxdWVzdBorLnBpcGVsaW5lLnYxLlJlc3RvcmVQaXBlbGluZVZlcnNpb25SZXNwb25zZSIAEmQKEUxpc3RVcGxvYWRlZEZpbGVzEiUucGlwZWxpbmUudjEuTGlzdFVwbG9hZGVkRmlsZXNSZXF1ZXN0GiYucGlwZWxpbmUudjEuTGlzdFVwbG9hZGVkRmlsZXNSZXNwb25zZSIAEmcKEkRlbGV0ZVVwbG9hZGVkRmlsZRImLnBpcGVsaW5lLnYxLkRlbGV0ZVVwbG9hZGVkRmlsZVJlcXVlc3QaJy5waXBlbGluZS52MS5EZWxldGVVcGxvYWRlZEZpbGVSZXNwb25zZSIAEmcKEkdldFBpcGVsaW5lQ29uZmlncxImLnBpcGVsaW5lLnYxLkdldFBpcGVsaW5lQ29uZmlnc1JlcXVlc3QaJy5waXBlbGluZS52MS5HZXRQaXBlbGluZUNvbmZpZ3NSZXNwb25zZSIAEmQKEVJlcG9ydFBpcGVsaW5lUnVuEiUucGlwZWxpbmUudjEuUmVwb3J0UGlwZWxpbmVSdW5SZXF1ZXN0GiYucGlwZWxpbmUudjEuUmVwb3J0UGlwZWxpbmVSdW5SZXNwb25zZSIAQkBaPmdpdGh1Yi5jb20vZmFpcnRpZXIvd29ya3NwYWNlLWFwaS9wcm90by9waXBlbGluZS92MTtwaXBlbGluZXYxYgZwcm90bzM");
+  fileDesc("Cg5waXBlbGluZS5wcm90bxILcGlwZWxpbmUudjEiqQIKCFBpcGVsaW5lEgoKAmlkGAEgASgJEhUKDWN1c3RvbWVyX3NsdWcYAiABKAkSDAoEbmFtZRgDIAEoCRITCgtzb3VyY2VfdHlwZRgEIAEoCRIVCg1zb3VyY2VfY29uZmlnGAUgASgJEhQKDGRhdGFzZXRfbmFtZRgGIAEoCRIQCghzY2hlZHVsZRgHIAEoCRIZChF3cml0ZV9kaXNwb3NpdGlvbhgIIAEoCRIPCgdlbmFibGVkGAkgASgIEhIKCmNyZWF0ZWRfYXQYCiABKAkSEgoKdXBkYXRlZF9hdBgLIAEoCRIWCg5tZXJnZV9zdHJhdGVneRgMIAEoCRITCgtsYXN0X3J1bl9hdBgNIAEoCRIXCg9sYXN0X3J1bl9zdGF0dXMYDiABKAkiqAEKC1BpcGVsaW5lUnVuEgoKAmlkGAEgASgJEhMKC3BpcGVsaW5lX2lkGAIgASgJEg4KBnN0YXR1cxgDIAEoCRISCgpzdGFydGVkX2F0GAQgASgJEhQKDGNvbXBsZXRlZF9hdBgFIAEoCRITCgtyb3dzX2xvYWRlZBgGIAEoAxIVCg1lcnJvcl9tZXNzYWdlGAcgASgJEhIKCmNyZWF0ZWRfYXQYCCABKAkiNAoORmllbGRWaW9sYXRpb24SDQoFZmllbGQYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkiQwoQVmFsaWRhdGlvbkVycm9ycxIvCgp2aW9sYXRpb25zGAEgAygLMhsucGlwZWxpbmUudjEuRmllbGRWaW9sYXRpb24iyAEKFUNyZWF0ZVBpcGVsaW5lUmVxdWVzdBIMCgRuYW1lGAEgASgJEhMKC3NvdXJjZV90eXBlGAIgASgJEhUKDXNvdXJjZV9jb25maWcYAyABKAkSGgoSc291cmNlX2NyZWRlbnRpYWxzGAQgASgJEhQKDGRhdGFzZXRfbmFtZRgFIAEoCRIQCghzY2hlZHVsZRgGIAEoCRIZChF3cml0ZV9kaXNwb3NpdGlvbhgHIAEoCRIWCg5tZXJnZV9zdHJhdGVneRgIIAEoCSJBChZDcmVhdGVQaXBlbGluZVJlc3BvbnNlEicKCHBpcGVsaW5lGAEgASgLMhUucGlwZWxpbmUudjEuUGlwZWxpbmUiFgoUTGlzdFBpcGVsaW5lc1JlcXVlc3QiQQoVTGlzdFBpcGVsaW5lc1Jlc3BvbnNlEigKCXBpcGVsaW5lcxgBIAMoCzIVLnBpcGVsaW5lLnYxLlBpcGVsaW5lIiAKEkdldFBpcGVsaW5lUmVxdWVzdBIKCgJpZBgBIAEoCSKdAQoTR2V0UGlwZWxpbmVSZXNwb25zZRInCghwaXBlbGluZRgBIAEoCzIVLnBpcGVsaW5lLnYxLlBpcGVsaW5lEi0KC3JlY2VudF9ydW5zGAIgAygLMhgucGlwZWxpbmUudjEuUGlwZWxpbmVSdW4SFQoNY29ubmVjdGlvbl9pZBgDIAEoCRIXCg9oYXNfY3JlZGVudGlhbHMYBCABKAgigAIKFVVwZGF0ZVBpcGVsaW5lUmVxdWVzdBIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhMKC3NvdXJjZV90eXBlGAMgASgJEhUKDXNvdXJjZV9jb25maWcYBCABKAkSGgoSc291cmNlX2NyZWRlbnRpYWxzGAUgASgJEhQKDGRhdGFzZXRfbmFtZRgGIAEoCRIQCghzY2hlZHVsZRgHIAEoCRIZChF3cml0ZV9kaXNwb3NpdGlvbhgIIAEoCRIPCgdlbmFibGVkGAkgASgIEhYKDm1lcmdlX3N0cmF0ZWd5GAogASgJEhkKEWNsZWFyX2NyZWRlbnRpYWxzGAsgASgIIkEKFlVwZGF0ZVBpcGVsaW5lUmVzcG9uc2USJwoIcGlwZWxpbmUYASABKAsyFS5waXBlbGluZS52MS5QaXBlbGluZSIjChVEZWxldGVQaXBlbGluZVJlcXVlc3QSCgoCaWQYASABKAkiGAoWRGVsZXRlUGlwZWxpbmVSZXNwb25zZSIkChZUcmlnZ2VyUGlwZWxpbmVSZXF1ZXN0EgoKAmlkGAEgASgJIkAKF1RyaWdnZXJQaXBlbGluZVJlc3BvbnNlEiUKA3J1bhgBIAEoCzIYLnBpcGVsaW5lLnYxLlBpcGVsaW5lUnVuIjIKG0xpc3RQaXBlbGluZVZlcnNpb25zUmVxdWVzdBITCgtwaXBlbGluZV9pZBgBIAEoCSJoCg9QaXBlbGluZVZlcnNpb24SCwoDc2hhGAEgASgJEg8KB21lc3NhZ2UYAiABKAkSEwoLYXV0aG9yX25hbWUYAyABKAkSFAoMYXV0aG9yX2VtYWlsGAQgASgJEgwKBGRhdGUYBSABKAkiTgocTGlzdFBpcGVsaW5lVmVyc2lvbnNSZXNwb25zZRIuCgh2ZXJzaW9ucxgBIAMoCzIcLnBpcGVsaW5lLnYxLlBpcGVsaW5lVmVyc2lvbiJBCh1SZXN0b3JlUGlwZWxpbmVWZXJzaW9uUmVxdWVzdBITCgtwaXBlbGluZV9pZBgBIAEoCRILCgNzaGEYAiABKAkiSQoeUmVzdG9yZVBpcGVsaW5lVmVyc2lvblJlc3BvbnNlEicKCHBpcGVsaW5lGAEgASgLMhUucGlwZWxpbmUudjEuUGlwZWxpbmUiZAoMVXBsb2FkZWRGaWxlEgwKBG5hbWUYASABKAkSDAoEZmlsZRgCIAEoCRISCgpzaXplX2J5dGVzGAMgASgDEhMKC3VwbG9hZGVkX2F0GAQgASgJEg8KB21pc3NpbmcYBSABKAgiLwoYTGlzdFVwbG9hZGVkRmlsZXNSZXF1ZXN0EhMKC3BpcGVsaW5lX2lkGAEgASgJIkUKGUxpc3RVcGxvYWRlZEZpbGVzUmVzcG9uc2USKAoFZmlsZXMYASADKAsyGS5waXBlbGluZS52MS5VcGxvYWRlZEZpbGUiPgoZRGVsZXRlVXBsb2FkZWRGaWxlUmVxdWVzdBITCgtwaXBlbGluZV9pZBgBIAEoCRIMCgRmaWxlGAIgASgJIhwKGkRlbGV0ZVVwbG9hZGVkRmlsZVJlc3BvbnNlIjIKGUdldFBpcGVsaW5lQ29uZmlnc1JlcXVlc3QSFQoNY3VzdG9tZXJfc2x1ZxgBIAEoCSJQChpHZXRQaXBlbGluZUNvbmZpZ3NSZXNwb25zZRIyCglwaXBlbGluZXMYASADKAsyHy5waXBlbGluZS52MS5QaXBlbGluZUNvbmZpZ0l0ZW0ilAIKElBpcGVsaW5lQ29uZmlnSXRlbRIKCgJpZBgBIAEoCRIaChJzb3VyY2VfY3JlZGVudGlhbHMYBSABKAkSEwoLdHJpZ2dlcl9ub3cYCiABKAgSFgoOcGVuZGluZ19ydW5faWQYCyABKAkSEwoLbGFzdF9ydW5fYXQYDCABKAlKBAgCEANKBAgDEARKBAgEEAVKBAgGEAdKBAgHEAhKBAgIEAlKBAgJEApKBAgNEA5SBG5hbWVSC3NvdXJjZV90eXBlUg1zb3VyY2VfY29uZmlnUgxkYXRhc2V0X25hbWVSCHNjaGVkdWxlUhF3cml0ZV9kaXNwb3NpdGlvblIHZW5hYmxlZFIObWVyZ2Vfc3RyYXRlZ3kipQEKGFJlcG9ydFBpcGVsaW5lUnVuUmVxdWVzdBITCgtwaXBlbGluZV9pZBgBIAEoCRIOCgZzdGF0dXMYAiABKAkSEgoKc3RhcnRlZF9hdBgDIAEoCRIUCgxjb21wbGV0ZWRfYXQYBCABKAkSEwoLcm93c19sb2FkZWQYBSABKAMSFQoNZXJyb3JfbWVzc2FnZRgGIAEoCRIOCgZydW5faWQYByABKAkiGwoZUmVwb3J0UGlwZWxpbmVSdW5SZXNwb25zZSJ0CgpTb3VyY2VUZXN0EgoKAmlkGAEgASgJEg4KBnN0YXR1cxgCIAEoCRIPCgdtZXNzYWdlGAMgASgJEg8KB2RldGFpbHMYBCADKAkSEgoKY3JlYXRlZF9hdBgFIAEoCRIUCgxjb21wbGV0ZWRfYXQYBiABKAkiegobVGVzdFNvdXJjZUNvbm5lY3Rpb25SZXF1ZXN0EhMKC3NvdXJjZV90eXBlGAEgASgJEhUKDXNvdXJjZV9jb25maWcYAiABKAkSGgoSc291cmNlX2NyZWRlbnRpYWxzGAMgASgJEhMKC3BpcGVsaW5lX2lkGAQgASgJIkUKHFRlc3RTb3VyY2VDb25uZWN0aW9uUmVzcG9uc2USJQoEdGVzdBgBIAEoCzIXLnBpcGVsaW5lLnYxLlNvdXJjZVRlc3QiIgoUR2V0U291cmNlVGVzdFJlcXVlc3QSCgoCaWQYASABKAkiPgoVR2V0U291cmNlVGVzdFJlc3BvbnNlEiUKBHRlc3QYASABKAsyFy5waXBlbGluZS52MS5Tb3VyY2VUZXN0ImcKEVBlbmRpbmdTb3VyY2VUZXN0EgoKAmlkGAEgASgJEhMKC3NvdXJjZV90eXBlGAIgASgJEhUKDXNvdXJjZV9jb25maWcYAyABKAkSGgoSc291cmNlX2NyZWRlbnRpYWxzGAQgASgJIjUKHEdldFBlbmRpbmdTb3VyY2VUZXN0c1JlcXVlc3QSFQoNY3VzdG9tZXJfc2x1ZxgBIAEoCSJOCh1HZXRQZW5kaW5nU291cmNlVGVzdHNSZXNwb25zZRItCgV0ZXN0cxgBIAMoCzIeLnBpcGVsaW5lLnYxLlBlbmRpbmdTb3VyY2VUZXN0IlcKF1JlcG9ydFNvdXJjZVRlc3RSZXF1ZXN0EgoKAmlkGAEgASgJEg4KBnN0YXR1cxgCIAEoCRIPCgdtZXNzYWdlGAMgASgJEg8KB2RldGFpbHMYBCADKAkiGgoYUmVwb3J0U291cmNlVGVzdFJlc3BvbnNlMtYMCg9QaXBlbGluZVNlcnZpY2USWwoOQ3JlYXRlUGlwZWxpbmUSIi5waXBlbGluZS52MS5DcmVhdGVQaXBlbGluZVJlcXVlc3QaIy5waXBlbGluZS52MS5DcmVhdGVQaXBlbGluZVJlc3BvbnNlIgASWAoNTGlzdFBpcGVsaW5lcxIhLnBpcGVsaW5lLnYxLkxpc3RQaXBlbGluZXNSZXF1ZXN0GiIucGlwZWxpbmUudjEuTGlzdFBpcGVsaW5lc1Jlc3BvbnNlIgASUgoLR2V0UGlwZWxpbmUSHy5waXBlbGluZS52MS5HZXRQaXBlbGluZVJlcXVlc3QaIC5waXBlbGluZS52MS5HZXRQaXBlbGluZVJlc3BvbnNlIgASWwoOVXBkYXRlUGlwZWxpbmUSIi5waXBlbGluZS52MS5VcGRhdGVQaXBlbGluZVJlcXVlc3QaIy5waXBlbGluZS52MS5VcGRhdGVQaXBlbGluZVJlc3BvbnNlIgASWwoORGVsZXRlUGlwZWxpbmUSIi5waXBlbGluZS52MS5EZWxldGVQaXBlbGluZVJlcXVlc3QaIy5waXBlbGluZS52MS5EZWxldGVQaXBlbGluZVJlc3BvbnNlIgASXgoPVHJpZ2dlclBpcGVsaW5lEiMucGlwZWxpbmUudjEuVHJpZ2dlclBpcGVsaW5lUmVxdWVzdBokLnBpcGVsaW5lLnYxLlRyaWdnZXJQaXBlbGluZVJlc3BvbnNlIgASbQoUTGlzdFBpcGVsaW5lVmVyc2lvbnMSKC5waXBlbGluZS52MS5MaXN0UGlwZWxpbmVWZXJzaW9uc1JlcXVlc3QaKS5waXBlbGluZS52MS5MaXN0UGlwZWxpbmVWZXJzaW9uc1Jlc3BvbnNlIgAScwoWUmVzdG9yZVBpcGVsaW5lVmVyc2lvbhIqLnBpcGVsaW5lLnYxLlJlc3RvcmVQaXBlbGluZVZlcnNpb25SZXF1ZXN0GisucGlwZWxpbmUudjEuUmVzdG9yZVBpcGVsaW5lVmVyc2lvblJlc3BvbnNlIgASZAoRTGlzdFVwbG9hZGVkRmlsZXMSJS5waXBlbGluZS52MS5MaXN0VXBsb2FkZWRGaWxlc1JlcXVlc3QaJi5waXBlbGluZS52MS5MaXN0VXBsb2FkZWRGaWxlc1Jlc3BvbnNlIgASZwoSRGVsZXRlVXBsb2FkZWRGaWxlEiYucGlwZWxpbmUudjEuRGVsZXRlVXBsb2FkZWRGaWxlUmVxdWVzdBonLnBpcGVsaW5lLnYxLkRlbGV0ZVVwbG9hZGVkRmlsZVJlc3BvbnNlIgASbQoUVGVzdFNvdXJjZUNvbm5lY3Rpb24SKC5waXBlbGluZS52MS5UZXN0U291cmNlQ29ubmVjdGlvblJlcXVlc3QaKS5waXBlbGluZS52MS5UZXN0U291cmNlQ29ubmVjdGlvblJlc3BvbnNlIgASWAoNR2V0U291cmNlVGVzdBIhLnBpcGVsaW5lLnYxLkdldFNvdXJjZVRlc3RSZXF1ZXN0GiIucGlwZWxpbmUudjEuR2V0U291cmNlVGVzdFJlc3BvbnNlIgAScAoVR2V0UGVuZGluZ1NvdXJjZVRlc3RzEikucGlwZWxpbmUudjEuR2V0UGVuZGluZ1NvdXJjZVRlc3RzUmVxdWVzdBoqLnBpcGVsaW5lLnYxLkdldFBlbmRpbmdTb3VyY2VUZXN0c1Jlc3BvbnNlIgASYQoQUmVwb3J0U291cmNlVGVzdBIkLnBpcGVsaW5lLnYxLlJlcG9ydFNvdXJjZVRlc3RSZXF1ZXN0GiUucGlwZWxpbmUudjEuUmVwb3J0U291cmNlVGVzdFJlc3BvbnNlIgASZwoSR2V0UGlwZWxpbmVDb25maWdzEiYucGlwZWxpbmUudjEuR2V0UGlwZWxpbmVDb25maWdzUmVxdWVzdBonLnBpcGVsaW5lLnYxLkdldFBpcGVsaW5lQ29uZmlnc1Jlc3BvbnNlIgASZAoRUmVwb3J0UGlwZWxpbmVSdW4SJS5waXBlbGluZS52MS5SZXBvcnRQaXBlbGluZVJ1blJlcXVlc3QaJi5waXBlbGluZS52MS5SZXBvcnRQaXBlbGluZVJ1blJlc3BvbnNlIgBCQFo+Z2l0aHViLmNvbS9mYWlydGllci93b3Jrc3BhY2UtYXBpL3Byb3RvL3BpcGVsaW5lL3YxO3BpcGVsaW5ldjFiBnByb3RvMw");
 
 /**
  * Pipeline represents a data ingestion pipeline definition.
@@ -959,6 +959,274 @@ export const ReportPipelineRunResponseSchema: GenMessage<ReportPipelineRunRespon
   messageDesc(file_pipeline, 30);
 
 /**
+ * SourceTest is one "can this thing read my source?" probe.
+ *
+ * @generated from message pipeline.v1.SourceTest
+ */
+export type SourceTest = Message<"pipeline.v1.SourceTest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * "pending" (queued for the worker), "running" (claimed), "success", or
+   * "failed". A test the worker never claimed stays pending until it expires.
+   *
+   * @generated from field: string status = 2;
+   */
+  status: string;
+
+  /**
+   * One human-readable line: what worked, or what did not. Credential values
+   * are scrubbed out of it by the worker before it is ever sent.
+   *
+   * @generated from field: string message = 3;
+   */
+  message: string;
+
+  /**
+   * Per-table or per-step detail lines, in the order they were probed —
+   * "orders: 8 columns", "customers: relation does not exist".
+   *
+   * @generated from field: repeated string details = 4;
+   */
+  details: string[];
+
+  /**
+   * RFC 3339 timestamps; completed_at is empty until the worker reports.
+   *
+   * @generated from field: string created_at = 5;
+   */
+  createdAt: string;
+
+  /**
+   * @generated from field: string completed_at = 6;
+   */
+  completedAt: string;
+};
+
+/**
+ * Describes the message pipeline.v1.SourceTest.
+ * Use `create(SourceTestSchema)` to create a new message.
+ */
+export const SourceTestSchema: GenMessage<SourceTest> = /*@__PURE__*/
+  messageDesc(file_pipeline, 31);
+
+/**
+ * @generated from message pipeline.v1.TestSourceConnectionRequest
+ */
+export type TestSourceConnectionRequest = Message<"pipeline.v1.TestSourceConnectionRequest"> & {
+  /**
+   * The source as it is on screen — a test is run BEFORE a save, so this is
+   * not read from any stored pipeline.
+   *
+   * @generated from field: string source_type = 1;
+   */
+  sourceType: string;
+
+  /**
+   * JSON string, as in CreatePipeline.
+   *
+   * @generated from field: string source_config = 2;
+   */
+  sourceConfig: string;
+
+  /**
+   * JSON string. Empty means "use what pipeline_id already has stored", which
+   * is what an edit form shows when the user does not retype a password.
+   *
+   * @generated from field: string source_credentials = 3;
+   */
+  sourceCredentials: string;
+
+  /**
+   * Optional: the pipeline being edited. Only used to resolve omitted
+   * credentials, and only for a pipeline of the caller's own workspace.
+   *
+   * @generated from field: string pipeline_id = 4;
+   */
+  pipelineId: string;
+};
+
+/**
+ * Describes the message pipeline.v1.TestSourceConnectionRequest.
+ * Use `create(TestSourceConnectionRequestSchema)` to create a new message.
+ */
+export const TestSourceConnectionRequestSchema: GenMessage<TestSourceConnectionRequest> = /*@__PURE__*/
+  messageDesc(file_pipeline, 32);
+
+/**
+ * @generated from message pipeline.v1.TestSourceConnectionResponse
+ */
+export type TestSourceConnectionResponse = Message<"pipeline.v1.TestSourceConnectionResponse"> & {
+  /**
+   * @generated from field: pipeline.v1.SourceTest test = 1;
+   */
+  test?: SourceTest | undefined;
+};
+
+/**
+ * Describes the message pipeline.v1.TestSourceConnectionResponse.
+ * Use `create(TestSourceConnectionResponseSchema)` to create a new message.
+ */
+export const TestSourceConnectionResponseSchema: GenMessage<TestSourceConnectionResponse> = /*@__PURE__*/
+  messageDesc(file_pipeline, 33);
+
+/**
+ * @generated from message pipeline.v1.GetSourceTestRequest
+ */
+export type GetSourceTestRequest = Message<"pipeline.v1.GetSourceTestRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message pipeline.v1.GetSourceTestRequest.
+ * Use `create(GetSourceTestRequestSchema)` to create a new message.
+ */
+export const GetSourceTestRequestSchema: GenMessage<GetSourceTestRequest> = /*@__PURE__*/
+  messageDesc(file_pipeline, 34);
+
+/**
+ * @generated from message pipeline.v1.GetSourceTestResponse
+ */
+export type GetSourceTestResponse = Message<"pipeline.v1.GetSourceTestResponse"> & {
+  /**
+   * @generated from field: pipeline.v1.SourceTest test = 1;
+   */
+  test?: SourceTest | undefined;
+};
+
+/**
+ * Describes the message pipeline.v1.GetSourceTestResponse.
+ * Use `create(GetSourceTestResponseSchema)` to create a new message.
+ */
+export const GetSourceTestResponseSchema: GenMessage<GetSourceTestResponse> = /*@__PURE__*/
+  messageDesc(file_pipeline, 35);
+
+/**
+ * PendingSourceTest is what the worker needs to run one probe: the same
+ * config/credentials pair a run would receive, with a workspace Connection
+ * reference already resolved into a usable credential.
+ *
+ * @generated from message pipeline.v1.PendingSourceTest
+ */
+export type PendingSourceTest = Message<"pipeline.v1.PendingSourceTest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string source_type = 2;
+   */
+  sourceType: string;
+
+  /**
+   * JSON strings.
+   *
+   * @generated from field: string source_config = 3;
+   */
+  sourceConfig: string;
+
+  /**
+   * @generated from field: string source_credentials = 4;
+   */
+  sourceCredentials: string;
+};
+
+/**
+ * Describes the message pipeline.v1.PendingSourceTest.
+ * Use `create(PendingSourceTestSchema)` to create a new message.
+ */
+export const PendingSourceTestSchema: GenMessage<PendingSourceTest> = /*@__PURE__*/
+  messageDesc(file_pipeline, 36);
+
+/**
+ * @generated from message pipeline.v1.GetPendingSourceTestsRequest
+ */
+export type GetPendingSourceTestsRequest = Message<"pipeline.v1.GetPendingSourceTestsRequest"> & {
+  /**
+   * @generated from field: string customer_slug = 1;
+   */
+  customerSlug: string;
+};
+
+/**
+ * Describes the message pipeline.v1.GetPendingSourceTestsRequest.
+ * Use `create(GetPendingSourceTestsRequestSchema)` to create a new message.
+ */
+export const GetPendingSourceTestsRequestSchema: GenMessage<GetPendingSourceTestsRequest> = /*@__PURE__*/
+  messageDesc(file_pipeline, 37);
+
+/**
+ * @generated from message pipeline.v1.GetPendingSourceTestsResponse
+ */
+export type GetPendingSourceTestsResponse = Message<"pipeline.v1.GetPendingSourceTestsResponse"> & {
+  /**
+   * @generated from field: repeated pipeline.v1.PendingSourceTest tests = 1;
+   */
+  tests: PendingSourceTest[];
+};
+
+/**
+ * Describes the message pipeline.v1.GetPendingSourceTestsResponse.
+ * Use `create(GetPendingSourceTestsResponseSchema)` to create a new message.
+ */
+export const GetPendingSourceTestsResponseSchema: GenMessage<GetPendingSourceTestsResponse> = /*@__PURE__*/
+  messageDesc(file_pipeline, 38);
+
+/**
+ * @generated from message pipeline.v1.ReportSourceTestRequest
+ */
+export type ReportSourceTestRequest = Message<"pipeline.v1.ReportSourceTestRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * "success" or "failed".
+   *
+   * @generated from field: string status = 2;
+   */
+  status: string;
+
+  /**
+   * @generated from field: string message = 3;
+   */
+  message: string;
+
+  /**
+   * @generated from field: repeated string details = 4;
+   */
+  details: string[];
+};
+
+/**
+ * Describes the message pipeline.v1.ReportSourceTestRequest.
+ * Use `create(ReportSourceTestRequestSchema)` to create a new message.
+ */
+export const ReportSourceTestRequestSchema: GenMessage<ReportSourceTestRequest> = /*@__PURE__*/
+  messageDesc(file_pipeline, 39);
+
+/**
+ * @generated from message pipeline.v1.ReportSourceTestResponse
+ */
+export type ReportSourceTestResponse = Message<"pipeline.v1.ReportSourceTestResponse"> & {
+};
+
+/**
+ * Describes the message pipeline.v1.ReportSourceTestResponse.
+ * Use `create(ReportSourceTestResponseSchema)` to create a new message.
+ */
+export const ReportSourceTestResponseSchema: GenMessage<ReportSourceTestResponse> = /*@__PURE__*/
+  messageDesc(file_pipeline, 40);
+
+/**
  * PipelineService manages dlt (data load tool) pipelines that ingest data from
  * external sources into Iceberg tables.
  *
@@ -1084,6 +1352,63 @@ export const PipelineService: GenService<{
     methodKind: "unary";
     input: typeof DeleteUploadedFileRequestSchema;
     output: typeof DeleteUploadedFileResponseSchema;
+  },
+  /**
+   * TestSourceConnection asks the workspace's own worker to open the source
+   * described by a request and report whether it could read it.
+   *
+   * It is a queued job, not a call: the probe MUST run where extraction runs
+   * — the worker's subprocess-per-run isolation, on the box, with the drivers
+   * and the network the real run has — and never in this process. So this
+   * returns a pending SourceTest immediately and the client polls GetSourceTest.
+   * The alternative, discovering a wrong password from the first scheduled run
+   * hours later, is the hole this closes.
+   *
+   * The request carries the config being edited, so a test works before the
+   * pipeline is ever saved (the wizard's whole point). Credentials may be
+   * omitted for an existing pipeline: the stored ones are used, the same way
+   * an edit leaves the field blank to keep them.
+   *
+   * @generated from rpc pipeline.v1.PipelineService.TestSourceConnection
+   */
+  testSourceConnection: {
+    methodKind: "unary";
+    input: typeof TestSourceConnectionRequestSchema;
+    output: typeof TestSourceConnectionResponseSchema;
+  },
+  /**
+   * GetSourceTest returns one test's current state. Tenant-scoped: a test id
+   * from another workspace is NOT_FOUND, not a permission error.
+   *
+   * @generated from rpc pipeline.v1.PipelineService.GetSourceTest
+   */
+  getSourceTest: {
+    methodKind: "unary";
+    input: typeof GetSourceTestRequestSchema;
+    output: typeof GetSourceTestResponseSchema;
+  },
+  /**
+   * GetPendingSourceTests claims the customer's queued source tests, marking
+   * each running so a second poll does not run it twice, and returns the
+   * config and resolved credentials to probe with. A claimed test the worker
+   * never reports on expires on its own.
+   *
+   * @generated from rpc pipeline.v1.PipelineService.GetPendingSourceTests
+   */
+  getPendingSourceTests: {
+    methodKind: "unary";
+    input: typeof GetPendingSourceTestsRequestSchema;
+    output: typeof GetPendingSourceTestsResponseSchema;
+  },
+  /**
+   * ReportSourceTest records a probe's outcome.
+   *
+   * @generated from rpc pipeline.v1.PipelineService.ReportSourceTest
+   */
+  reportSourceTest: {
+    methodKind: "unary";
+    input: typeof ReportSourceTestRequestSchema;
+    output: typeof ReportSourceTestResponseSchema;
   },
   /**
    * GetPipelineConfigs returns the worker's trigger feed for a customer:

@@ -40,6 +40,12 @@ export const useWorkspaceStore = defineStore('workspace', () => {
      * all, which is what it did before boxes advertised this.
      */
     const duckdbExtensions = ref<string[] | undefined>(undefined)
+    /**
+     * Which source types this box's worker can probe ("Test connection"), or
+     * undefined when it is too old to say. Undefined means no button: a button
+     * that queues a test nothing will ever claim is worse than none.
+     */
+    const testableSourceTypes = ref<string[] | undefined>(undefined)
     const connectionDetails = ref<ConnectionDetails | null>(null)
     const isLoading = ref(false)
     const error = ref<string | null>(null)
@@ -80,6 +86,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
             filedropEnabled.value = doc.capabilities.filedrop
             googleOauthEnabled.value = doc.capabilities.google_oauth
             duckdbExtensions.value = doc.capabilities.duckdb_extensions
+            testableSourceTypes.value = doc.capabilities.testable_source_types
             dltEnabled.value = true
             connectionDetails.value = {
                 lakekeeperUrl: doc.lakekeeper_url ?? '',
@@ -105,6 +112,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         filedropEnabled,
         googleOauthEnabled,
         duckdbExtensions,
+        testableSourceTypes,
         connectionDetails,
         isLoading,
         error,

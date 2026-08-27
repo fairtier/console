@@ -12,6 +12,7 @@ import DestinationCard from '../components/pipeline/DestinationCard.vue'
 import FilesStep from '../components/pipeline/FilesStep.vue'
 import CredentialsCard from '../components/pipeline/CredentialsCard.vue'
 import SourceCard from '../components/pipeline/SourceCard.vue'
+import TestConnectionCard from '../components/pipeline/TestConnectionCard.vue'
 import VersionHistory from '../components/pipeline/VersionHistory.vue'
 import { useToast } from '../composables/useToast'
 import { useCronText } from '../composables/useCronText'
@@ -457,6 +458,16 @@ function goBack() {
           :attached-connection-id="attachedConnectionId"
           :has-stored-credentials="hasStoredCredentials"
           :field-errors="fieldErrors"
+        />
+
+        <!-- "Test connection". The card hides itself unless the box says it
+             can probe this source type; the probe runs there, not here. -->
+        <TestConnectionCard
+          :form="form"
+          :source="source"
+          :advanced-json="advancedJson"
+          :is-edit="isEdit"
+          :pipeline-id="editId"
         />
 
         <DestinationCard :form="form" :schedulable="source.schedulable" :field-errors="fieldErrors" />

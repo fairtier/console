@@ -34,6 +34,11 @@ export interface WorkspaceCapabilities {
      * the picker then offers everything, as it did before the field existed.
      */
     duckdb_extensions?: string[]
+    /**
+     * Source types whose connection the box's worker can probe. Absent on a
+     * box that predates source tests — the wizard then shows no Test button.
+     */
+    testable_source_types?: string[]
 }
 
 export interface WorkspaceBootstrap {
