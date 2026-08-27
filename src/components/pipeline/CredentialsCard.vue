@@ -63,7 +63,12 @@ const credentialOptions = computed(() => {
         opts.push({ value: '', label: t('connections.picker.keepExisting') })
     }
     for (const c of props.google.connectionOptions.value) {
-        opts.push({ value: c.id, label: c.email && c.email !== c.name ? `${c.name} (${c.email})` : c.name })
+        const name = c.email && c.email !== c.name ? `${c.name} (${c.email})` : c.name
+        // An account we KNOW does not carry this source's access is labelled,
+        // not hidden: it is still choosable (reconnecting widens it in place),
+        // and hiding the account the customer is looking for would be worse
+        // than naming what it is missing.
+        opts.push({ value: c.id, label: props.google.covers(c) ? name : `${name} — ${t('connections.picker.missingScope')}` })
     }
     if (props.isEdit && props.hasStoredCredentials) {
         opts.push({ value: DETACH, label: t('connections.picker.detach') })
@@ -127,7 +132,14 @@ watch(
                             {{ t('connections.picker.connectNew') }}
                         </button>
                     </div>
-                    <p class="mt-2 text-xs leading-[1.5]" style="color: var(--ink-3)">
+                    <p
+                        v-if="google.selectedLacksScope.value && !form.detach"
+                        class="mt-2 text-xs leading-[1.5]"
+                        style="color: var(--warn-ink)"
+                    >
+                        {{ t('connections.picker.reconnectForScope') }}
+                    </p>
+                    <p v-else class="mt-2 text-xs leading-[1.5]" style="color: var(--ink-3)">
                         {{ form.detach ? t('connections.picker.detachHint') : t('connections.picker.hint') }}
                     </p>
                     <p v-if="google.error.value" class="mt-2 text-xs" style="color: var(--err)">

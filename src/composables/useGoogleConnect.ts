@@ -1,10 +1,17 @@
 import { computed, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ConnectError, Code } from '@connectrpc/connect'
-import { connectGoogle, OAuthClientNotConfiguredError, OAuthUnavailableError } from '../api/googleOAuth'
+import {
+    connectGoogle,
+    connectionCovers,
+    OAuthClientNotConfiguredError,
+    OAuthUnavailableError,
+    type GoogleCapability,
+} from '../api/googleOAuth'
 import { oauthClientClient } from '../api'
 import { errorMessage } from '../api/errors'
 import { useConnectionsStore } from '../stores/connections'
+import type { Connection } from '../api'
 import type { GoogleScope, PipelineForm } from '../lib/pipelineSources'
 import { useToast } from './useToast'
 
@@ -48,6 +55,9 @@ export function useGoogleConnect(form: PipelineForm, scope: Ref<GoogleScope>, is
     const connecting = ref(false)
     const error = ref('')
 
+    // What the consent has to ask for to serve this source.
+    const capability = computed<GoogleCapability>(() => (scope.value === 'drive' ? 'drive' : ''))
+
     // Kept as a boolean for the template's "hide the whole block" test.
     const available = computed(() => (state.value === 'unknown' ? null : state.value !== 'unavailable'))
 
@@ -72,6 +82,28 @@ export function useGoogleConnect(form: PipelineForm, scope: Ref<GoogleScope>, is
         if (!isEdit.value && enabled.value && !form.connectionId && !form.oauthGrantId && first) {
             form.connectionId = first.id
         }
+    })
+
+    /**
+     * Does this connection carry what the selected source needs?
+     *
+     * The rule itself is connectionCovers (see it for why an empty scope list
+     * has to read as unknown rather than as "nothing granted"); this binds it
+     * to the source currently selected.
+     */
+    function covers(c: Connection): boolean {
+        return connectionCovers(c.scopes, capability.value)
+    }
+
+    /**
+     * The chosen account is known NOT to carry what this source needs — the
+     * one case worth a warning, because the fix (reconnect, which widens the
+     * same connection in place) is one click away and the alternative is a 403
+     * inside a scheduled run.
+     */
+    const selectedLacksScope = computed(() => {
+        const sel = connectionOptions.value.find((c) => c.id === form.connectionId)
+        return !!sel && !covers(sel)
     })
 
     // The picker carries one value, so detach rides in the same control as the
@@ -104,7 +136,7 @@ export function useGoogleConnect(form: PipelineForm, scope: Ref<GoogleScope>, is
         error.value = ''
         connecting.value = true
         try {
-            const res = await connectGoogle(scope.value === 'drive' ? 'drive' : '')
+            const res = await connectGoogle(capability.value)
             let promoted = false
             if (connectionsStore.availability !== 'unavailable') {
                 // Promote the grant to a workspace connection so this sign-in is
@@ -192,7 +224,11 @@ export function useGoogleConnect(form: PipelineForm, scope: Ref<GoogleScope>, is
         { immediate: true },
     )
 
-    return { state, scope, available, connecting, error, connected, connectionOptions, credentialChoice, connect, disconnect }
+    return {
+        state, scope, available, connecting, error, connected,
+        connectionOptions, credentialChoice, covers, selectedLacksScope,
+        connect, disconnect,
+    }
 }
 
 /** The flow's public surface, as the wizard hands it to CredentialsCard. */

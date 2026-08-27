@@ -31,6 +31,11 @@ export default {
         detachHint:
           'Saving will leave this pipeline without credentials, so its runs fail until you connect an account again. Do this to free a connection you want to disconnect.',
         hint: 'The pipeline follows this connection: reconnecting or disconnecting it in Integrations applies here too.',
+        // Shown when the account's own consent is known not to cover what this
+        // source reads — a Sheets sign-in picked for a Drive pipeline.
+        missingScope: 'no Google Drive access',
+        reconnectForScope:
+          'This account was connected without Google Drive access. Reconnect it above to add Drive — the same connection is widened, so every pipeline using it keeps working.',
       },
       toast: {
         connected: 'Google connected as {email}.',
@@ -71,6 +76,9 @@ export default {
         detachHint:
           'Po uložení zůstane pipeline bez přihlašovacích údajů a její běhy budou selhávat, dokud účet znovu nepřipojíte. Použijte, když chcete uvolnit připojení, které potřebujete odpojit.',
         hint: 'Pipeline toto připojení následuje: opětovné připojení nebo odpojení v Integracích se projeví i zde.',
+        missingScope: 'bez přístupu ke Google Disku',
+        reconnectForScope:
+          'Tento účet byl připojen bez přístupu ke Google Disku. Připojte ho výše znovu a přístup se přidá — rozšíří se stávající připojení, takže všechny pipeline, které ho používají, běží dál.',
       },
       toast: {
         connected: 'Google připojen jako {email}.',

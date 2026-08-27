@@ -17,6 +17,36 @@ import { workspaceApiBase, workspaceAuthToken } from './transport'
  */
 export type GoogleCapability = '' | 'drive'
 
+/**
+ * The Google scope each capability adds. Mirrors `core.GoogleDriveFileScope`
+ * in workspace-api — a scope string that drifts authorizes nothing and fails
+ * hours later, on the box, so it is written once on each side of the wire and
+ * nowhere else.
+ *
+ * Used to read a connection's granted scopes back: `Connection.scopes` says
+ * what the consent actually authorized, so the picker can tell a Sheets-only
+ * account from a Drive-capable one.
+ */
+export const CAPABILITY_SCOPE: Record<GoogleCapability, string> = {
+    '': '',
+    drive: 'https://www.googleapis.com/auth/drive.file',
+}
+
+/**
+ * Does a connection's granted scopes cover what a capability needs?
+ *
+ * Mirrors workspace.Connection.HasGoogleScope on the server, including the
+ * part that matters: an EMPTY list means "not recorded" — every account
+ * connected before scopes were tracked — and reads as unknown, never as
+ * "nothing granted". Marking those as incapable would tell a customer their
+ * working connection is broken on the strength of a measurement nobody took.
+ */
+export function connectionCovers(scopes: string[], capability: GoogleCapability): boolean {
+    const need = CAPABILITY_SCOPE[capability]
+    if (!need || !scopes.length) return true
+    return scopes.includes(need)
+}
+
 /** Result handed back by the callback popup. */
 export interface GoogleOAuthResult {
     grant_id: string

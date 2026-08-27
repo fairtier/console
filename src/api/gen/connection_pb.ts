@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file connection.proto.
  */
 export const file_connection: GenFile = /*@__PURE__*/
-  fileDesc("ChBjb25uZWN0aW9uLnByb3RvEg1jb25uZWN0aW9uLnYxImcKCkNvbm5lY3Rpb24SCgoCaWQYASABKAkSDAoEdHlwZRgCIAEoCRIMCgRuYW1lGAMgASgJEg4KBnN0YXR1cxgEIAEoCRINCgVlbWFpbBgFIAEoCRISCgpjcmVhdGVkX2F0GAYgASgJIhgKFkxpc3RDb25uZWN0aW9uc1JlcXVlc3QiSQoXTGlzdENvbm5lY3Rpb25zUmVzcG9uc2USLgoLY29ubmVjdGlvbnMYASADKAsyGS5jb25uZWN0aW9uLnYxLkNvbm5lY3Rpb24iTAoXQ3JlYXRlQ29ubmVjdGlvblJlcXVlc3QSDAoEbmFtZRgBIAEoCRIZCg9nb29nbGVfZ3JhbnRfaWQYAiABKAlIAEIICgZzb3VyY2UiSQoYQ3JlYXRlQ29ubmVjdGlvblJlc3BvbnNlEi0KCmNvbm5lY3Rpb24YASABKAsyGS5jb25uZWN0aW9uLnYxLkNvbm5lY3Rpb24iJQoXRGVsZXRlQ29ubmVjdGlvblJlcXVlc3QSCgoCaWQYASABKAkiGgoYRGVsZXRlQ29ubmVjdGlvblJlc3BvbnNlMsUCChFDb25uZWN0aW9uU2VydmljZRJiCg9MaXN0Q29ubmVjdGlvbnMSJS5jb25uZWN0aW9uLnYxLkxpc3RDb25uZWN0aW9uc1JlcXVlc3QaJi5jb25uZWN0aW9uLnYxLkxpc3RDb25uZWN0aW9uc1Jlc3BvbnNlIgASZQoQQ3JlYXRlQ29ubmVjdGlvbhImLmNvbm5lY3Rpb24udjEuQ3JlYXRlQ29ubmVjdGlvblJlcXVlc3QaJy5jb25uZWN0aW9uLnYxLkNyZWF0ZUNvbm5lY3Rpb25SZXNwb25zZSIAEmUKEERlbGV0ZUNvbm5lY3Rpb24SJi5jb25uZWN0aW9uLnYxLkRlbGV0ZUNvbm5lY3Rpb25SZXF1ZXN0GicuY29ubmVjdGlvbi52MS5EZWxldGVDb25uZWN0aW9uUmVzcG9uc2UiAEJEWkJnaXRodWIuY29tL2ZhaXJ0aWVyL3dvcmtzcGFjZS1hcGkvcHJvdG8vY29ubmVjdGlvbi92MTtjb25uZWN0aW9udjFiBnByb3RvMw");
+  fileDesc("ChBjb25uZWN0aW9uLnByb3RvEg1jb25uZWN0aW9uLnYxIncKCkNvbm5lY3Rpb24SCgoCaWQYASABKAkSDAoEdHlwZRgCIAEoCRIMCgRuYW1lGAMgASgJEg4KBnN0YXR1cxgEIAEoCRINCgVlbWFpbBgFIAEoCRISCgpjcmVhdGVkX2F0GAYgASgJEg4KBnNjb3BlcxgHIAMoCSIYChZMaXN0Q29ubmVjdGlvbnNSZXF1ZXN0IkkKF0xpc3RDb25uZWN0aW9uc1Jlc3BvbnNlEi4KC2Nvbm5lY3Rpb25zGAEgAygLMhkuY29ubmVjdGlvbi52MS5Db25uZWN0aW9uIkwKF0NyZWF0ZUNvbm5lY3Rpb25SZXF1ZXN0EgwKBG5hbWUYASABKAkSGQoPZ29vZ2xlX2dyYW50X2lkGAIgASgJSABCCAoGc291cmNlIkkKGENyZWF0ZUNvbm5lY3Rpb25SZXNwb25zZRItCgpjb25uZWN0aW9uGAEgASgLMhkuY29ubmVjdGlvbi52MS5Db25uZWN0aW9uIiUKF0RlbGV0ZUNvbm5lY3Rpb25SZXF1ZXN0EgoKAmlkGAEgASgJIhoKGERlbGV0ZUNvbm5lY3Rpb25SZXNwb25zZTLFAgoRQ29ubmVjdGlvblNlcnZpY2USYgoPTGlzdENvbm5lY3Rpb25zEiUuY29ubmVjdGlvbi52MS5MaXN0Q29ubmVjdGlvbnNSZXF1ZXN0GiYuY29ubmVjdGlvbi52MS5MaXN0Q29ubmVjdGlvbnNSZXNwb25zZSIAEmUKEENyZWF0ZUNvbm5lY3Rpb24SJi5jb25uZWN0aW9uLnYxLkNyZWF0ZUNvbm5lY3Rpb25SZXF1ZXN0GicuY29ubmVjdGlvbi52MS5DcmVhdGVDb25uZWN0aW9uUmVzcG9uc2UiABJlChBEZWxldGVDb25uZWN0aW9uEiYuY29ubmVjdGlvbi52MS5EZWxldGVDb25uZWN0aW9uUmVxdWVzdBonLmNvbm5lY3Rpb24udjEuRGVsZXRlQ29ubmVjdGlvblJlc3BvbnNlIgBCRFpCZ2l0aHViLmNvbS9mYWlydGllci93b3Jrc3BhY2UtYXBpL3Byb3RvL2Nvbm5lY3Rpb24vdjE7Y29ubmVjdGlvbnYxYgZwcm90bzM");
 
 /**
  * Connection is the wire shape of one workspace connection. No credential
@@ -56,6 +56,19 @@ export type Connection = Message<"connection.v1.Connection"> & {
    * @generated from field: string created_at = 6;
    */
   createdAt: string;
+
+  /**
+   * What the granting consent authorized (google connections). Empty means
+   * "not recorded" — a connection made before scopes were tracked — never
+   * "nothing granted", so a client must not refuse on an empty list.
+   *
+   * It is here so the connection picker can say "this account is connected for
+   * Sheets only, reconnect to add Drive" at the moment of choosing, instead of
+   * letting a scheduled run on the box discover it in a 403.
+   *
+   * @generated from field: repeated string scopes = 7;
+   */
+  scopes: string[];
 };
 
 /**
