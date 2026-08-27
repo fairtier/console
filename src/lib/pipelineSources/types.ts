@@ -112,6 +112,17 @@ export interface ReaderFunction {
     /** The DuckDB table function, e.g. 'read_pdf'. */
     fn: string
     labelKey: string
+    /**
+     * The extension that PROVIDES this function, when it is not the variant's
+     * own — read_pdf over a Drive file needs `pdf` loaded beside `gdrive`.
+     *
+     * DuckDB autoloads no community extension's functions, so the pairing is
+     * not an optimization: with gdrive alone, read_pdf does not exist. The
+     * config says `extensions: ["gdrive", "pdf"]`, and the box has to accept
+     * both — which is why the form filters this list against the allowlist the
+     * bootstrap document serves rather than assuming it.
+     */
+    requiresExtension?: string
 }
 
 /**

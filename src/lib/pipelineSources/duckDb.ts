@@ -24,13 +24,39 @@ export const GDRIVE_EXTENSION = 'gdrive'
 export const DUCKDB_BADGE = { abbr: 'DDB', bg: 'var(--info-soft)', fg: 'var(--info-ink)' }
 
 /** Keys a guided duckdb form can represent. Anything else opens as JSON. */
-const GUIDED_KEYS = new Set(['extension', 'attach', 'tables'])
+const GUIDED_KEYS = new Set(['extension', 'extensions', 'attach', 'tables'])
 /** Keys of one `tables[]` entry the guided forms have controls for. */
 const GUIDED_TABLE_KEYS = new Set(['name', 'query', 'cursor_column', 'primary_key'])
 
 /** True when `parsed` carries no key beyond the guided set. */
 export function onlyGuidedKeys(parsed: Record<string, unknown>, allowed = GUIDED_KEYS): boolean {
     return Object.keys(parsed).every((k) => allowed.has(k))
+}
+
+/**
+ * configExtensions reads the LOAD list out of either form the config may use —
+ * `extension: "mysql"` or `extensions: ["gdrive", "pdf"]` — and returns null
+ * for a config that names none, names both, or names something that is not a
+ * string. Null means "not a shape any form here claims", never "no extension".
+ *
+ * The plural form exists because a Drive PDF needs two: gdrive is a filesystem
+ * and pdf is the reader, and DuckDB autoloads no community extension's
+ * functions. Order is meaning — the first is the ATTACH TYPE and the default
+ * secret type — so this preserves it.
+ */
+export function configExtensions(parsed: Record<string, unknown>): string[] | null {
+    const single = parsed.extension
+    const many = parsed.extensions
+    if (single !== undefined && many !== undefined) return null
+    if (typeof single === 'string') return single ? [single] : null
+    if (!Array.isArray(many) || many.length === 0) return null
+    if (!many.every((e) => typeof e === 'string' && e)) return null
+    return many as string[]
+}
+
+/** The extension a config leads with — what a picker variant claims on. */
+export function primaryExtension(parsed: Record<string, unknown>): string | null {
+    return configExtensions(parsed)?.[0] ?? null
 }
 
 /**
@@ -110,9 +136,12 @@ export const duckDb: PipelineSource = {
     ),
 
     // The gdrive extension reads the customer's Google Drive; every other
-    // extension reads something that has nothing to do with Google. The
-    // backend takes the same view from the other end — it refuses an oauth
-    // credential on any extension but this one — so the two agree without
-    // either consulting the other.
-    googleScope: (config): GoogleScope => (config.extension === GDRIVE_EXTENSION ? 'drive' : ''),
+    // extension reads something that has nothing to do with Google. Anywhere
+    // in the list counts, not just first: a PDF in Drive loads
+    // ["gdrive", "pdf"] and is still a Google-backed source. The backend takes
+    // the same view from the other end — it refuses an oauth credential on a
+    // config that does not load gdrive — so the two agree without either
+    // consulting the other.
+    googleScope: (config): GoogleScope =>
+        configExtensions(config)?.includes(GDRIVE_EXTENSION) ? 'drive' : '',
 }

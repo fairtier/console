@@ -8,17 +8,19 @@
 // is what moves the pipeline there for good (the rule every guided form
 // follows).
 //
-// Which readers each variant may offer is not a style choice. The worker LOADs
-// exactly ONE extension per pipeline, and DuckDB does not autoload a community
-// extension's functions — verified against duckdb 1.5.5: with only `gdrive`
-// loaded, read_pdf is "Table Function with name read_pdf does not exist". So a
-// Drive source offers the readers DuckDB has built in (read_csv, read_parquet,
-// read_json) and nothing else: a PDF *inside* Drive needs both `gdrive` and
-// `pdf` loaded, which the config cannot express today. A PDF at an http(s) URL
-// is the `pdf` variant and works — httpfs is baked and core extensions do
-// autoload.
+// Which readers a Drive source may offer is not a style choice. DuckDB does not
+// autoload a community extension's functions — verified against duckdb 1.5.5:
+// with only `gdrive` loaded, read_pdf is "Table Function with name read_pdf
+// does not exist", while with `gdrive` and `pdf` both loaded the same call
+// reaches the Drive filesystem (it asks for the secret). So a Drive PDF is not
+// one extension but two, `extensions: ["gdrive", "pdf"]`, and each reader here
+// declares which extension provides it. The box has to accept both, so the form
+// filters this list against the allowlist the bootstrap document serves.
+//
+// A PDF at an http(s) URL was never affected: httpfs is core, and core
+// extensions do autoload.
 
-import { DUCKDB_BADGE, GDRIVE_EXTENSION, onlyGuidedKeys, sqlString } from './duckDb'
+import { configExtensions, DUCKDB_BADGE, GDRIVE_EXTENSION, onlyGuidedKeys, primaryExtension, sqlString } from './duckDb'
 import type { GoogleScope, PipelineForm, PipelineSource, ReaderFunction } from './types'
 
 /** `gdrive://id:<file id>` — by id, never by folder path. See toDriveId. */
@@ -29,6 +31,11 @@ const QUERY_RE = /^SELECT \* FROM ([a-z_]+)\('((?:[^']|'')*)'\)$/
 
 function renderQuery(fn: string, address: string): string {
     return `SELECT * FROM ${fn}('${sqlString(address)}')`
+}
+
+/** Two LOAD lists are the same list — order included, since order is meaning. */
+function sameList(a: string[], b: string[]): boolean {
+    return a.length === b.length && a.every((v, i) => v === b[i])
 }
 
 /**
@@ -103,12 +110,18 @@ const READER_VARIANTS: ReaderVariant[] = [
         labelKey: 'pipelines.sourceTypes.duckdb_gdrive',
         group: 'google',
         address: 'drive',
-        // Built-in readers only — see the note at the top of this file.
-        // read_csv is also how a *native* Google Sheet is read.
+        // DuckDB's built-in readers cost nothing extra (read_csv is also how a
+        // *native* Google Sheet is read); the rest name the extension that has
+        // to be loaded beside gdrive for their function to exist at all.
         functions: [
             { fn: 'read_csv', labelKey: 'pipelinesUi.wizard.configure.duckdb.readers.driveCsv' },
             { fn: 'read_parquet', labelKey: 'pipelinesUi.wizard.configure.duckdb.readers.parquet' },
             { fn: 'read_json', labelKey: 'pipelinesUi.wizard.configure.duckdb.readers.json' },
+            { fn: 'read_pdf', labelKey: 'pipelinesUi.wizard.configure.duckdb.readers.pdfText', requiresExtension: 'pdf' },
+            { fn: 'read_pdf_tables', labelKey: 'pipelinesUi.wizard.configure.duckdb.readers.pdfTables', requiresExtension: 'pdf' },
+            { fn: 'html_extract_tables', labelKey: 'pipelinesUi.wizard.configure.duckdb.readers.htmlTables', requiresExtension: 'webbed' },
+            { fn: 'read_html', labelKey: 'pipelinesUi.wizard.configure.duckdb.readers.html', requiresExtension: 'webbed' },
+            { fn: 'read_xml', labelKey: 'pipelinesUi.wizard.configure.duckdb.readers.xml', requiresExtension: 'webbed' },
         ],
         example: '1a2b3c',
     },
@@ -116,9 +129,21 @@ const READER_VARIANTS: ReaderVariant[] = [
 
 function readerSource(v: ReaderVariant): PipelineSource {
     const defaultFn = v.functions[0]!.fn
-    const known = new Set(v.functions.map((f) => f.fn))
+    const byFn = new Map(v.functions.map((f) => [f.fn, f]))
     const addressOf = (raw: string): string =>
         v.address === 'drive' ? DRIVE_PREFIX + toDriveId(raw) : raw.trim()
+    /** The LOAD list one reader choice implies: the variant's own, plus the
+     *  extension that provides the function when it is somebody else's. */
+    const loadList = (fn: string): string[] => {
+        const extra = byFn.get(fn)?.requiresExtension
+        return extra && extra !== v.extension ? [v.extension, extra] : [v.extension]
+    }
+    /** The config's extension half — singular while it can be, because that is
+     *  the shape every existing pipeline and every hand-written example has. */
+    const extensionKeys = (fn: string): Record<string, unknown> => {
+        const list = loadList(fn)
+        return list.length === 1 ? { extension: list[0]! } : { extensions: list }
+    }
 
     return {
         key: `duckdb/${v.extension}`,
@@ -155,12 +180,16 @@ function readerSource(v: ReaderVariant): PipelineSource {
                 ? '{"secret": {"REFRESH_TOKEN": "…", "CLIENT_ID": "…", "CLIENT_SECRET": "…"}}'
                 : '{}',
 
-        match: (parsed) => parsed.extension === v.extension,
+        // The variant a config belongs to is the extension it leads with:
+        // ["gdrive", "pdf"] is a Drive source that happens to read a PDF, not
+        // a PDF source.
+        match: (parsed) => primaryExtension(parsed) === v.extension,
 
         isGuidable(parsed) {
-            if (parsed.extension !== v.extension) return false
             // An `attach` here would be a shape this form cannot show at all.
-            if (!onlyGuidedKeys(parsed, new Set(['extension', 'tables']))) return false
+            if (!onlyGuidedKeys(parsed, new Set(['extension', 'extensions', 'tables']))) return false
+            const loaded = configExtensions(parsed)
+            if (!loaded || loaded[0] !== v.extension) return false
             if (!Array.isArray(parsed.tables) || parsed.tables.length !== 1) return false
             const t = parsed.tables[0] as Record<string, unknown> | null
             if (!t || typeof t !== 'object' || Array.isArray(t)) return false
@@ -168,7 +197,12 @@ function readerSource(v: ReaderVariant): PipelineSource {
             if (typeof t.name !== 'string' || !t.name) return false
             if (typeof t.query !== 'string') return false
             const m = t.query.match(QUERY_RE)
-            if (!m || !known.has(m[1]!)) return false
+            if (!m || !byFn.has(m[1]!)) return false
+            // The reader and the LOAD list have to agree, or the form would
+            // rewrite one of them on save: a query calling read_pdf under
+            // `extension: "gdrive"` alone is exactly the config that saved
+            // fine and then failed on the box.
+            if (!sameList(loaded, loadList(m[1]!))) return false
             const address = m[2]!.replace(/''/g, "'")
             return v.address !== 'drive' || address.startsWith(DRIVE_PREFIX)
         },
@@ -180,17 +214,18 @@ function readerSource(v: ReaderVariant): PipelineSource {
             const address = m ? m[2]!.replace(/''/g, "'") : ''
             return {
                 readerUrl: v.address === 'drive' ? address.slice(DRIVE_PREFIX.length) : address,
-                readerFn: m && known.has(m[1]!) ? m[1]! : defaultFn,
+                readerFn: m && byFn.has(m[1]!) ? m[1]! : defaultFn,
                 readerTable: t && typeof t.name === 'string' ? t.name : '',
             }
         },
 
         toConfig(form: PipelineForm) {
+            const fn = form.readerFn || defaultFn
             const table: Record<string, string> = {
                 name: form.readerTable.trim(),
-                query: renderQuery(form.readerFn || defaultFn, addressOf(form.readerUrl)),
+                query: renderQuery(fn, addressOf(form.readerUrl)),
             }
-            return { extension: v.extension, tables: [table] }
+            return { ...extensionKeys(fn), tables: [table] }
         },
 
         formErrors(form) {

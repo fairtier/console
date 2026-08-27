@@ -476,6 +476,7 @@ describe('duckdb readers', () => {
                 readerTable: 'invoices',
             }),
         )
+        // One extension stays singular: `extension`, not a one-item list.
         expect(cfg).toEqual({
             extension: 'gdrive',
             tables: [{ name: 'invoices', query: "SELECT * FROM read_csv('gdrive://id:1a2b3c')" }],
@@ -483,13 +484,65 @@ describe('duckdb readers', () => {
         expect(gdrive.toForm(cfg as Record<string, unknown>).readerUrl).toBe('1a2b3c')
     })
 
-    test('Drive offers only the readers a gdrive pipeline can actually run', () => {
-        // The worker LOADs exactly one extension, and DuckDB does not autoload
-        // a community extension's functions (verified against duckdb 1.5.5:
-        // read_pdf with only gdrive loaded does not exist). Offering "PDF" here
-        // would draft a pipeline that saves and then fails on the box.
-        const fns = (gdrive.reader?.functions ?? []).map((f) => f.fn)
-        expect(fns).toEqual(['read_csv', 'read_parquet', 'read_json'])
+    test('a Drive reader declares the extension that provides it', () => {
+        // DuckDB autoloads no community extension's functions (verified
+        // against duckdb 1.5.5: with only gdrive loaded, read_pdf does not
+        // exist), so a Drive PDF is two extensions, not one. Built-in readers
+        // declare nothing — they cost no second LOAD.
+        const byFn = new Map((gdrive.reader?.functions ?? []).map((f) => [f.fn, f.requiresExtension]))
+        expect(byFn.get('read_csv')).toBeUndefined()
+        expect(byFn.get('read_pdf')).toBe('pdf')
+        expect(byFn.get('read_xml')).toBe('webbed')
+    })
+
+    test('a Drive PDF loads gdrive AND pdf, gdrive first', () => {
+        // Order is meaning: the first extension is the ATTACH TYPE and the
+        // default secret type, and the secret here is gdrive's.
+        const cfg = gdrive.toConfig(
+            blankForm({
+                sourceKey: 'duckdb/gdrive',
+                readerUrl: '1a2b3c',
+                readerFn: 'read_pdf',
+                readerTable: 'invoice_pages',
+            }),
+        )
+        expect(cfg).toEqual({
+            extensions: ['gdrive', 'pdf'],
+            tables: [{ name: 'invoice_pages', query: "SELECT * FROM read_pdf('gdrive://id:1a2b3c')" }],
+        })
+        expect(gdrive.isGuidable(cfg as Record<string, unknown>)).toBe(true)
+        expect(gdrive.toForm(cfg as Record<string, unknown>).readerFn).toBe('read_pdf')
+        // Still a Google source: gdrive anywhere in the list, not just first.
+        expect(gdrive.googleScope(cfg as Record<string, unknown>)).toBe('drive')
+    })
+
+    test('a reader and a LOAD list that disagree open in the JSON editor', () => {
+        // This exact config — read_pdf under gdrive alone — is what validated,
+        // saved, and then failed on the box. The form must not silently
+        // rewrite it into the pairing on save.
+        expect(
+            gdrive.isGuidable({
+                extension: 'gdrive',
+                tables: [{ name: 'pages', query: "SELECT * FROM read_pdf('gdrive://id:1a2b3c')" }],
+            }),
+        ).toBe(false)
+        // ...and the other way round: a list carrying an extension no reader
+        // in this form asks for.
+        expect(
+            gdrive.isGuidable({
+                extensions: ['gdrive', 'webbed'],
+                tables: [{ name: 'rows', query: "SELECT * FROM read_csv('gdrive://id:1a2b3c')" }],
+            }),
+        ).toBe(false)
+    })
+
+    test('the plural form belongs to the extension it leads with', () => {
+        // ["gdrive", "pdf"] is a Drive source that reads a PDF, not a PDF
+        // source that happens to sit in Drive.
+        expect(sourceFor('duckdb', { extensions: ['gdrive', 'pdf'] }).key).toBe('duckdb/gdrive')
+        expect(sourceFor('duckdb', { extension: 'pdf' }).key).toBe('duckdb/pdf')
+        // Both forms at once is not a config any variant claims.
+        expect(sourceFor('duckdb', { extension: 'pdf', extensions: ['pdf'] }).key).toBe('duckdb')
     })
 
     test('a public URL is not asked for credentials at all', () => {

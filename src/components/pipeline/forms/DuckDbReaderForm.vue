@@ -15,6 +15,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { sourceForKey, toDriveId, type PipelineForm } from '../../../lib/pipelineSources'
+import { useWorkspaceStore } from '../../../stores/workspace'
 import Select from '../../ui/Select.vue'
 
 const props = defineProps<{
@@ -23,13 +24,29 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const workspace = useWorkspaceStore()
 
 const source = computed(() => sourceForKey(props.form.sourceKey))
 const isDrive = computed(() => source.value.reader?.address === 'drive')
 
-const readerOptions = computed(() =>
-    (source.value.reader?.functions ?? []).map((f) => ({ value: f.fn, label: t(f.labelKey) })),
-)
+// A reader whose function comes from a second extension — read_pdf over a
+// Drive file needs `pdf` loaded beside `gdrive` — is offered only where the box
+// accepts that extension too. A box too old to advertise its allowlist gets
+// everything, which is what happened before the field existed; the currently
+// selected reader is always kept, so opening an older pipeline never silently
+// changes what it reads.
+const readerOptions = computed(() => {
+    const allowed = workspace.duckdbExtensions ? new Set(workspace.duckdbExtensions) : null
+    return (source.value.reader?.functions ?? [])
+        .filter(
+            (f) =>
+                !allowed ||
+                !f.requiresExtension ||
+                allowed.has(f.requiresExtension) ||
+                f.fn === props.form.readerFn,
+        )
+        .map((f) => ({ value: f.fn, label: t(f.labelKey) }))
+})
 
 // What the config will actually name, shown under the field: a Drive URL
 // pasted whole becomes an id here, in front of the user, rather than silently

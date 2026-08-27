@@ -14,7 +14,7 @@
 // under a "leave empty to keep" note over a *host* field. Legibility wins;
 // `rest_api`'s base_url already behaves this way.
 
-import { DUCKDB_BADGE, onlyGuidedKeys, parseTables, tablesToConfig } from './duckDb'
+import { configExtensions, DUCKDB_BADGE, onlyGuidedKeys, parseTables, primaryExtension, tablesToConfig } from './duckDb'
 import type { PipelineForm, PipelineSource } from './types'
 
 /** The connection fields both dialects are built from. */
@@ -181,11 +181,15 @@ function databaseSource(d: Dialect): PipelineSource {
             '}',
         credentialsPlaceholder: '{"attach_params": {"password": "…"}}',
 
-        match: (parsed) => parsed.extension === d.extension,
+        match: (parsed) => primaryExtension(parsed) === d.extension,
 
         isGuidable(parsed) {
-            if (parsed.extension !== d.extension) return false
             if (!onlyGuidedKeys(parsed)) return false
+            // Exactly this one extension. A database ATTACH has no use for a
+            // second, and a config carrying one means something this form
+            // would drop on save.
+            const loaded = configExtensions(parsed)
+            if (!loaded || loaded.length !== 1 || loaded[0] !== d.extension) return false
             if (typeof parsed.attach !== 'string' || !d.parse(parsed.attach)) return false
             return parseTables(parsed.tables) !== null
         },

@@ -248,9 +248,12 @@ export function formFieldFor(path: string): string {
             return 'connectionId'
         // --- duckdb ---
         case 'extension':
+        case 'extensions':
             // Chosen by picking a system, so the refusal belongs at the picker
             // — "this box does not accept the mysql extension" under a MySQL
-            // tile, not inside a config the user never typed.
+            // tile, not inside a config the user never typed. `extensions` is
+            // the same choice for a Drive document, where the reader picker
+            // adds the second extension.
             return 'sourceKey'
         case 'attach':
             // Generated from host/port/user/database; the group they form is
