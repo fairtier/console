@@ -53,6 +53,36 @@ describe('the registry', () => {
         for (const s of SOURCES) expect(s.labelKey).toStartWith('pipelines.sourceTypes.')
     })
 
+    test('shows its own shape in the raw editors, never another type\'s', () => {
+        // The bug this replaces: one hardcoded rest_api example served as the
+        // placeholder for sql_database, filesystem and duckdb alike, over a
+        // credentials box that always said api_key. A wrong example is worse
+        // than none — it is the only hint the screen offers.
+        for (const s of SOURCES) {
+            // An ellipsis stands for the value the user types; everything
+            // around it has to be JSON the backend would actually accept.
+            for (const ph of [s.configPlaceholder, s.credentialsPlaceholder]) {
+                expect(() => JSON.parse(ph.replace(/\{ … \}/g, '{}').replace(/…/g, 'x'))).not.toThrow()
+            }
+        }
+        // Each unguided type names a key only it has.
+        expect(sourceFor('sql_database').configPlaceholder).toContain('tables')
+        expect(sourceFor('sql_database').credentialsPlaceholder).toContain('connection_string')
+        expect(sourceFor('filesystem').configPlaceholder).toContain('bucket_url')
+        expect(sourceFor('filesystem').credentialsPlaceholder).toContain('access_key_id')
+        expect(sourceFor('duckdb').configPlaceholder).toContain('extension')
+        expect(sourceFor('duckdb').credentialsPlaceholder).toContain('attach_params')
+        // And a type we have never heard of claims nothing at all.
+        expect(sourceFor('clickhouse').configPlaceholder).toBe('{}')
+        expect(sourceFor('clickhouse').credentialsPlaceholder).toBe('{}')
+    })
+
+    test('a guided source\'s advanced-JSON example is one its own form accepts', () => {
+        for (const s of SOURCES.filter((s) => s.guided)) {
+            expect(s.isGuidable(JSON.parse(s.configPlaceholder.replace(/…/g, 'x')))).toBe(true)
+        }
+    })
+
     test('an unguided source never claims a config is guidable', () => {
         for (const s of SOURCES.filter((s) => !s.guided)) {
             expect(s.isGuidable({})).toBe(false)

@@ -20,27 +20,55 @@ export { toRestResource } from './restApi'
 /** Every source the wizard offers, in the order it offers them. */
 export const SOURCES: PipelineSource[] = [
     restApi,
-    genericSource('sql_database', 'pipelines.sourceTypes.sql_database', {
-        abbr: 'SQL',
-        bg: 'var(--info-soft)',
-        fg: 'var(--info-ink)',
-    }),
-    genericSource('filesystem', 'pipelines.sourceTypes.filesystem', {
-        abbr: 'FS',
-        bg: 'var(--clay-soft)',
-        fg: 'var(--clay-soft-ink)',
-    }),
+    // Shapes below mirror workspace-api's validators (workspace/
+    // pipeline_schema.go) — an example that would be rejected on save is
+    // just a slower version of the wrong placeholder these replace.
+    genericSource(
+        'sql_database',
+        'pipelines.sourceTypes.sql_database',
+        { abbr: 'SQL', bg: 'var(--info-soft)', fg: 'var(--info-ink)' },
+        {
+            config: '{\n  "tables": ["orders", "customers"]\n}',
+            // PostgreSQL only — the worker image installs no other driver,
+            // and the save refuses any other dialect.
+            credentials: '{"connection_string": "postgresql://user:password@host:5432/shop"}',
+        },
+    ),
+    genericSource(
+        'filesystem',
+        'pipelines.sourceTypes.filesystem',
+        { abbr: 'FS', bg: 'var(--clay-soft)', fg: 'var(--clay-soft-ink)' },
+        {
+            config: '{\n  "bucket_url": "s3://my-bucket/exports",\n  "file_glob": "*.csv"\n}',
+            credentials: '{"access_key_id": "…", "secret_access_key": "…"}',
+        },
+    ),
     googleSheets,
     fileUpload,
-    // Extraction through a DuckDB extension (mysql today) — config shape is
+    // Extraction through a DuckDB extension — config shape is
     // {extension, attach, tables}; the JSON editor is its v1 UI, matching the
     // generic entries above. See workspace-api validateDuckDBConfig for the
-    // save-time contract.
-    genericSource('duckdb', 'pipelines.sourceTypes.duckdb', {
-        abbr: 'DDB',
-        bg: 'var(--info-soft)',
-        fg: 'var(--info-ink)',
-    }),
+    // save-time contract, and docs/plans/duckdb-source-ui.md (monorepo) for
+    // the guided forms that are meant to replace this editor.
+    genericSource(
+        'duckdb',
+        'pipelines.sourceTypes.duckdb',
+        { abbr: 'DDB', bg: 'var(--info-soft)', fg: 'var(--info-ink)' },
+        {
+            // A database extension, which is the shape that needs the most
+            // explaining: an ATTACH template whose every secret part is a
+            // {placeholder} filled from the credentials below. Reader
+            // extensions (pdf, webbed, httpfs, gdrive) take no attach and
+            // give each table an explicit query over the reader function.
+            config:
+                '{\n' +
+                '  "extension": "mysql",\n' +
+                '  "attach": "host=db.internal port=3306 user=readonly database=shop password={password}",\n' +
+                '  "tables": [{"name": "orders", "cursor_column": "updated_at"}]\n' +
+                '}',
+            credentials: '{"attach_params": {"password": "…"}}',
+        },
+    ),
 ]
 
 const BY_ID = new Map(SOURCES.map((s) => [s.id, s]))

@@ -17,6 +17,12 @@ export const googleSheets: PipelineSource = {
     // key. The raw service-account textarea stays as the advanced fallback.
     googleOAuth: true,
 
+    configPlaceholder: '{\n  "spreadsheet_url_or_id": "…",\n  "range_names": ["Sheet1"]\n}',
+    // For a Google source the raw editor is the service-account fallback,
+    // not an api_key box: it is what the advanced <details> holds open when
+    // signing in is unavailable.
+    credentialsPlaceholder: '{"service_account_key": { … }}',
+
     isGuidable(parsed) {
         for (const k of Object.keys(parsed)) {
             if (!GUIDED_KEYS.has(k)) return false

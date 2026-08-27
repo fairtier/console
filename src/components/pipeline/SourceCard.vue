@@ -101,7 +101,7 @@ const guidedForm = computed(() => (props.source.guided ? SOURCE_FORMS[props.sour
                 <textarea
                     v-model="form.sourceConfigRaw"
                     rows="6"
-                    placeholder='{"base_url": "https://api.example.com", "resources": []}'
+                    :placeholder="source.configPlaceholder"
                     class="w-full resize-y rounded-[10px] border px-[13px] py-[11px] font-mono text-[13px] leading-[1.5] outline-none"
                     style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
                 ></textarea>

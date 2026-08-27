@@ -34,6 +34,15 @@ export const restApi: PipelineSource = {
     fileDrop: false,
     googleOAuth: false,
 
+    // Only ever seen in Advanced JSON — the guided form is the default view.
+    configPlaceholder:
+        '{\n' +
+        '  "base_url": "https://api.example.com",\n' +
+        '  "resources": [{"name": "orders", "endpoint": "/orders"}]\n' +
+        '}',
+    // Every field is optional: an unauthenticated API needs none of it.
+    credentialsPlaceholder: '{"api_key": "…"}',
+
     isGuidable(parsed) {
         for (const k of Object.keys(parsed)) {
             if (!GUIDED_KEYS.has(k)) return false

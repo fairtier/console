@@ -372,7 +372,7 @@ function goBack() {
         <CredentialsCard
           v-if="source.credentials"
           :form="form"
-          :uses-google="source.googleOAuth"
+          :source="source"
           :google="google"
           :is-edit="isEdit"
           :attached-connection-id="attachedConnectionId"

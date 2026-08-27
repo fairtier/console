@@ -10,7 +10,12 @@ import type { PipelineSource, SourceBadge } from './types'
  * through the JSON editor, which is the honest answer for a config whose
  * shape we do not know.
  */
-export function genericSource(id: string, labelKey: string, badge: SourceBadge): PipelineSource {
+export function genericSource(
+    id: string,
+    labelKey: string,
+    badge: SourceBadge,
+    placeholders: { config?: string; credentials?: string } = {},
+): PipelineSource {
     return {
         id,
         labelKey,
@@ -20,6 +25,10 @@ export function genericSource(id: string, labelKey: string, badge: SourceBadge):
         schedulable: true,
         fileDrop: false,
         googleOAuth: false,
+        // A type we know the shape of says so; a type we do not defaults to
+        // `{}`, which claims nothing. Never another type's example.
+        configPlaceholder: placeholders.config ?? '{}',
+        credentialsPlaceholder: placeholders.credentials ?? '{}',
         isGuidable: () => false,
         toForm: () => ({}),
         toConfig: () => ({}),

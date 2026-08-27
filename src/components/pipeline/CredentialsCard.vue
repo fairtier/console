@@ -15,15 +15,16 @@
 import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { DETACH, type GoogleConnect } from '../../composables/useGoogleConnect'
-import type { PipelineForm } from '../../lib/pipelineSources'
+import type { PipelineForm, PipelineSource } from '../../lib/pipelineSources'
 import Icon from '../ui/Icon.vue'
 import Select from '../ui/Select.vue'
 import Spinner from '../ui/Spinner.vue'
 
 const props = defineProps<{
     form: PipelineForm
-    /** True for a source that signs in with Google rather than pasting a key. */
-    usesGoogle: boolean
+    /** The source being configured: how it authenticates, and what its raw
+     *  credentials editor should show when empty. */
+    source: PipelineSource
     google: GoogleConnect
     isEdit: boolean
     /** On edit: the connection the pipeline is attached to, '' if it holds its own. */
@@ -77,7 +78,7 @@ watch(
         </div>
 
         <!-- google_sheets: Sign in with Google (default) + service account (advanced) -->
-        <template v-if="usesGoogle">
+        <template v-if="source.googleOAuth">
             <!-- OAuth (hidden when the server has no Google OAuth configured) -->
             <div v-if="google.available.value !== false" class="mb-[14px]">
                 <!-- Workspace connection picker (preferred): the pipeline
@@ -199,7 +200,7 @@ watch(
                     <textarea
                         v-model="form.credentialsRaw"
                         rows="4"
-                        placeholder='{"service_account_key": { … }}'
+                        :placeholder="source.credentialsPlaceholder"
                         class="w-full resize-y rounded-[10px] border px-[13px] py-[11px] font-mono text-[13px] leading-[1.5] outline-none"
                         style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
                     ></textarea>
@@ -218,7 +219,7 @@ watch(
             <textarea
                 v-model="form.credentialsRaw"
                 rows="2"
-                placeholder='{"api_key": "..."}'
+                :placeholder="source.credentialsPlaceholder"
                 class="w-full resize-y rounded-[10px] border px-[13px] py-[11px] font-mono text-[13px] leading-[1.5] outline-none"
                 style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
             ></textarea>

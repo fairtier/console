@@ -17,6 +17,11 @@ export const fileUpload: PipelineSource = {
     fileDrop: true,
     googleOAuth: false,
 
+    // Neither raw editor is ever rendered for this type: the file drop takes
+    // the config's place, and the platform holds the credentials.
+    configPlaceholder: '{}',
+    credentialsPlaceholder: '{}',
+
     isGuidable: () => false,
     toForm: () => ({}),
     toConfig: () => ({}),

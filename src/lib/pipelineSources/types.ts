@@ -80,6 +80,22 @@ export interface PipelineSource {
     /** Authenticates by signing in with Google. */
     googleOAuth: boolean
 
+    // --- Placeholders for the raw editors. ---
+    /**
+     * What the raw source_config editor shows when empty: a minimal, real
+     * example of *this* type's shape.
+     *
+     * Per-source because one card renders that editor for every unguided
+     * type, for any guided type switched to Advanced JSON, and for a type
+     * this build has never heard of. A single hardcoded example is therefore
+     * wrong for all but one of them — and was: a rest_api config greeted
+     * sql_database, filesystem and duckdb alike. `{}` is the honest
+     * placeholder for a shape we do not know.
+     */
+    configPlaceholder: string
+    /** The same, for the raw credentials editor. */
+    credentialsPlaceholder: string
+
     /**
      * True when a parsed config fits the guided form. False sends the wizard
      * to the advanced JSON editor so nothing the form cannot render is
