@@ -149,6 +149,10 @@ export default {
             driveFilePlaceholder: 'paste the file’s Drive link, or its id',
             driveFileHint:
               'Paste the link from the file’s Drive page — the id is taken out of it. Files are read one by one, by id: the access you grant covers the files you point at, not the folders around them.',
+            drivePick: 'Choose…',
+            drivePicked: 'Chosen: {name}',
+            drivePickFailed:
+              'Could not open the Google file picker. Paste the file’s Drive link instead.',
             readAs: 'Read as',
             readers: {
               pdfText: 'Text, one row per page',
@@ -398,6 +402,10 @@ export default {
             driveFilePlaceholder: 'vložte odkaz na soubor z Disku nebo jeho id',
             driveFileHint:
               'Vložte odkaz ze stránky souboru na Disku — id se z něj vezme. Soubory se čtou po jednom, podle id: přístup, který udělíte, platí pro soubory, na které ukážete, ne pro složky kolem nich.',
+            drivePick: 'Vybrat…',
+            drivePicked: 'Vybráno: {name}',
+            drivePickFailed:
+              'Výběr souboru z Google Disku se nepodařilo otevřít. Vložte místo toho odkaz na soubor.',
             readAs: 'Číst jako',
             readers: {
               pdfText: 'Text, jeden řádek na stránku',

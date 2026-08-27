@@ -12,11 +12,22 @@
 // rather than a URL, because the consent grants `drive.file` — access to the
 // files the customer picks, not to the folders around them, so a path resolves
 // to nothing. Pasting the Drive URL is fine; the id is taken out of it.
-import { computed } from 'vue'
+//
+// "Choose from Drive" is the other half of that same scope decision rather
+// than a nicety on top of it: `drive.file` reaches the files a user picks
+// through Google's own Picker, so picking is what authorizes the read. The
+// paste field stays regardless — the Picker needs Google's scripts and the
+// customer's own OAuth client, and when either is missing the button hides
+// itself instead of taking the field with it.
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { oauthClientClient } from '../../../api'
+import { useDrivePicker } from '../../../composables/useDrivePicker'
 import { sourceForKey, toDriveId, type PipelineForm } from '../../../lib/pipelineSources'
 import { useWorkspaceStore } from '../../../stores/workspace'
+import Icon from '../../ui/Icon.vue'
 import Select from '../../ui/Select.vue'
+import Spinner from '../../ui/Spinner.vue'
 
 const props = defineProps<{
     form: PipelineForm
@@ -52,6 +63,52 @@ const readerOptions = computed(() => {
 // pasted whole becomes an id here, in front of the user, rather than silently
 // on save.
 const resolved = computed(() => (isDrive.value ? toDriveId(props.form.readerUrl) : ''))
+
+// --- Choose from Drive ---
+
+const { picking, unavailable, pick } = useDrivePicker()
+/** The customer's own Google client id; '' until known, or if none is set. */
+const googleClientId = ref('')
+const pickedName = ref('')
+const pickError = ref('')
+
+const canPick = computed(() => isDrive.value && !!googleClientId.value && !unavailable.value)
+
+onMounted(async () => {
+    if (!isDrive.value) return
+    try {
+        const res = await oauthClientClient.getOAuthClient({ provider: 'google' })
+        if (res.configured) googleClientId.value = res.clientId
+    } catch {
+        // No client, or an endpoint that does not serve one: the paste field
+        // is the whole feature then, exactly as before the Picker existed.
+    }
+})
+
+/** A file name becomes a plausible table name: monthly.pdf -> monthly. */
+function tableNameFrom(fileName: string): string {
+    return fileName
+        .replace(/\.[^.]+$/, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+        .slice(0, 60)
+}
+
+async function choose() {
+    pickError.value = ''
+    try {
+        const file = await pick(googleClientId.value, props.form.oauthEmail)
+        if (!file) return
+        props.form.readerUrl = file.id
+        pickedName.value = file.name
+        // Only when the user has not named the table themselves: overwriting a
+        // name someone typed is worse than leaving an empty box.
+        if (!props.form.readerTable.trim()) props.form.readerTable = tableNameFrom(file.name)
+    } catch {
+        pickError.value = t('pipelinesUi.wizard.configure.duckdb.drivePickFailed')
+    }
+}
 </script>
 
 <template>
@@ -59,16 +116,35 @@ const resolved = computed(() => (isDrive.value ? toDriveId(props.form.readerUrl)
         <label class="mb-1.5 block text-[12.5px] font-semibold" style="color: var(--ink-2)">
             {{ isDrive ? t('pipelinesUi.wizard.configure.duckdb.driveFile') : t('pipelinesUi.wizard.configure.duckdb.fileUrl') }}
         </label>
-        <input
-            v-model="form.readerUrl"
-            :placeholder="
-                isDrive
-                    ? t('pipelinesUi.wizard.configure.duckdb.driveFilePlaceholder')
-                    : t('pipelinesUi.wizard.configure.duckdb.fileUrlPlaceholder')
-            "
-            class="h-10 w-full rounded-[10px] border px-[13px] font-mono text-[13px] outline-none"
-            style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
-        />
+        <div class="flex gap-2">
+            <input
+                v-model="form.readerUrl"
+                :placeholder="
+                    isDrive
+                        ? t('pipelinesUi.wizard.configure.duckdb.driveFilePlaceholder')
+                        : t('pipelinesUi.wizard.configure.duckdb.fileUrlPlaceholder')
+                "
+                class="h-10 w-full rounded-[10px] border px-[13px] font-mono text-[13px] outline-none"
+                style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
+            />
+            <button
+                v-if="canPick"
+                type="button"
+                :disabled="picking"
+                class="flex h-10 shrink-0 items-center gap-2 rounded-[10px] border px-3.5 text-[13px] font-semibold"
+                style="background: var(--surface-2); border-color: var(--line); color: var(--ink)"
+                :style="picking ? 'opacity:.6; cursor:not-allowed;' : 'cursor:pointer;'"
+                @click="choose"
+            >
+                <Spinner v-if="picking" :size="14" />
+                <Icon v-else name="file" :size="14" />
+                {{ t('pipelinesUi.wizard.configure.duckdb.drivePick') }}
+            </button>
+        </div>
+        <p v-if="pickedName" class="mt-1.5 text-xs" style="color: var(--ink-3)">
+            {{ t('pipelinesUi.wizard.configure.duckdb.drivePicked', { name: pickedName }) }}
+        </p>
+        <p v-if="pickError" class="mt-1.5 text-xs" style="color: var(--err)">{{ pickError }}</p>
         <p v-if="isDrive && resolved" class="mt-1.5 font-mono text-[11.5px]" style="color: var(--ink-3)">
             gdrive://id:{{ resolved }}
         </p>
