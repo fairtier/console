@@ -171,7 +171,19 @@ function onDocPointerDown(e: PointerEvent) {
     if (trigger.value?.contains(target) || list.value?.contains(target)) return
     closePanel(false)
 }
-function onViewportChange() {
+// Scroll is listened for in the capture phase, which is the only way to hear a
+// scrolling ancestor (the event does not bubble) — and that also delivers the
+// panel's OWN scrolling, which `scrollActiveIntoView` causes the moment a list
+// longer than its cap opens on a selection below the fold. Closing on that made
+// every long Select unopenable: the source picker's 12 options opened and shut
+// inside one click, with nothing in the console to show for it. So a scroll
+// that started inside the panel is the panel doing its job, not the page
+// moving underneath it.
+// `instanceof Node`, not a cast: this same handler takes `resize`, whose target
+// is the window, and `contains` throws a TypeError on anything that is not a
+// node.
+function onViewportChange(e: Event) {
+    if (e.target instanceof Node && list.value?.contains(e.target)) return
     closePanel(false)
 }
 
