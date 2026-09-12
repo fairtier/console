@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file assist.proto.
  */
 export const file_assist: GenFile = /*@__PURE__*/
-  fileDesc("Cgxhc3Npc3QucHJvdG8SCWFzc2lzdC52MSIqCglEcmFmdEZpbGUSDAoEcGF0aBgBIAEoCRIPCgdjb250ZW50GAIgASgJIiwKGkRyYWZ0VHJhbnNmb3JtYXRpb25SZXF1ZXN0Eg4KBnByb21wdBgBIAEoCSKQAQobRHJhZnRUcmFuc2Zvcm1hdGlvblJlc3BvbnNlEj0KBWRyYWZ0GAEgASgLMi4udHJhbnNmb3JtYXRpb24udjEuQ3JlYXRlVHJhbnNmb3JtYXRpb25SZXF1ZXN0EiMKBWZpbGVzGAIgAygLMhQuYXNzaXN0LnYxLkRyYWZ0RmlsZRINCgVub3RlcxgDIAEoCSJDChlEcmFmdFJpbGxEYXNoYm9hcmRSZXF1ZXN0Eg4KBnByb21wdBgBIAEoCRIWCg5leGlzdGluZ19wYXRocxgCIAMoCSJQChpEcmFmdFJpbGxEYXNoYm9hcmRSZXNwb25zZRIjCgVmaWxlcxgBIAMoCzIULmFzc2lzdC52MS5EcmFmdEZpbGUSDQoFbm90ZXMYAiABKAkiNgoPRHJhZnRTcWxSZXF1ZXN0Eg4KBnByb21wdBgBIAEoCRITCgtjdXJyZW50X3NxbBgCIAEoCSJIChBEcmFmdFNxbFJlc3BvbnNlEgsKA3NxbBgBIAEoCRINCgVub3RlcxgCIAEoCRIYChBub19yZWxldmFudF9kYXRhGAMgASgIIsEBChNFeHBsYWluRXJyb3JSZXF1ZXN0EjQKDHBpcGVsaW5lX3J1bhgBIAEoCzIcLmFzc2lzdC52MS5QaXBlbGluZVJ1blRhcmdldEgAEkAKEnRyYW5zZm9ybWF0aW9uX3J1bhgCIAEoCzIiLmFzc2lzdC52MS5UcmFuc2Zvcm1hdGlvblJ1blRhcmdldEgAEigKA3NxbBgDIAEoCzIZLmFzc2lzdC52MS5TcWxFcnJvclRhcmdldEgAQggKBnRhcmdldCI4ChFQaXBlbGluZVJ1blRhcmdldBITCgtwaXBlbGluZV9pZBgBIAEoCRIOCgZydW5faWQYAiABKAkiRAoXVHJhbnNmb3JtYXRpb25SdW5UYXJnZXQSGQoRdHJhbnNmb3JtYXRpb25faWQYASABKAkSDgoGcnVuX2lkGAIgASgJIjQKDlNxbEVycm9yVGFyZ2V0EgsKA3NxbBgBIAEoCRIVCg1lcnJvcl9tZXNzYWdlGAIgASgJInMKFEV4cGxhaW5FcnJvclJlc3BvbnNlEhMKC2V4cGxhbmF0aW9uGAEgASgJEhQKDGxpa2VseV9jYXVzZRgCIAEoCRIVCg1zdWdnZXN0ZWRfZml4GAMgASgJEhkKEXN1Z2dlc3RlZF9zbmlwcGV0GAQgASgJMvYCCg1Bc3Npc3RTZXJ2aWNlEmYKE0RyYWZ0VHJhbnNmb3JtYXRpb24SJS5hc3Npc3QudjEuRHJhZnRUcmFuc2Zvcm1hdGlvblJlcXVlc3QaJi5hc3Npc3QudjEuRHJhZnRUcmFuc2Zvcm1hdGlvblJlc3BvbnNlIgASYwoSRHJhZnRSaWxsRGFzaGJvYXJkEiQuYXNzaXN0LnYxLkRyYWZ0UmlsbERhc2hib2FyZFJlcXVlc3QaJS5hc3Npc3QudjEuRHJhZnRSaWxsRGFzaGJvYXJkUmVzcG9uc2UiABJFCghEcmFmdFNxbBIaLmFzc2lzdC52MS5EcmFmdFNxbFJlcXVlc3QaGy5hc3Npc3QudjEuRHJhZnRTcWxSZXNwb25zZSIAElEKDEV4cGxhaW5FcnJvchIeLmFzc2lzdC52MS5FeHBsYWluRXJyb3JSZXF1ZXN0Gh8uYXNzaXN0LnYxLkV4cGxhaW5FcnJvclJlc3BvbnNlIgBCPFo6Z2l0aHViLmNvbS9mYWlydGllci93b3Jrc3BhY2UtYXBpL3Byb3RvL2Fzc2lzdC92MTthc3Npc3R2MWIGcHJvdG8z", [file_transformation]);
+  fileDesc("Cgxhc3Npc3QucHJvdG8SCWFzc2lzdC52MSIqCglEcmFmdEZpbGUSDAoEcGF0aBgBIAEoCRIPCgdjb250ZW50GAIgASgJIiwKGkRyYWZ0VHJhbnNmb3JtYXRpb25SZXF1ZXN0Eg4KBnByb21wdBgBIAEoCSKsAQobRHJhZnRUcmFuc2Zvcm1hdGlvblJlc3BvbnNlEj0KBWRyYWZ0GAEgASgLMi4udHJhbnNmb3JtYXRpb24udjEuQ3JlYXRlVHJhbnNmb3JtYXRpb25SZXF1ZXN0EiMKBWZpbGVzGAIgAygLMhQuYXNzaXN0LnYxLkRyYWZ0RmlsZRINCgVub3RlcxgDIAEoCRIaChJ1bnN1cHBvcnRlZF9yZWFzb24YBCABKAkiQwoZRHJhZnRSaWxsRGFzaGJvYXJkUmVxdWVzdBIOCgZwcm9tcHQYASABKAkSFgoOZXhpc3RpbmdfcGF0aHMYAiADKAkibAoaRHJhZnRSaWxsRGFzaGJvYXJkUmVzcG9uc2USIwoFZmlsZXMYASADKAsyFC5hc3Npc3QudjEuRHJhZnRGaWxlEg0KBW5vdGVzGAIgASgJEhoKEnVuc3VwcG9ydGVkX3JlYXNvbhgDIAEoCSI2Cg9EcmFmdFNxbFJlcXVlc3QSDgoGcHJvbXB0GAEgASgJEhMKC2N1cnJlbnRfc3FsGAIgASgJIkgKEERyYWZ0U3FsUmVzcG9uc2USCwoDc3FsGAEgASgJEg0KBW5vdGVzGAIgASgJEhgKEG5vX3JlbGV2YW50X2RhdGEYAyABKAgiwQEKE0V4cGxhaW5FcnJvclJlcXVlc3QSNAoMcGlwZWxpbmVfcnVuGAEgASgLMhwuYXNzaXN0LnYxLlBpcGVsaW5lUnVuVGFyZ2V0SAASQAoSdHJhbnNmb3JtYXRpb25fcnVuGAIgASgLMiIuYXNzaXN0LnYxLlRyYW5zZm9ybWF0aW9uUnVuVGFyZ2V0SAASKAoDc3FsGAMgASgLMhkuYXNzaXN0LnYxLlNxbEVycm9yVGFyZ2V0SABCCAoGdGFyZ2V0IjgKEVBpcGVsaW5lUnVuVGFyZ2V0EhMKC3BpcGVsaW5lX2lkGAEgASgJEg4KBnJ1bl9pZBgCIAEoCSJEChdUcmFuc2Zvcm1hdGlvblJ1blRhcmdldBIZChF0cmFuc2Zvcm1hdGlvbl9pZBgBIAEoCRIOCgZydW5faWQYAiABKAkiNAoOU3FsRXJyb3JUYXJnZXQSCwoDc3FsGAEgASgJEhUKDWVycm9yX21lc3NhZ2UYAiABKAkicwoURXhwbGFpbkVycm9yUmVzcG9uc2USEwoLZXhwbGFuYXRpb24YASABKAkSFAoMbGlrZWx5X2NhdXNlGAIgASgJEhUKDXN1Z2dlc3RlZF9maXgYAyABKAkSGQoRc3VnZ2VzdGVkX3NuaXBwZXQYBCABKAky9gIKDUFzc2lzdFNlcnZpY2USZgoTRHJhZnRUcmFuc2Zvcm1hdGlvbhIlLmFzc2lzdC52MS5EcmFmdFRyYW5zZm9ybWF0aW9uUmVxdWVzdBomLmFzc2lzdC52MS5EcmFmdFRyYW5zZm9ybWF0aW9uUmVzcG9uc2UiABJjChJEcmFmdFJpbGxEYXNoYm9hcmQSJC5hc3Npc3QudjEuRHJhZnRSaWxsRGFzaGJvYXJkUmVxdWVzdBolLmFzc2lzdC52MS5EcmFmdFJpbGxEYXNoYm9hcmRSZXNwb25zZSIAEkUKCERyYWZ0U3FsEhouYXNzaXN0LnYxLkRyYWZ0U3FsUmVxdWVzdBobLmFzc2lzdC52MS5EcmFmdFNxbFJlc3BvbnNlIgASUQoMRXhwbGFpbkVycm9yEh4uYXNzaXN0LnYxLkV4cGxhaW5FcnJvclJlcXVlc3QaHy5hc3Npc3QudjEuRXhwbGFpbkVycm9yUmVzcG9uc2UiAEI8WjpnaXRodWIuY29tL2ZhaXJ0aWVyL3dvcmtzcGFjZS1hcGkvcHJvdG8vYXNzaXN0L3YxO2Fzc2lzdHYxYgZwcm90bzM", [file_transformation]);
 
 /**
  * DraftFile is one generated file, path relative to the target repo root.
@@ -75,7 +75,7 @@ export type DraftTransformationResponse = Message<"assist.v1.DraftTransformation
   /**
    * Starter dbt files for the hosted repo (models/**.sql + schema.yml),
    * rendered read-only for review; the user commits them via the box repo
-   * editor or copy-paste.
+   * editor or copy-paste. Empty when unsupported_reason is set.
    *
    * @generated from field: repeated assist.v1.DraftFile files = 2;
    */
@@ -83,10 +83,23 @@ export type DraftTransformationResponse = Message<"assist.v1.DraftTransformation
 
   /**
    * Short human-readable explanation of the draft and any assumptions made.
+   * When unsupported_reason is set: what to do instead.
    *
    * @generated from field: string notes = 3;
    */
   notes: string;
+
+  /**
+   * The model's explicit refusal: the request needs data the warehouse does
+   * not hold, or a dbt capability the platform cannot run (dbt reaches no
+   * database but the workspace's own warehouse; no python models, no
+   * snapshots). The client renders it as a standing warning and leaves the
+   * form untouched. Additive — empty (the proto3 default) means a normal
+   * draft, so older clients keep their existing behaviour.
+   *
+   * @generated from field: string unsupported_reason = 4;
+   */
+  unsupportedReason: string;
 };
 
 /**
@@ -127,16 +140,32 @@ export const DraftRillDashboardRequestSchema: GenMessage<DraftRillDashboardReque
 export type DraftRillDashboardResponse = Message<"assist.v1.DraftRillDashboardResponse"> & {
   /**
    * Drafted files (metrics/<name>.yaml, dashboards/<name>.yaml, optional
-   * models/<name>.sql), YAML-validated server-side.
+   * models/<name>.sql), YAML-validated server-side. Empty when
+   * unsupported_reason is set.
    *
    * @generated from field: repeated assist.v1.DraftFile files = 1;
    */
   files: DraftFile[];
 
   /**
+   * Explanation and assumptions. When unsupported_reason is set: what to do
+   * instead.
+   *
    * @generated from field: string notes = 2;
    */
   notes: string;
+
+  /**
+   * The model's explicit refusal: the request needs data the warehouse does
+   * not hold, or a Rill capability the platform cannot run (the only data
+   * source is the attached warehouse; no alerts, no scheduled delivery, no
+   * public or embedded dashboards). The client opens no editor buffers and
+   * renders it as a standing warning. Additive — empty (the proto3 default)
+   * means a normal draft.
+   *
+   * @generated from field: string unsupported_reason = 3;
+   */
+  unsupportedReason: string;
 };
 
 /**

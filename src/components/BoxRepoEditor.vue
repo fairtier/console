@@ -35,7 +35,13 @@ const props = defineProps<{
   // Placeholder shown in the new-file path input.
   newFilePlaceholder?: string
   // When provided, the AI draft panel is shown and calls this. Omit to hide it.
-  aiDraft?: (prompt: string, existingPaths: string[]) => Promise<{ files: DraftFile[]; notes: string }>
+  // A non-empty unsupportedReason is the drafter's refusal (the request needs
+  // data nothing has ingested, or a capability the workspace cannot run): files
+  // is then empty and nothing is opened in the editor.
+  aiDraft?: (
+    prompt: string,
+    existingPaths: string[],
+  ) => Promise<{ files: DraftFile[]; notes: string; unsupportedReason?: string }>
 }>()
 
 const emit = defineEmits<{
@@ -76,6 +82,9 @@ const aiOpen = ref(false)
 const aiPrompt = ref('')
 const drafting = ref(false)
 const draftNotes = ref('')
+// Non-empty after a draft the workspace refused as impossible; rendered as a
+// standing panel next to the prompt, not a toast that scrolls away.
+const draftUnsupported = ref('')
 
 // --- New file ---------------------------------------------------------------
 const newFileOpen = ref(false)
@@ -289,9 +298,17 @@ async function draftWithAI() {
   const prompt = aiPrompt.value.trim()
   if (!prompt || drafting.value || !props.aiDraft) return
   drafting.value = true
+  draftUnsupported.value = ''
   try {
     const resp = await props.aiDraft(prompt, files.value.map((f) => f.path))
     draftNotes.value = resp.notes
+    // The refusal path: the request needs data nothing has ingested, or a
+    // capability this workspace does not have. Open nothing — a half-filled
+    // editor would read as a draft that only needs saving.
+    if (resp.unsupportedReason) {
+      draftUnsupported.value = resp.unsupportedReason
+      return
+    }
     for (const f of resp.files) {
       const existing = buffers.value.find((b) => b.path === f.path)
       if (existing) {
@@ -485,6 +502,13 @@ onBeforeUnmount(() => {
               <Spinner v-if="drafting" :size="14" />
               <Icon v-else name="sparkle" :size="14" />{{ tp('ai.draft') }}
             </button>
+            <div
+              v-if="draftUnsupported"
+              style="margin-top:8px; font-size:12px; line-height:1.5; background:var(--warn-soft); border:1px solid var(--warn); border-radius:9px; padding:9px 11px; color:var(--ink);"
+            >
+              <div style="font-weight:700; margin-bottom:3px; color:var(--warn-ink);">{{ tp('ai.unsupportedTitle') }}</div>
+              <div>{{ draftUnsupported }}</div>
+            </div>
             <div v-if="draftNotes" style="margin-top:8px; font-size:12px; color:var(--ink-2); line-height:1.5; background:var(--inset); border:1px solid var(--line); border-radius:9px; padding:9px 11px;">{{ draftNotes }}</div>
           </div>
         </div>

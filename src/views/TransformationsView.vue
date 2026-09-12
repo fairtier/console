@@ -40,7 +40,7 @@ const SqlEditor = defineAsyncComponent(() => import('../components/sql/SqlEditor
 function draftDbtFiles(prompt: string, _existingPaths: string[]) {
   return assistClient
     .draftTransformation({ prompt })
-    .then((r) => ({ files: r.files, notes: r.notes }))
+    .then((r) => ({ files: r.files, notes: r.notes, unsupportedReason: r.unsupportedReason }))
 }
 
 const transformations = ref<Transformation[]>([])
@@ -187,6 +187,9 @@ const aiPrompt = ref('')
 const drafting = ref(false)
 const draftNotes = ref('')
 const draftFiles = ref<DraftFile[]>([])
+// Non-empty after a draft the workspace refused as impossible (data nothing
+// has ingested, or a dbt capability it cannot run).
+const draftUnsupported = ref('')
 
 // silent skips the full-section loading state — used by the demo card's
 // background poll so a refresh every few seconds doesn't flash the list.
@@ -346,6 +349,7 @@ function startCreate() {
   form.triggerAfterPipelineId = ''
   form.dbtSelector = ''
   draftNotes.value = ''
+  draftUnsupported.value = ''
   draftFiles.value = []
   aiPrompt.value = ''
   resetModelState()
@@ -365,6 +369,7 @@ function startEdit(tr: Transformation) {
   form.triggerAfterPipelineId = tr.triggerAfterPipelineId
   form.dbtSelector = tr.dbtSelector
   draftNotes.value = ''
+  draftUnsupported.value = ''
   draftFiles.value = []
   resetModelState()
   formOpen.value = true
@@ -560,8 +565,19 @@ async function draftWithAI() {
   const prompt = aiPrompt.value.trim()
   if (!prompt || drafting.value) return
   drafting.value = true
+  draftUnsupported.value = ''
   try {
     const resp = await assistClient.draftTransformation({ prompt })
+    // The refusal path: the request needs data nothing has ingested, or a dbt
+    // capability this workspace cannot run. Leave the form, the model SQL and
+    // the file cards exactly as they were — pre-filling them would invite
+    // saving a transformation that cannot build.
+    if (resp.unsupportedReason) {
+      draftUnsupported.value = resp.unsupportedReason
+      draftNotes.value = resp.notes
+      draftFiles.value = [] // never leave an earlier draft's cards under a refusal
+      return
+    }
     if (resp.draft) {
       form.name = resp.draft.name
       form.hosted = true
@@ -675,6 +691,20 @@ async function copyFile(f: DraftFile) {
             <Spinner v-if="drafting" :size="15" />
             <Icon v-else name="sparkle" :size="15" />{{ t('transformationsUi.ai.draft') }}
           </button>
+        </div>
+
+        <!-- The drafter's refusal: nothing was pre-filled, and this says why. -->
+        <div
+          v-if="draftUnsupported"
+          style="display:flex; align-items:flex-start; gap:11px; background:var(--warn-soft); border:1px solid var(--warn); border-radius:14px; padding:14px 16px; margin-top:12px;"
+        >
+          <Icon name="info" :size="18" :style="{ color: 'var(--warn-ink)', flex: 'none', marginTop: '1px' }" />
+          <div style="font-size:13.5px; line-height:1.55; color:var(--ink);">
+            <div style="margin-bottom:3px; font-weight:700; color:var(--warn-ink);">
+              {{ t('transformationsUi.ai.unsupportedTitle') }}
+            </div>
+            <div>{{ draftUnsupported }}</div>
+          </div>
         </div>
 
         <!-- Draft notes + generated files -->

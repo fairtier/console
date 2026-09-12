@@ -35,6 +35,7 @@ export default {
         notConfigured: 'AI drafting is coming soon — create and edit files manually for now.',
         rateLimited: 'Too many drafting requests — wait a minute and try again.',
         draftFailed: 'Drafting failed',
+        unsupportedTitle: 'We can’t build that dashboard here',
       },
       history: {
         button: 'History',
@@ -99,6 +100,7 @@ export default {
         notConfigured: 'AI návrhy brzy — zatím vytvářejte a upravujte soubory ručně.',
         rateLimited: 'Příliš mnoho požadavků — počkejte minutu a zkuste to znovu.',
         draftFailed: 'Návrh se nezdařil',
+        unsupportedTitle: 'Takový dashboard tady postavit neumíme',
       },
       history: {
         button: 'Historie',

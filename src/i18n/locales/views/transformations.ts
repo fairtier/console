@@ -71,6 +71,7 @@ export default {
         notConfigured: 'AI drafting is coming soon — configure the transformation manually below.',
         rateLimited: 'Too many drafting requests — wait a minute and try again.',
         draftFailed: 'Drafting failed',
+        unsupportedTitle: 'We can’t build that here',
         filesTitle: 'Supporting dbt files',
         filesHint: 'The model SQL above is saved together with the transformation. Commit these supporting files (schema, extra models) via “Advanced: dbt project files” — or paste them into your own repo.',
         copy: 'Copy',
@@ -113,6 +114,7 @@ export default {
           notConfigured: 'AI drafting is coming soon — create and edit files manually for now.',
           rateLimited: 'Too many drafting requests — wait a minute and try again.',
           draftFailed: 'Drafting failed',
+          unsupportedTitle: 'We can’t build that here',
         },
         history: {
           button: 'History',
@@ -243,6 +245,7 @@ export default {
         notConfigured: 'AI návrhy brzy — zatím nastavte transformaci ručně níže.',
         rateLimited: 'Příliš mnoho požadavků — počkejte minutu a zkuste to znovu.',
         draftFailed: 'Návrh se nezdařil',
+        unsupportedTitle: 'Tohle tady postavit neumíme',
         filesTitle: 'Podpůrné dbt soubory',
         filesHint: 'SQL modelu výše se uloží společně s transformací. Podpůrné soubory (schema, další modely) commitněte v „Pokročilé: soubory dbt projektu“ — nebo je vložte do vlastního repozitáře.',
         copy: 'Kopírovat',
@@ -285,6 +288,7 @@ export default {
           notConfigured: 'AI návrhy brzy — zatím vytvářejte a upravujte soubory ručně.',
           rateLimited: 'Příliš mnoho požadavků — počkejte minutu a zkuste to znovu.',
           draftFailed: 'Návrh se nezdařil',
+          unsupportedTitle: 'Tohle tady postavit neumíme',
         },
         history: {
           button: 'Historie',
