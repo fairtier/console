@@ -26,7 +26,7 @@
     "@connectrpc/connect": "^2.1.2",
     "@connectrpc/connect-web": "^2.1.2",
     "@lezer/highlight": "^1.2.3",
-    "@sentry/vue": "^10.70.0",
+    "@sentry/vue": "^10.74.0",
     "@tailwindcss/vite": "^4.3.3",
     "pinia": "^4.0.3",
     "sql-formatter": "^15.8.2",
