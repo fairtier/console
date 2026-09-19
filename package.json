@@ -23,7 +23,7 @@
     "@codemirror/language": "^6.12.4",
     "@codemirror/state": "^6.7.5",
     "@codemirror/view": "^6.43.12",
-    "@connectrpc/connect": "^2.1.2",
+    "@connectrpc/connect": "^2.2.0",
     "@connectrpc/connect-web": "^2.1.2",
     "@lezer/highlight": "^1.2.3",
     "@sentry/vue": "^10.74.0",
