@@ -3,7 +3,8 @@
 ## Project Vision
 
 The web console of a FairTier data workspace: pipelines, transformations,
-workflows, SQL, catalog, dashboards. It is served next to the workspace it manages and
+workflows, SQL, catalog, dashboards, and AI agents (access tokens + setup for
+a person's own MCP client against workspace-api's `/mcp`). It is served next to the workspace it manages and
 talks only to that workspace's own API — accounts, billing and provisioning
 belong to whoever hosts the workspace, not to this app.
 
@@ -34,7 +35,10 @@ belong to whoever hosts the workspace, not to this app.
   by `[test] root` in `bunfig.toml`)
 - **E2E:** `bun run test:e2e` (Playwright; hermetic — builds the app, boots
   `server.ts` with dummy `FT_*`, asserts the pre-login surface; specs that
-  need the app past the login fake the API with `e2e/fixtures/workspaceApi.ts`)
+  need the app past the login fake the API with `e2e/fixtures/workspaceApi.ts`.
+  `FT_E2E_SMOKE_URL=http://localhost:<port>` runs it off `:3000` — do that
+  when another checkout may already be serving there, since outside CI
+  Playwright reuses whatever answers the URL)
 - **Type Check:** `bun run type-check` (via vue-tsc)
 
 ## Coding Standards & Patterns
