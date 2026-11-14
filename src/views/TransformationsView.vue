@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ConnectError, Code } from '@connectrpc/connect'
 import { transformationClient, assistClient, pipelineClient, boxRepoClient } from '../api'
 import { errorMessage } from '../api/errors'
@@ -22,6 +22,7 @@ import ExplainPanel from '../components/ExplainPanel.vue'
 
 const { t } = useI18n()
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 const { confirm } = useConfirm()
 
@@ -263,8 +264,7 @@ onMounted(() => {
   // Deep link (/transformations?transformation=<id>) opens that
   // transformation's run history — the workflow run timeline links here, like
   // the failed-run notification links to /pipelines?pipeline=<id>.
-  const target = route.query.transformation
-  if (typeof target === 'string' && target) void toggleRuns(target)
+  openFromQuery()
 })
 onBeforeUnmount(() => {
   document.removeEventListener('click', onDocClick)
@@ -286,12 +286,33 @@ async function explainRun(transformationId: string, runId: string) {
   }
 }
 
+// The URL names the open row (?transformation=<id>), so a deep link to the row that is
+// already open is a no-op and one to another row is a query change.
+function syncQuery(id: string | null) {
+  if ((route.query.transformation ?? null) === id) return
+  const query = { ...route.query }
+  if (id) query.transformation = id
+  else delete query.transformation
+  router.replace({ query }).catch(() => {})
+}
+
+// Opens the row the URL names: on mount, and when a notification (or a
+// workflow step link) is followed while this page is already open — same
+// route, new query, so the component is reused and onMounted does not run.
+function openFromQuery() {
+  const target = route.query.transformation
+  if (typeof target === 'string' && target && expandedId.value !== target) void toggleRuns(target)
+}
+watch(() => route.query.transformation, openFromQuery)
+
 async function toggleRuns(id: string) {
   if (expandedId.value === id) {
     expandedId.value = null
+    syncQuery(null)
     return
   }
   expandedId.value = id
+  syncQuery(id)
   runs.value = []
   runsLoading.value = true
   try {
@@ -1065,7 +1086,7 @@ async function copyFile(f: DraftFile) {
         </div>
 
         <!-- Expanded: recent runs -->
-        <div v-if="expandedId === tr.id" style="padding:0 20px 16px; border-top:1px dashed var(--line-2); background:var(--inset);">
+        <div v-if="expandedId === tr.id" data-testid="transformation-runs" :data-transformation-id="tr.id" style="padding:0 20px 16px; border-top:1px dashed var(--line-2); background:var(--inset);">
           <div v-if="runsLoading" style="display:flex; justify-content:center; padding:20px 0;">
             <Spinner :size="18" />
           </div>

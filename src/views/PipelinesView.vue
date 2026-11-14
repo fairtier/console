@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
 import { pipelineClient } from '../api'
@@ -122,12 +122,33 @@ function closeMenus() {
 }
 
 // Toggle a pipeline's run-history row, loading its recent runs on open.
+// The URL names the open row (?pipeline=<id>), so a deep link to the row that is
+// already open is a no-op and one to another row is a query change.
+function syncQuery(id: string | null) {
+  if ((route.query.pipeline ?? null) === id) return
+  const query = { ...route.query }
+  if (id) query.pipeline = id
+  else delete query.pipeline
+  router.replace({ query }).catch(() => {})
+}
+
+// Opens the row the URL names: on mount, and when a notification (or a
+// workflow step link) is followed while this page is already open — same
+// route, new query, so the component is reused and onMounted does not run.
+function openFromQuery() {
+  const target = route.query.pipeline
+  if (typeof target === 'string' && target && expandedId.value !== target) void toggleExpand(target)
+}
+watch(() => route.query.pipeline, openFromQuery)
+
 async function toggleExpand(id: string) {
   if (expandedId.value === id) {
     expandedId.value = null
+    syncQuery(null)
     return
   }
   expandedId.value = id
+  syncQuery(id)
   runs.value = []
   runsLoading.value = true
   try {
@@ -152,8 +173,7 @@ onMounted(() => {
   loadPipelines()
   // Deep-link from a failed-run notification (/pipelines?pipeline=<id>) opens
   // that pipeline's run history straight on the error.
-  const target = route.query.pipeline
-  if (typeof target === 'string' && target) void toggleExpand(target)
+  openFromQuery()
 })
 onBeforeUnmount(() => {
   document.removeEventListener('click', onDocClick)
@@ -334,7 +354,7 @@ async function deletePipeline(id: string) {
       </div>
 
       <!-- Expanded: recent runs (full error lives in run.errorMessage) -->
-      <div v-if="expandedId === p.id" style="padding:0 20px 16px; border-top:1px dashed var(--line-2); background:var(--inset);">
+      <div v-if="expandedId === p.id" data-testid="pipeline-runs" :data-pipeline-id="p.id" style="padding:0 20px 16px; border-top:1px dashed var(--line-2); background:var(--inset);">
         <div v-if="runsLoading" style="display:flex; justify-content:center; padding:20px 0;">
           <Spinner :size="18" />
         </div>
