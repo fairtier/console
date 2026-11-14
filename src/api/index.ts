@@ -15,6 +15,7 @@ import { DemoService } from "./gen/demo_pb.js"
 import { OAuthClientService } from "./gen/oauthclient_pb.js"
 import { ConnectionService } from "./gen/connection_pb.js"
 import { WorkflowService } from "./gen/workflow_pb.js"
+import { AccessTokenService } from "./gen/access_token_pb.js"
 
 // One plane, one transport: everything here is served by the workspace's own
 // API (see ./transport). Identity, billing and provisioning are not product
@@ -40,6 +41,9 @@ export const oauthClientClient = createClient(OAuthClientService, transport)
 export const connectionClient = createClient(ConnectionService, transport)
 // Workflows: ordered pipeline/transformation steps on one schedule.
 export const workflowClient = createClient(WorkflowService, transport)
+// Workspace access tokens for a person's own MCP client. Served only when the
+// box enables MCP; otherwise every call answers Unimplemented.
+export const accessTokenClient = createClient(AccessTokenService, transport)
 export const workspaceHealthClient = createClient(WorkspaceHealthService, transport)
 
 // Re-export generated types for convenience

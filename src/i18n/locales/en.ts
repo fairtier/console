@@ -76,6 +76,7 @@ export default {
         git: 'Git',
         integrations: 'Integrations',
         serviceAccounts: 'Service Accounts',
+        agents: 'AI agents',
         accountExternal: 'Account & Billing',
         // The account Console's screens: this app renders them as links into
         // its origin (layouts/navContract.ts), so it needs its own copy of

@@ -58,6 +58,7 @@ export const navGroups: NavGroup[] = [
             { name: 'git', labelKey: 'nav.git', icon: 'link' },
             { name: 'integrations', labelKey: 'nav.integrations', icon: 'launch' },
             { name: 'service-accounts', labelKey: 'nav.serviceAccounts', icon: 'lock' },
+            { name: 'agents', labelKey: 'nav.agents', icon: 'agent' },
         ],
     },
 ]
