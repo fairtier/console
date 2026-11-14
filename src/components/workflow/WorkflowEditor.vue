@@ -188,7 +188,9 @@ async function submit() {
       saved = resp.workflow
       toast.success(t('workflowsUi.toast.updated'))
     } else {
-      const resp = await workflowClient.createWorkflow(body)
+      // enabled is optional on create (absent = on); an API older than the
+      // field ignores it and creates the workflow enabled.
+      const resp = await workflowClient.createWorkflow({ ...body, enabled: form.enabled })
       saved = resp.workflow
       toast.success(t('workflowsUi.toast.created'))
     }
@@ -259,14 +261,11 @@ const iconBtn = (disabled: boolean) => ({
     <span v-if="fieldErrors.description" style="display:block; margin-top:6px; font-size:12px; color:var(--err);">{{ fieldErrors.description }}</span>
 
     <div style="display:flex; align-items:center; gap:12px; margin-top:14px;">
-      <template v-if="workflow">
-        <Toggle v-model="form.enabled" :aria-label="t('workflowsUi.form.enabled')" />
-        <div>
-          <div style="font-size:13px; font-weight:700; color:var(--ink-2);">{{ t('workflowsUi.form.enabled') }}</div>
-          <div style="font-size:12px; color:var(--ink-3);">{{ t('workflowsUi.form.enabledHint') }}</div>
-        </div>
-      </template>
-      <div v-else style="font-size:12px; color:var(--ink-3);">{{ t('workflowsUi.form.enabledOnCreate') }}</div>
+      <Toggle v-model="form.enabled" :aria-label="t('workflowsUi.form.enabled')" />
+      <div>
+        <div style="font-size:13px; font-weight:700; color:var(--ink-2);">{{ t('workflowsUi.form.enabled') }}</div>
+        <div style="font-size:12px; color:var(--ink-3);">{{ t(workflow ? 'workflowsUi.form.enabledHint' : 'workflowsUi.form.enabledOnCreate') }}</div>
+      </div>
     </div>
 
     <!-- Step builder -->
