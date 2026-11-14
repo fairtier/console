@@ -128,6 +128,21 @@ function initialRuns(): Record<string, Json[]> {
     }
 }
 
+// --- Access tokens ----------------------------------------------------------
+
+const inDays = (d: number) => new Date(now + d * 86_400_000).toISOString()
+
+function initialTokens(): Json[] {
+    return [
+        { id: 'tok-1', name: 'laptop claude code', prefix: 'ftw_1a2b3c4d', scopes: ['workspace:read'], createdAt: ago(60 * 24 * 20), expiresAt: inDays(70), lastUsedAt: ago(180) },
+        { id: 'tok-2', name: 'cursor on the build box', prefix: 'ftw_9f8e7d6c', scopes: ['workspace:read', 'workspace:write'], createdAt: ago(60 * 24 * 85), expiresAt: inDays(5), lastUsedAt: ago(60 * 24 * 2) },
+        { id: 'tok-3', name: 'old experiment', prefix: 'ftw_0badcafe', scopes: ['workspace:read', 'workspace:write'], createdAt: ago(60 * 24 * 60), expiresAt: inDays(30), revokedAt: ago(60 * 24 * 10) },
+    ]
+}
+
+/** The secret CreateAccessToken hands out: "ftw_" + 64 hex characters. */
+export const NEW_SECRET = `ftw_${'5e'.repeat(32)}`
+
 // --- Wire helpers -----------------------------------------------------------
 
 const CORS = {
@@ -181,6 +196,8 @@ function encodeViolations(vs: { field: string; description: string }[]): string 
 
 export interface FakeApi {
     workflows: Json[]
+    /** access_token.v1 tokens; only served when `mcp` is on. */
+    tokens: Json[]
     runs: Record<string, Json[]>
     /** Every RPC the page made, as "Service/Method". */
     calls: string[]
@@ -191,12 +208,18 @@ export interface FakeApi {
 export interface FakeOptions {
     /** Start with no workflows (the empty state). */
     empty?: boolean
+    /**
+     * Serve access_token.v1 as a box with MCP_ENABLED=true does. Off, its
+     * paths answer a bare 404, as an API without MCP enabled does.
+     */
+    mcp?: boolean
 }
 
 export async function fakeWorkspaceApi(page: Page, opts: FakeOptions = {}): Promise<FakeApi> {
     const api: FakeApi = {
         workflows: opts.empty ? [] : initialWorkflows(),
         runs: opts.empty ? {} : initialRuns(),
+        tokens: opts.mcp ? initialTokens() : [],
         calls: [],
         bodies: {},
     }
@@ -231,6 +254,12 @@ export async function fakeWorkspaceApi(page: Page, opts: FakeOptions = {}): Prom
             body = {}
         }
         ;(api.bodies[rpc] ??= []).push(body)
+
+        // Without MCP_ENABLED the service is not mounted at all: the Go mux
+        // answers a plain 404, which Connect clients read as Unimplemented.
+        if (!opts.mcp && rpc.startsWith('AccessTokenService/')) {
+            return route.fulfill({ status: 404, headers: { ...CORS, 'content-type': 'text/plain' }, body: '404 page not found\n' })
+        }
 
         switch (rpc) {
             case 'PipelineService/ListPipelines':
@@ -299,9 +328,34 @@ export async function fakeWorkspaceApi(page: Page, opts: FakeOptions = {}): Prom
                 api.workflows = api.workflows.filter((w) => w.id !== body.id)
                 return ok(route, {})
 
-            default:
-                return fail(route, 'unimplemented', `${rpc} is not faked`)
+            case 'AccessTokenService/ListAccessTokens':
+                return ok(route, { tokens: api.tokens })
+
+            case 'AccessTokenService/CreateAccessToken': {
+                const name = String(body.name ?? '').trim()
+                if (name === 'taken') {
+                    return fail(route, 'invalid_argument', 'name: pick another name', [{ field: 'name', description: 'pick another name' }])
+                }
+                const token: Json = {
+                    id: `tok-${api.tokens.length + 1}`,
+                    name,
+                    prefix: NEW_SECRET.slice(0, 12),
+                    scopes: (body.scopes as string[] | undefined) ?? [],
+                    createdAt: new Date().toISOString(),
+                    expiresAt: inDays(Number(body.expiresInDays) || 90),
+                }
+                api.tokens.unshift(token)
+                return ok(route, { token, secret: NEW_SECRET })
+            }
+
+            case 'AccessTokenService/RevokeAccessToken': {
+                const tok = api.tokens.find((x) => x.id === body.id)
+                if (!tok) return fail(route, 'not_found', 'access token not found')
+                tok.revokedAt ??= new Date().toISOString()
+                return ok(route, {})
+            }
         }
+        return fail(route, 'unimplemented', `${rpc} is not faked`)
     })
 
     return api
