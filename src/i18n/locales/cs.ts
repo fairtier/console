@@ -27,6 +27,7 @@ export default {
         off: 'Vypnuto',
         tearingDown: 'Ruší se',
         destroyed: 'Zrušeno',
+        skipped: 'Přeskočeno',
     },
     shell: {
         noWorkspace: 'Žádný workspace',
@@ -66,6 +67,7 @@ export default {
     nav: {
         pipelines: 'Pipeline',
         transformations: 'Transformace',
+        workflows: 'Workflowy',
         rill: 'Dashboardy (Rill)',
         overview: 'Přehled',
         catalog: 'Katalog',

@@ -12,6 +12,7 @@ const SqlView = () => import('../views/SqlView.vue')
 const PipelinesView = () => import('../views/PipelinesView.vue')
 const PipelineWizardView = () => import('../views/PipelineWizardView.vue')
 const TransformationsView = () => import('../views/TransformationsView.vue')
+const WorkflowsView = () => import('../views/WorkflowsView.vue')
 // RillView pulls in CodeMirror (like SqlView) — keep it lazy.
 const RillView = () => import('../views/RillView.vue')
 const AppsView = () => import('../views/AppsView.vue')
@@ -26,6 +27,7 @@ const appChildren: RouteRecordRaw[] = [
     { path: 'pipelines', name: 'pipelines', component: PipelinesView },
     { path: 'pipelines/new', name: 'pipeline-new', component: PipelineWizardView },
     { path: 'transformations', name: 'transformations', component: TransformationsView },
+    { path: 'workflows', name: 'workflows', component: WorkflowsView },
     { path: 'rill', name: 'rill', component: RillView },
     { path: 'apps', name: 'apps', component: AppsView },
     { path: 'git', name: 'git', component: GitView },

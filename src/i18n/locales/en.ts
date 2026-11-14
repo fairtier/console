@@ -27,6 +27,7 @@ export default {
         off: 'Off',
         tearingDown: 'Tearing down',
         destroyed: 'Destroyed',
+        skipped: 'Skipped',
     },
     shell: {
         noWorkspace: 'No workspace',
@@ -66,6 +67,7 @@ export default {
     nav: {
         pipelines: 'Pipelines',
         transformations: 'Transformations',
+        workflows: 'Workflows',
         rill: 'Dashboards (Rill)',
         overview: 'Overview',
         catalog: 'Catalog',

@@ -46,6 +46,7 @@ export const LOCAL_CONTRACT_PATHS = [
     '/sql',
     '/pipelines',
     '/transformations',
+    '/workflows',
     '/rill',
     '/apps',
     '/git',
