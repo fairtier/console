@@ -39,6 +39,12 @@ export interface WorkspaceCapabilities {
      * box that predates source tests — the wizard then shows no Test button.
      */
     testable_source_types?: string[]
+    /**
+     * Whether this workspace serves the MCP endpoint and the access-token API
+     * (`MCP_ENABLED=true`). Optional because a box older than the field omits
+     * it; the AI agents page then probes `ListAccessTokens` instead.
+     */
+    mcp?: boolean
 }
 
 export interface WorkspaceBootstrap {
@@ -59,6 +65,8 @@ export interface WorkspaceBootstrap {
     /** Present only while the app is enabled. */
     cube_url?: string
     duckflight_url?: string
+    /** The MCP endpoint; present only while `capabilities.mcp` is true. */
+    mcp_url?: string
     capabilities: WorkspaceCapabilities
 }
 

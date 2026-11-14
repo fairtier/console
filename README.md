@@ -163,13 +163,18 @@ Code, Cursor, any MCP client — to the workspace-api's MCP endpoint
 (`<FT_WORKSPACE_API_URL>/mcp`) and manages the **access tokens** it
 authenticates with (`access_token.v1`: `ftw_…`, scope `workspace:read` or
 `workspace:write`, shown once at creation, revocable). The page fills this
-workspace's endpoint and a freshly created token into copy-paste setup for
-each client; the secret lives only in the page and is gone on reload.
+workspace's endpoint (the bootstrap document's `mcp_url`, else
+`<FT_WORKSPACE_API_URL>/mcp`) and a freshly created token into copy-paste
+setup for each client; the secret lives only in the page and is gone on
+reload.
 
 The endpoint and the token service are **off unless the workspace-api runs
-with `MCP_ENABLED=true`**. The bootstrap document does not advertise it, so
-the page asks `ListAccessTokens` and, on Unimplemented/NotFound, shows what
-the feature is and how a self-hoster turns it on rather than an error. The
+with `MCP_ENABLED=true`**, which the bootstrap document reports as
+`capabilities.mcp`. When it is false the page shows what the feature is and
+how a self-hoster turns it on, without calling the token API. A
+workspace-api too old to send the field is probed instead: `ListAccessTokens`
+answering Unimplemented/NotFound gives the same calm state rather than an
+error. The
 threat model (tokens act as their owner; data can contain text that steers an
 agent) is in workspace-api's `docs/mcp.md`.
 

@@ -46,6 +46,13 @@ export const useWorkspaceStore = defineStore('workspace', () => {
      * that queues a test nothing will ever claim is worse than none.
      */
     const testableSourceTypes = ref<string[] | undefined>(undefined)
+    /**
+     * Whether the workspace serves MCP, or undefined when it is too old to
+     * say — the AI agents page then probes the token API instead.
+     */
+    const mcpEnabled = ref<boolean | undefined>(undefined)
+    /** The advertised MCP endpoint; empty when not advertised. */
+    const mcpUrl = ref('')
     const connectionDetails = ref<ConnectionDetails | null>(null)
     const isLoading = ref(false)
     const error = ref<string | null>(null)
@@ -87,6 +94,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
             googleOauthEnabled.value = doc.capabilities.google_oauth
             duckdbExtensions.value = doc.capabilities.duckdb_extensions
             testableSourceTypes.value = doc.capabilities.testable_source_types
+            mcpEnabled.value = doc.capabilities.mcp
+            mcpUrl.value = doc.mcp_url ?? ''
             dltEnabled.value = true
             connectionDetails.value = {
                 lakekeeperUrl: doc.lakekeeper_url ?? '',
@@ -113,6 +122,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         googleOauthEnabled,
         duckdbExtensions,
         testableSourceTypes,
+        mcpEnabled,
+        mcpUrl,
         connectionDetails,
         isLoading,
         error,

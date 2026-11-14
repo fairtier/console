@@ -217,6 +217,14 @@ export interface FakeOptions {
      * paths answer a bare 404, as an API without MCP enabled does.
      */
     mcp?: boolean
+    /**
+     * How the bootstrap document reports MCP: 'advertise' (default, a current
+     * box: capabilities.mcp = mcp, plus mcp_url while on) or 'omit' (a box
+     * older than the field, which the page has to probe).
+     */
+    bootstrapMcp?: 'advertise' | 'omit'
+    /** The mcp_url to advertise (default `${API}/mcp`). */
+    mcpUrl?: string
     /** Answer as a workspace-api from before SetWorkflowEnabled (Unimplemented). */
     legacyWorkflows?: boolean
     /** What NotificationService/ListNotifications returns (default: none). */
@@ -247,10 +255,13 @@ export async function fakeWorkspaceApi(page: Page, opts: FakeOptions = {}): Prom
         const path = new URL(req.url()).pathname
 
         if (path === '/.well-known/fairtier-workspace') {
-            return ok(route, {
-                slug: 'demo', customer_domain: 'example.com', casdoor_issuer: '', casdoor_org: 'smoke', console_client_id: 'smoke-e2e',
-                capabilities: { control_plane: false, rill: false, cube: false, duckflight: false, filedrop: false, google_oauth: false },
-            })
+            const capabilities: Json = { control_plane: false, rill: false, cube: false, duckflight: false, filedrop: false, google_oauth: false }
+            const doc: Json = { slug: 'demo', customer_domain: 'example.com', casdoor_issuer: '', casdoor_org: 'smoke', console_client_id: 'smoke-e2e', capabilities }
+            if ((opts.bootstrapMcp ?? 'advertise') === 'advertise') {
+                capabilities.mcp = !!opts.mcp
+                if (opts.mcp) doc.mcp_url = opts.mcpUrl ?? `${API}/mcp`
+            }
+            return ok(route, doc)
         }
 
         const rpc = path.replace(/^\/[a-z_]+\.v1\./, '')
