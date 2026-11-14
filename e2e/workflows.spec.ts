@@ -120,12 +120,20 @@ test('the editor builds a step list and warns about double runs', async ({ page 
     await expect(stepRows.nth(1)).toContainText('step 1 here')
     await shot(page, 'workflows-editor')
 
+    // Created paused: on by default, switched off here.
+    const enabled = editor.getByRole('switch', { name: 'Enabled' })
+    await expect(enabled).toHaveAttribute('aria-checked', 'true')
+    await enabled.click()
+
     await editor.getByRole('button', { name: 'Create workflow' }).click()
-    await expect(page.getByTestId('workflow-row').filter({ hasText: 'orders_daily' })).toBeVisible()
+    const created = page.getByTestId('workflow-row').filter({ hasText: 'orders_daily' })
+    await expect(created).toBeVisible()
+    await expect(created.getByRole('switch')).toHaveAttribute('aria-checked', 'false')
     const sent = api.bodies['WorkflowService/CreateWorkflow']!.at(-1)!
     expect(sent).toMatchObject({
         name: 'orders_daily',
         schedule: '0 7 * * *',
+        enabled: false,
         steps: [{ kind: 'pipeline' }, { kind: 'transformation' }],
     })
 })

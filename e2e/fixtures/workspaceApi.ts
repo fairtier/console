@@ -323,7 +323,8 @@ export async function fakeWorkspaceApi(page: Page, opts: FakeOptions = {}): Prom
                     name,
                     description: body.description ?? '',
                     schedule: body.schedule ?? '',
-                    ...(existing ? { enabled: !!body.enabled } : {}),
+                    // Optional on create: absent means enabled.
+                    enabled: existing ? !!body.enabled : body.enabled !== false,
                     steps: named,
                 }
                 if (existing) api.workflows.splice(api.workflows.indexOf(existing), 1, wf)
