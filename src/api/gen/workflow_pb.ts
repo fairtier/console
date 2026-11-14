@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file workflow.proto.
  */
 export const file_workflow: GenFile = /*@__PURE__*/
-  fileDesc("Cg53b3JrZmxvdy5wcm90bxILd29ya2Zsb3cudjEiTAoMV29ya2Zsb3dTdGVwEgwKBGtpbmQYASABKAkSDgoGcmVmX2lkGAIgASgJEgwKBG5hbWUYAyABKAkSEAoIcG9zaXRpb24YBCABKAUi8wEKCFdvcmtmbG93EgoKAmlkGAEgASgJEhUKDWN1c3RvbWVyX3NsdWcYAiABKAkSDAoEbmFtZRgDIAEoCRITCgtkZXNjcmlwdGlvbhgEIAEoCRIQCghzY2hlZHVsZRgFIAEoCRIPCgdlbmFibGVkGAYgASgIEigKBXN0ZXBzGAcgAygLMhkud29ya2Zsb3cudjEuV29ya2Zsb3dTdGVwEhIKCmNyZWF0ZWRfYXQYCCABKAkSEgoKdXBkYXRlZF9hdBgJIAEoCRITCgtsYXN0X3J1bl9hdBgKIAEoCRIXCg9sYXN0X3J1bl9zdGF0dXMYCyABKAki2AEKD1dvcmtmbG93U3RlcFJ1bhIQCghwb3NpdGlvbhgBIAEoBRIMCgRraW5kGAIgASgJEg4KBnJlZl9pZBgDIAEoCRIMCgRuYW1lGAQgASgJEg4KBnN0YXR1cxgFIAEoCRIXCg9waXBlbGluZV9ydW5faWQYBiABKAkSHQoVdHJhbnNmb3JtYXRpb25fcnVuX2lkGAcgASgJEhIKCnN0YXJ0ZWRfYXQYCCABKAkSFAoMY29tcGxldGVkX2F0GAkgASgJEhUKDWVycm9yX21lc3NhZ2UYCiABKAki1QEKC1dvcmtmbG93UnVuEgoKAmlkGAEgASgJEhMKC3dvcmtmbG93X2lkGAIgASgJEg4KBnN0YXR1cxgDIAEoCRIPCgd0cmlnZ2VyGAQgASgJEhIKCnN0YXJ0ZWRfYXQYBSABKAkSFAoMY29tcGxldGVkX2F0GAYgASgJEhUKDWVycm9yX21lc3NhZ2UYByABKAkSEgoKY3JlYXRlZF9hdBgIIAEoCRIvCglzdGVwX3J1bnMYCSADKAsyHC53b3JrZmxvdy52MS5Xb3JrZmxvd1N0ZXBSdW4idgoVQ3JlYXRlV29ya2Zsb3dSZXF1ZXN0EgwKBG5hbWUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEAoIc2NoZWR1bGUYAyABKAkSKAoFc3RlcHMYBCADKAsyGS53b3JrZmxvdy52MS5Xb3JrZmxvd1N0ZXAiQQoWQ3JlYXRlV29ya2Zsb3dSZXNwb25zZRInCgh3b3JrZmxvdxgBIAEoCzIVLndvcmtmbG93LnYxLldvcmtmbG93IhYKFExpc3RXb3JrZmxvd3NSZXF1ZXN0IkEKFUxpc3RXb3JrZmxvd3NSZXNwb25zZRIoCgl3b3JrZmxvd3MYASADKAsyFS53b3JrZmxvdy52MS5Xb3JrZmxvdyIgChJHZXRXb3JrZmxvd1JlcXVlc3QSCgoCaWQYASABKAkibQoTR2V0V29ya2Zsb3dSZXNwb25zZRInCgh3b3JrZmxvdxgBIAEoCzIVLndvcmtmbG93LnYxLldvcmtmbG93Ei0KC3JlY2VudF9ydW5zGAIgAygLMhgud29ya2Zsb3cudjEuV29ya2Zsb3dSdW4ikwEKFVVwZGF0ZVdvcmtmbG93UmVxdWVzdBIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJEhAKCHNjaGVkdWxlGAQgASgJEg8KB2VuYWJsZWQYBSABKAgSKAoFc3RlcHMYBiADKAsyGS53b3JrZmxvdy52MS5Xb3JrZmxvd1N0ZXAiQQoWVXBkYXRlV29ya2Zsb3dSZXNwb25zZRInCgh3b3JrZmxvdxgBIAEoCzIVLndvcmtmbG93LnYxLldvcmtmbG93IiMKFURlbGV0ZVdvcmtmbG93UmVxdWVzdBIKCgJpZBgBIAEoCSIYChZEZWxldGVXb3JrZmxvd1Jlc3BvbnNlIiQKFlRyaWdnZXJXb3JrZmxvd1JlcXVlc3QSCgoCaWQYASABKAkiQAoXVHJpZ2dlcldvcmtmbG93UmVzcG9uc2USJQoDcnVuGAEgASgLMhgud29ya2Zsb3cudjEuV29ya2Zsb3dSdW4iVQoXTGlzdFdvcmtmbG93UnVuc1JlcXVlc3QSEwoLd29ya2Zsb3dfaWQYASABKAkSEQoJcGFnZV9zaXplGAIgASgFEhIKCnBhZ2VfdG9rZW4YAyABKAkiWwoYTGlzdFdvcmtmbG93UnVuc1Jlc3BvbnNlEiYKBHJ1bnMYASADKAsyGC53b3JrZmxvdy52MS5Xb3JrZmxvd1J1bhIXCg9uZXh0X3BhZ2VfdG9rZW4YAiABKAkiMgoZR2V0V29ya2Zsb3dDb25maWdzUmVxdWVzdBIVCg1jdXN0b21lcl9zbHVnGAEgASgJIlAKGkdldFdvcmtmbG93Q29uZmlnc1Jlc3BvbnNlEjIKCXdvcmtmbG93cxgBIAMoCzIfLndvcmtmbG93LnYxLldvcmtmbG93Q29uZmlnSXRlbSJnChJXb3JrZmxvd0NvbmZpZ1N0ZXASEAoIcG9zaXRpb24YASABKAUSDAoEa2luZBgCIAEoCRIOCgZyZWZfaWQYAyABKAkSDAoEbmFtZRgEIAEoCRITCgtyZWZfZW5hYmxlZBgFIAEoCCLcAQoSV29ya2Zsb3dDb25maWdJdGVtEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEAoIc2NoZWR1bGUYAyABKAkSDwoHZW5hYmxlZBgEIAEoCBIuCgVzdGVwcxgFIAMoCzIfLndvcmtmbG93LnYxLldvcmtmbG93Q29uZmlnU3RlcBITCgt0cmlnZ2VyX25vdxgGIAEoCBIWCg5wZW5kaW5nX3J1bl9pZBgHIAEoCRITCgtsYXN0X3J1bl9hdBgIIAEoCRIXCg9sYXN0X3J1bl9zdGF0dXMYCSABKAki3gEKFVdvcmtmbG93U3RlcFJ1blJlcG9ydBIQCghwb3NpdGlvbhgBIAEoBRIMCgRraW5kGAIgASgJEg4KBnJlZl9pZBgDIAEoCRIMCgRuYW1lGAQgASgJEg4KBnN0YXR1cxgFIAEoCRIXCg9waXBlbGluZV9ydW5faWQYBiABKAkSHQoVdHJhbnNmb3JtYXRpb25fcnVuX2lkGAcgASgJEhIKCnN0YXJ0ZWRfYXQYCCABKAkSFAoMY29tcGxldGVkX2F0GAkgASgJEhUKDWVycm9yX21lc3NhZ2UYCiABKAki2AEKGFJlcG9ydFdvcmtmbG93UnVuUmVxdWVzdBIOCgZydW5faWQYASABKAkSEwoLd29ya2Zsb3dfaWQYAiABKAkSDgoGc3RhdHVzGAMgASgJEg8KB3RyaWdnZXIYBCABKAkSEgoKc3RhcnRlZF9hdBgFIAEoCRIUCgxjb21wbGV0ZWRfYXQYBiABKAkSFQoNZXJyb3JfbWVzc2FnZRgHIAEoCRI1CglzdGVwX3J1bnMYCCADKAsyIi53b3JrZmxvdy52MS5Xb3JrZmxvd1N0ZXBSdW5SZXBvcnQiGwoZUmVwb3J0V29ya2Zsb3dSdW5SZXNwb25zZTLoBgoPV29ya2Zsb3dTZXJ2aWNlElsKDkNyZWF0ZVdvcmtmbG93EiIud29ya2Zsb3cudjEuQ3JlYXRlV29ya2Zsb3dSZXF1ZXN0GiMud29ya2Zsb3cudjEuQ3JlYXRlV29ya2Zsb3dSZXNwb25zZSIAElgKDUxpc3RXb3JrZmxvd3MSIS53b3JrZmxvdy52MS5MaXN0V29ya2Zsb3dzUmVxdWVzdBoiLndvcmtmbG93LnYxLkxpc3RXb3JrZmxvd3NSZXNwb25zZSIAElIKC0dldFdvcmtmbG93Eh8ud29ya2Zsb3cudjEuR2V0V29ya2Zsb3dSZXF1ZXN0GiAud29ya2Zsb3cudjEuR2V0V29ya2Zsb3dSZXNwb25zZSIAElsKDlVwZGF0ZVdvcmtmbG93EiIud29ya2Zsb3cudjEuVXBkYXRlV29ya2Zsb3dSZXF1ZXN0GiMud29ya2Zsb3cudjEuVXBkYXRlV29ya2Zsb3dSZXNwb25zZSIAElsKDkRlbGV0ZVdvcmtmbG93EiIud29ya2Zsb3cudjEuRGVsZXRlV29ya2Zsb3dSZXF1ZXN0GiMud29ya2Zsb3cudjEuRGVsZXRlV29ya2Zsb3dSZXNwb25zZSIAEl4KD1RyaWdnZXJXb3JrZmxvdxIjLndvcmtmbG93LnYxLlRyaWdnZXJXb3JrZmxvd1JlcXVlc3QaJC53b3JrZmxvdy52MS5UcmlnZ2VyV29ya2Zsb3dSZXNwb25zZSIAEmEKEExpc3RXb3JrZmxvd1J1bnMSJC53b3JrZmxvdy52MS5MaXN0V29ya2Zsb3dSdW5zUmVxdWVzdBolLndvcmtmbG93LnYxLkxpc3RXb3JrZmxvd1J1bnNSZXNwb25zZSIAEmcKEkdldFdvcmtmbG93Q29uZmlncxImLndvcmtmbG93LnYxLkdldFdvcmtmbG93Q29uZmlnc1JlcXVlc3QaJy53b3JrZmxvdy52MS5HZXRXb3JrZmxvd0NvbmZpZ3NSZXNwb25zZSIAEmQKEVJlcG9ydFdvcmtmbG93UnVuEiUud29ya2Zsb3cudjEuUmVwb3J0V29ya2Zsb3dSdW5SZXF1ZXN0GiYud29ya2Zsb3cudjEuUmVwb3J0V29ya2Zsb3dSdW5SZXNwb25zZSIAQkBaPmdpdGh1Yi5jb20vZmFpcnRpZXIvd29ya3NwYWNlLWFwaS9wcm90by93b3JrZmxvdy92MTt3b3JrZmxvd3YxYgZwcm90bzM");
+  fileDesc("Cg53b3JrZmxvdy5wcm90bxILd29ya2Zsb3cudjEiTAoMV29ya2Zsb3dTdGVwEgwKBGtpbmQYASABKAkSDgoGcmVmX2lkGAIgASgJEgwKBG5hbWUYAyABKAkSEAoIcG9zaXRpb24YBCABKAUi8AIKCFdvcmtmbG93EgoKAmlkGAEgASgJEhUKDWN1c3RvbWVyX3NsdWcYAiABKAkSDAoEbmFtZRgDIAEoCRITCgtkZXNjcmlwdGlvbhgEIAEoCRIQCghzY2hlZHVsZRgFIAEoCRIPCgdlbmFibGVkGAYgASgIEigKBXN0ZXBzGAcgAygLMhkud29ya2Zsb3cudjEuV29ya2Zsb3dTdGVwEhIKCmNyZWF0ZWRfYXQYCCABKAkSEgoKdXBkYXRlZF9hdBgJIAEoCRITCgtsYXN0X3J1bl9hdBgKIAEoCRIXCg9sYXN0X3J1bl9zdGF0dXMYCyABKAkSFgoObGFzdF9ydW5fZXJyb3IYDCABKAkSJgoZbGFzdF9mYWlsZWRfc3RlcF9wb3NpdGlvbhgNIAEoBUgAiAEBEh0KFWxhc3RfZmFpbGVkX3N0ZXBfbmFtZRgOIAEoCUIcChpfbGFzdF9mYWlsZWRfc3RlcF9wb3NpdGlvbiLYAQoPV29ya2Zsb3dTdGVwUnVuEhAKCHBvc2l0aW9uGAEgASgFEgwKBGtpbmQYAiABKAkSDgoGcmVmX2lkGAMgASgJEgwKBG5hbWUYBCABKAkSDgoGc3RhdHVzGAUgASgJEhcKD3BpcGVsaW5lX3J1bl9pZBgGIAEoCRIdChV0cmFuc2Zvcm1hdGlvbl9ydW5faWQYByABKAkSEgoKc3RhcnRlZF9hdBgIIAEoCRIUCgxjb21wbGV0ZWRfYXQYCSABKAkSFQoNZXJyb3JfbWVzc2FnZRgKIAEoCSLVAQoLV29ya2Zsb3dSdW4SCgoCaWQYASABKAkSEwoLd29ya2Zsb3dfaWQYAiABKAkSDgoGc3RhdHVzGAMgASgJEg8KB3RyaWdnZXIYBCABKAkSEgoKc3RhcnRlZF9hdBgFIAEoCRIUCgxjb21wbGV0ZWRfYXQYBiABKAkSFQoNZXJyb3JfbWVzc2FnZRgHIAEoCRISCgpjcmVhdGVkX2F0GAggASgJEi8KCXN0ZXBfcnVucxgJIAMoCzIcLndvcmtmbG93LnYxLldvcmtmbG93U3RlcFJ1biKYAQoVQ3JlYXRlV29ya2Zsb3dSZXF1ZXN0EgwKBG5hbWUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEAoIc2NoZWR1bGUYAyABKAkSKAoFc3RlcHMYBCADKAsyGS53b3JrZmxvdy52MS5Xb3JrZmxvd1N0ZXASFAoHZW5hYmxlZBgFIAEoCEgAiAEBQgoKCF9lbmFibGVkIkEKFkNyZWF0ZVdvcmtmbG93UmVzcG9uc2USJwoId29ya2Zsb3cYASABKAsyFS53b3JrZmxvdy52MS5Xb3JrZmxvdyIWChRMaXN0V29ya2Zsb3dzUmVxdWVzdCJBChVMaXN0V29ya2Zsb3dzUmVzcG9uc2USKAoJd29ya2Zsb3dzGAEgAygLMhUud29ya2Zsb3cudjEuV29ya2Zsb3ciIAoSR2V0V29ya2Zsb3dSZXF1ZXN0EgoKAmlkGAEgASgJIm0KE0dldFdvcmtmbG93UmVzcG9uc2USJwoId29ya2Zsb3cYASABKAsyFS53b3JrZmxvdy52MS5Xb3JrZmxvdxItCgtyZWNlbnRfcnVucxgCIAMoCzIYLndvcmtmbG93LnYxLldvcmtmbG93UnVuIpMBChVVcGRhdGVXb3JrZmxvd1JlcXVlc3QSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIQCghzY2hlZHVsZRgEIAEoCRIPCgdlbmFibGVkGAUgASgIEigKBXN0ZXBzGAYgAygLMhkud29ya2Zsb3cudjEuV29ya2Zsb3dTdGVwIkEKFlVwZGF0ZVdvcmtmbG93UmVzcG9uc2USJwoId29ya2Zsb3cYASABKAsyFS53b3JrZmxvdy52MS5Xb3JrZmxvdyI4ChlTZXRXb3JrZmxvd0VuYWJsZWRSZXF1ZXN0EgoKAmlkGAEgASgJEg8KB2VuYWJsZWQYAiABKAgiRQoaU2V0V29ya2Zsb3dFbmFibGVkUmVzcG9uc2USJwoId29ya2Zsb3cYASABKAsyFS53b3JrZmxvdy52MS5Xb3JrZmxvdyIjChVEZWxldGVXb3JrZmxvd1JlcXVlc3QSCgoCaWQYASABKAkiGAoWRGVsZXRlV29ya2Zsb3dSZXNwb25zZSIkChZUcmlnZ2VyV29ya2Zsb3dSZXF1ZXN0EgoKAmlkGAEgASgJIkAKF1RyaWdnZXJXb3JrZmxvd1Jlc3BvbnNlEiUKA3J1bhgBIAEoCzIYLndvcmtmbG93LnYxLldvcmtmbG93UnVuIlUKF0xpc3RXb3JrZmxvd1J1bnNSZXF1ZXN0EhMKC3dvcmtmbG93X2lkGAEgASgJEhEKCXBhZ2Vfc2l6ZRgCIAEoBRISCgpwYWdlX3Rva2VuGAMgASgJIlsKGExpc3RXb3JrZmxvd1J1bnNSZXNwb25zZRImCgRydW5zGAEgAygLMhgud29ya2Zsb3cudjEuV29ya2Zsb3dSdW4SFwoPbmV4dF9wYWdlX3Rva2VuGAIgASgJIjIKGUdldFdvcmtmbG93Q29uZmlnc1JlcXVlc3QSFQoNY3VzdG9tZXJfc2x1ZxgBIAEoCSJQChpHZXRXb3JrZmxvd0NvbmZpZ3NSZXNwb25zZRIyCgl3b3JrZmxvd3MYASADKAsyHy53b3JrZmxvdy52MS5Xb3JrZmxvd0NvbmZpZ0l0ZW0iZwoSV29ya2Zsb3dDb25maWdTdGVwEhAKCHBvc2l0aW9uGAEgASgFEgwKBGtpbmQYAiABKAkSDgoGcmVmX2lkGAMgASgJEgwKBG5hbWUYBCABKAkSEwoLcmVmX2VuYWJsZWQYBSABKAgi3AEKEldvcmtmbG93Q29uZmlnSXRlbRIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhAKCHNjaGVkdWxlGAMgASgJEg8KB2VuYWJsZWQYBCABKAgSLgoFc3RlcHMYBSADKAsyHy53b3JrZmxvdy52MS5Xb3JrZmxvd0NvbmZpZ1N0ZXASEwoLdHJpZ2dlcl9ub3cYBiABKAgSFgoOcGVuZGluZ19ydW5faWQYByABKAkSEwoLbGFzdF9ydW5fYXQYCCABKAkSFwoPbGFzdF9ydW5fc3RhdHVzGAkgASgJIt4BChVXb3JrZmxvd1N0ZXBSdW5SZXBvcnQSEAoIcG9zaXRpb24YASABKAUSDAoEa2luZBgCIAEoCRIOCgZyZWZfaWQYAyABKAkSDAoEbmFtZRgEIAEoCRIOCgZzdGF0dXMYBSABKAkSFwoPcGlwZWxpbmVfcnVuX2lkGAYgASgJEh0KFXRyYW5zZm9ybWF0aW9uX3J1bl9pZBgHIAEoCRISCgpzdGFydGVkX2F0GAggASgJEhQKDGNvbXBsZXRlZF9hdBgJIAEoCRIVCg1lcnJvcl9tZXNzYWdlGAogASgJItgBChhSZXBvcnRXb3JrZmxvd1J1blJlcXVlc3QSDgoGcnVuX2lkGAEgASgJEhMKC3dvcmtmbG93X2lkGAIgASgJEg4KBnN0YXR1cxgDIAEoCRIPCgd0cmlnZ2VyGAQgASgJEhIKCnN0YXJ0ZWRfYXQYBSABKAkSFAoMY29tcGxldGVkX2F0GAYgASgJEhUKDWVycm9yX21lc3NhZ2UYByABKAkSNQoJc3RlcF9ydW5zGAggAygLMiIud29ya2Zsb3cudjEuV29ya2Zsb3dTdGVwUnVuUmVwb3J0IhsKGVJlcG9ydFdvcmtmbG93UnVuUmVzcG9uc2Uy0QcKD1dvcmtmbG93U2VydmljZRJbCg5DcmVhdGVXb3JrZmxvdxIiLndvcmtmbG93LnYxLkNyZWF0ZVdvcmtmbG93UmVxdWVzdBojLndvcmtmbG93LnYxLkNyZWF0ZVdvcmtmbG93UmVzcG9uc2UiABJYCg1MaXN0V29ya2Zsb3dzEiEud29ya2Zsb3cudjEuTGlzdFdvcmtmbG93c1JlcXVlc3QaIi53b3JrZmxvdy52MS5MaXN0V29ya2Zsb3dzUmVzcG9uc2UiABJSCgtHZXRXb3JrZmxvdxIfLndvcmtmbG93LnYxLkdldFdvcmtmbG93UmVxdWVzdBogLndvcmtmbG93LnYxLkdldFdvcmtmbG93UmVzcG9uc2UiABJbCg5VcGRhdGVXb3JrZmxvdxIiLndvcmtmbG93LnYxLlVwZGF0ZVdvcmtmbG93UmVxdWVzdBojLndvcmtmbG93LnYxLlVwZGF0ZVdvcmtmbG93UmVzcG9uc2UiABJnChJTZXRXb3JrZmxvd0VuYWJsZWQSJi53b3JrZmxvdy52MS5TZXRXb3JrZmxvd0VuYWJsZWRSZXF1ZXN0Gicud29ya2Zsb3cudjEuU2V0V29ya2Zsb3dFbmFibGVkUmVzcG9uc2UiABJbCg5EZWxldGVXb3JrZmxvdxIiLndvcmtmbG93LnYxLkRlbGV0ZVdvcmtmbG93UmVxdWVzdBojLndvcmtmbG93LnYxLkRlbGV0ZVdvcmtmbG93UmVzcG9uc2UiABJeCg9UcmlnZ2VyV29ya2Zsb3cSIy53b3JrZmxvdy52MS5UcmlnZ2VyV29ya2Zsb3dSZXF1ZXN0GiQud29ya2Zsb3cudjEuVHJpZ2dlcldvcmtmbG93UmVzcG9uc2UiABJhChBMaXN0V29ya2Zsb3dSdW5zEiQud29ya2Zsb3cudjEuTGlzdFdvcmtmbG93UnVuc1JlcXVlc3QaJS53b3JrZmxvdy52MS5MaXN0V29ya2Zsb3dSdW5zUmVzcG9uc2UiABJnChJHZXRXb3JrZmxvd0NvbmZpZ3MSJi53b3JrZmxvdy52MS5HZXRXb3JrZmxvd0NvbmZpZ3NSZXF1ZXN0Gicud29ya2Zsb3cudjEuR2V0V29ya2Zsb3dDb25maWdzUmVzcG9uc2UiABJkChFSZXBvcnRXb3JrZmxvd1J1bhIlLndvcmtmbG93LnYxLlJlcG9ydFdvcmtmbG93UnVuUmVxdWVzdBomLndvcmtmbG93LnYxLlJlcG9ydFdvcmtmbG93UnVuUmVzcG9uc2UiAEJAWj5naXRodWIuY29tL2ZhaXJ0aWVyL3dvcmtzcGFjZS1hcGkvcHJvdG8vd29ya2Zsb3cvdjE7d29ya2Zsb3d2MWIGcHJvdG8z");
 
 /**
  * WorkflowStep is one entry in a workflow's ordered step list.
@@ -90,8 +90,8 @@ export type Workflow = Message<"workflow.v1.Workflow"> & {
   description: string;
 
   /**
-   * Cron expression (five fields, or a macro such as "@daily"), or empty for
-   * manual runs only.
+   * Five-field cron expression (UTC), or empty for manual runs only. @macros
+   * such as "@daily" are rejected, as the Console rejects them.
    *
    * @generated from field: string schedule = 5;
    */
@@ -136,6 +136,29 @@ export type Workflow = Message<"workflow.v1.Workflow"> & {
    * @generated from field: string last_run_status = 11;
    */
   lastRunStatus: string;
+
+  /**
+   * When the most recent run failed: the first line of its error (the
+   * failed step's error, else the run's), at most 200 characters. Empty
+   * otherwise.
+   *
+   * @generated from field: string last_run_error = 12;
+   */
+  lastRunError: string;
+
+  /**
+   * When the most recent run failed at a step: that step's zero-based
+   * position and name (snapshot at run time). Unset otherwise — position 0
+   * is a real step, hence the presence.
+   *
+   * @generated from field: optional int32 last_failed_step_position = 13;
+   */
+  lastFailedStepPosition?: number | undefined;
+
+  /**
+   * @generated from field: string last_failed_step_name = 14;
+   */
+  lastFailedStepName: string;
 };
 
 /**
@@ -326,6 +349,14 @@ export type CreateWorkflowRequest = Message<"workflow.v1.CreateWorkflowRequest">
    * @generated from field: repeated workflow.v1.WorkflowStep steps = 4;
    */
   steps: WorkflowStep[];
+
+  /**
+   * Whether the schedule is on. Absent means true (the behaviour before this
+   * field existed); set false to create a workflow paused.
+   *
+   * @generated from field: optional bool enabled = 5;
+   */
+  enabled?: boolean | undefined;
 };
 
 /**
@@ -485,6 +516,45 @@ export const UpdateWorkflowResponseSchema: GenMessage<UpdateWorkflowResponse> = 
   messageDesc(file_workflow, 11);
 
 /**
+ * @generated from message workflow.v1.SetWorkflowEnabledRequest
+ */
+export type SetWorkflowEnabledRequest = Message<"workflow.v1.SetWorkflowEnabledRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: bool enabled = 2;
+   */
+  enabled: boolean;
+};
+
+/**
+ * Describes the message workflow.v1.SetWorkflowEnabledRequest.
+ * Use `create(SetWorkflowEnabledRequestSchema)` to create a new message.
+ */
+export const SetWorkflowEnabledRequestSchema: GenMessage<SetWorkflowEnabledRequest> = /*@__PURE__*/
+  messageDesc(file_workflow, 12);
+
+/**
+ * @generated from message workflow.v1.SetWorkflowEnabledResponse
+ */
+export type SetWorkflowEnabledResponse = Message<"workflow.v1.SetWorkflowEnabledResponse"> & {
+  /**
+   * @generated from field: workflow.v1.Workflow workflow = 1;
+   */
+  workflow?: Workflow | undefined;
+};
+
+/**
+ * Describes the message workflow.v1.SetWorkflowEnabledResponse.
+ * Use `create(SetWorkflowEnabledResponseSchema)` to create a new message.
+ */
+export const SetWorkflowEnabledResponseSchema: GenMessage<SetWorkflowEnabledResponse> = /*@__PURE__*/
+  messageDesc(file_workflow, 13);
+
+/**
  * @generated from message workflow.v1.DeleteWorkflowRequest
  */
 export type DeleteWorkflowRequest = Message<"workflow.v1.DeleteWorkflowRequest"> & {
@@ -499,7 +569,7 @@ export type DeleteWorkflowRequest = Message<"workflow.v1.DeleteWorkflowRequest">
  * Use `create(DeleteWorkflowRequestSchema)` to create a new message.
  */
 export const DeleteWorkflowRequestSchema: GenMessage<DeleteWorkflowRequest> = /*@__PURE__*/
-  messageDesc(file_workflow, 12);
+  messageDesc(file_workflow, 14);
 
 /**
  * @generated from message workflow.v1.DeleteWorkflowResponse
@@ -512,7 +582,7 @@ export type DeleteWorkflowResponse = Message<"workflow.v1.DeleteWorkflowResponse
  * Use `create(DeleteWorkflowResponseSchema)` to create a new message.
  */
 export const DeleteWorkflowResponseSchema: GenMessage<DeleteWorkflowResponse> = /*@__PURE__*/
-  messageDesc(file_workflow, 13);
+  messageDesc(file_workflow, 15);
 
 /**
  * @generated from message workflow.v1.TriggerWorkflowRequest
@@ -529,7 +599,7 @@ export type TriggerWorkflowRequest = Message<"workflow.v1.TriggerWorkflowRequest
  * Use `create(TriggerWorkflowRequestSchema)` to create a new message.
  */
 export const TriggerWorkflowRequestSchema: GenMessage<TriggerWorkflowRequest> = /*@__PURE__*/
-  messageDesc(file_workflow, 14);
+  messageDesc(file_workflow, 16);
 
 /**
  * @generated from message workflow.v1.TriggerWorkflowResponse
@@ -546,7 +616,7 @@ export type TriggerWorkflowResponse = Message<"workflow.v1.TriggerWorkflowRespon
  * Use `create(TriggerWorkflowResponseSchema)` to create a new message.
  */
 export const TriggerWorkflowResponseSchema: GenMessage<TriggerWorkflowResponse> = /*@__PURE__*/
-  messageDesc(file_workflow, 15);
+  messageDesc(file_workflow, 17);
 
 /**
  * @generated from message workflow.v1.ListWorkflowRunsRequest
@@ -578,7 +648,7 @@ export type ListWorkflowRunsRequest = Message<"workflow.v1.ListWorkflowRunsReque
  * Use `create(ListWorkflowRunsRequestSchema)` to create a new message.
  */
 export const ListWorkflowRunsRequestSchema: GenMessage<ListWorkflowRunsRequest> = /*@__PURE__*/
-  messageDesc(file_workflow, 16);
+  messageDesc(file_workflow, 18);
 
 /**
  * @generated from message workflow.v1.ListWorkflowRunsResponse
@@ -604,7 +674,7 @@ export type ListWorkflowRunsResponse = Message<"workflow.v1.ListWorkflowRunsResp
  * Use `create(ListWorkflowRunsResponseSchema)` to create a new message.
  */
 export const ListWorkflowRunsResponseSchema: GenMessage<ListWorkflowRunsResponse> = /*@__PURE__*/
-  messageDesc(file_workflow, 17);
+  messageDesc(file_workflow, 19);
 
 /**
  * @generated from message workflow.v1.GetWorkflowConfigsRequest
@@ -621,7 +691,7 @@ export type GetWorkflowConfigsRequest = Message<"workflow.v1.GetWorkflowConfigsR
  * Use `create(GetWorkflowConfigsRequestSchema)` to create a new message.
  */
 export const GetWorkflowConfigsRequestSchema: GenMessage<GetWorkflowConfigsRequest> = /*@__PURE__*/
-  messageDesc(file_workflow, 18);
+  messageDesc(file_workflow, 20);
 
 /**
  * @generated from message workflow.v1.GetWorkflowConfigsResponse
@@ -638,7 +708,7 @@ export type GetWorkflowConfigsResponse = Message<"workflow.v1.GetWorkflowConfigs
  * Use `create(GetWorkflowConfigsResponseSchema)` to create a new message.
  */
 export const GetWorkflowConfigsResponseSchema: GenMessage<GetWorkflowConfigsResponse> = /*@__PURE__*/
-  messageDesc(file_workflow, 19);
+  messageDesc(file_workflow, 21);
 
 /**
  * WorkflowConfigStep is a step as the worker needs it. The referenced
@@ -691,7 +761,7 @@ export type WorkflowConfigStep = Message<"workflow.v1.WorkflowConfigStep"> & {
  * Use `create(WorkflowConfigStepSchema)` to create a new message.
  */
 export const WorkflowConfigStepSchema: GenMessage<WorkflowConfigStep> = /*@__PURE__*/
-  messageDesc(file_workflow, 20);
+  messageDesc(file_workflow, 22);
 
 /**
  * @generated from message workflow.v1.WorkflowConfigItem
@@ -764,7 +834,7 @@ export type WorkflowConfigItem = Message<"workflow.v1.WorkflowConfigItem"> & {
  * Use `create(WorkflowConfigItemSchema)` to create a new message.
  */
 export const WorkflowConfigItemSchema: GenMessage<WorkflowConfigItem> = /*@__PURE__*/
-  messageDesc(file_workflow, 21);
+  messageDesc(file_workflow, 23);
 
 /**
  * WorkflowStepRunReport is one step's state in a ReportWorkflowRun call.
@@ -845,7 +915,7 @@ export type WorkflowStepRunReport = Message<"workflow.v1.WorkflowStepRunReport">
  * Use `create(WorkflowStepRunReportSchema)` to create a new message.
  */
 export const WorkflowStepRunReportSchema: GenMessage<WorkflowStepRunReport> = /*@__PURE__*/
-  messageDesc(file_workflow, 22);
+  messageDesc(file_workflow, 24);
 
 /**
  * @generated from message workflow.v1.ReportWorkflowRunRequest
@@ -910,7 +980,7 @@ export type ReportWorkflowRunRequest = Message<"workflow.v1.ReportWorkflowRunReq
  * Use `create(ReportWorkflowRunRequestSchema)` to create a new message.
  */
 export const ReportWorkflowRunRequestSchema: GenMessage<ReportWorkflowRunRequest> = /*@__PURE__*/
-  messageDesc(file_workflow, 23);
+  messageDesc(file_workflow, 25);
 
 /**
  * @generated from message workflow.v1.ReportWorkflowRunResponse
@@ -923,7 +993,7 @@ export type ReportWorkflowRunResponse = Message<"workflow.v1.ReportWorkflowRunRe
  * Use `create(ReportWorkflowRunResponseSchema)` to create a new message.
  */
 export const ReportWorkflowRunResponseSchema: GenMessage<ReportWorkflowRunResponse> = /*@__PURE__*/
-  messageDesc(file_workflow, 24);
+  messageDesc(file_workflow, 26);
 
 /**
  * WorkflowService manages workflows: a named, ordered, linear list of steps,
@@ -939,7 +1009,7 @@ export const ReportWorkflowRunResponseSchema: GenMessage<ReportWorkflowRunRespon
  *
  * User-facing RPCs (require JWT auth, available on public port):
  *   CreateWorkflow, ListWorkflows, GetWorkflow, UpdateWorkflow,
- *   DeleteWorkflow, TriggerWorkflow, ListWorkflowRuns
+ *   SetWorkflowEnabled, DeleteWorkflow, TriggerWorkflow, ListWorkflowRuns
  *
  * Worker-facing RPCs (served on the authenticated internal port, not the
  * public one; tenant-bound service tokens):
@@ -953,7 +1023,8 @@ export const ReportWorkflowRunResponseSchema: GenMessage<ReportWorkflowRunRespon
  */
 export const WorkflowService: GenService<{
   /**
-   * CreateWorkflow defines a new workflow. It is enabled on creation.
+   * CreateWorkflow defines a new workflow. It is enabled on creation unless
+   * the request sets enabled to false.
    *
    * @generated from rpc workflow.v1.WorkflowService.CreateWorkflow
    */
@@ -995,6 +1066,19 @@ export const WorkflowService: GenService<{
     output: typeof UpdateWorkflowResponseSchema;
   },
   /**
+   * SetWorkflowEnabled turns a workflow's schedule on or off without
+   * resending its definition. Same authorization as UpdateWorkflow. A
+   * disabled workflow keeps its definition and history, and a manual
+   * TriggerWorkflow still runs it.
+   *
+   * @generated from rpc workflow.v1.WorkflowService.SetWorkflowEnabled
+   */
+  setWorkflowEnabled: {
+    methodKind: "unary";
+    input: typeof SetWorkflowEnabledRequestSchema;
+    output: typeof SetWorkflowEnabledResponseSchema;
+  },
+  /**
    * DeleteWorkflow permanently removes a workflow and its run history. The
    * pipelines and transformations it references are not touched.
    *
@@ -1030,7 +1114,12 @@ export const WorkflowService: GenService<{
   /**
    * GetWorkflowConfigs returns the workflows the worker should act on: every
    * enabled workflow, plus a disabled one that has a pending (manually
-   * triggered) run. Workflows without steps are omitted.
+   * triggered) run. Omitted: workflows without steps (a pending run of one is
+   * failed instead, since nothing can ever run it), and workflows whose
+   * latest run is still "running" — the worker must not start a second run
+   * alongside it; the workflow reappears once that run is reported finished
+   * or is failed as stuck (a periodic server sweep fails runs "running" for
+   * longer than WORKFLOW_RUN_STUCK_TIMEOUT, 8 hours by default).
    *
    * @generated from rpc workflow.v1.WorkflowService.GetWorkflowConfigs
    */
@@ -1043,6 +1132,17 @@ export const WorkflowService: GenService<{
    * ReportWorkflowRun records a workflow run's progress. It is an idempotent
    * upsert on run_id, step runs included, so the worker reports after every
    * step and may safely repeat a report.
+   *
+   * Errors a worker must NOT retry (the same report will fail the same way):
+   *   InvalidArgument   — malformed report (bad UUID, status, timestamp,
+   *                       position or step kind); FieldViolations name it.
+   *   NotFound          — the workflow does not exist (deleted mid-run) or
+   *                       belongs to another tenant, or run_id already
+   *                       belongs to another workflow.
+   * Configuration errors, not fixed by retrying the report until an operator
+   * acts: Unauthenticated, PermissionDenied.
+   * Anything else (Unavailable, DeadlineExceeded, Internal, Unknown, a
+   * transport failure) is transient: retry the same report.
    *
    * @generated from rpc workflow.v1.WorkflowService.ReportWorkflowRun
    */
