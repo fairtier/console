@@ -2,7 +2,9 @@
 
 The web console of a [FairTier](https://fairtier.com) data workspace — a Vue 3
 SPA for the product itself: pipelines, transformations, workflows (ordered
-pipeline/transformation steps on one schedule), SQL, the Iceberg catalog, dashboards, service accounts. It is served next to the workspace it
+pipeline/transformation steps on one schedule), SQL, the Iceberg catalog, dashboards, service accounts,
+and AI agents (connecting a person's own MCP client to the workspace — see
+[below](#ai-agents-mcp)). It is served next to the workspace it
 manages, talks only to that workspace's own
 [workspace-api](https://github.com/fairtier/workspace-api), and authenticates
 against the workspace's own identity provider (Casdoor).
@@ -53,10 +55,13 @@ Two tiers, and the split is enforced by config rather than habit:
   builds the app and starts [`server.ts`](./server.ts) with dummy `FT_*`
   values, then asserts what a fresh deployment serves before anyone signs in.
   No backend and no identity provider. Specs that need a page past the login
-  (`e2e/workflows.spec.ts`) seed a session in localStorage and answer the
-  Connect calls at the network layer with
-  [`e2e/fixtures/workspaceApi.ts`](./e2e/fixtures/workspaceApi.ts) — a fake,
-  so the real API contract is still tested against a live workspace.
+  (`e2e/workflows.spec.ts`, `e2e/agents.spec.ts`, `e2e/deeplinks.spec.ts`)
+  seed a session in localStorage and answer the Connect calls at the network
+  layer with [`e2e/fixtures/workspaceApi.ts`](./e2e/fixtures/workspaceApi.ts)
+  — a fake, so the real API contract is still tested against a live
+  workspace. `FT_E2E_SMOKE_URL=http://localhost:<port>` moves the suite (and
+  the server it starts) off `:3000`; `FT_E2E_SCREENSHOTS=<dir>` makes the
+  page specs also write screenshots there.
 
 Playwright ships no Bun-native runner, but it is still invoked through Bun:
 `bun run test:e2e` resolves `node_modules/.bin/playwright`, whose
@@ -150,6 +155,23 @@ suspecting the SDK.
 Two deliberate omissions, both a config change away: no tracing (errors only),
 and no source maps (production stack traces are minified; un-minifying them
 would need a CI upload step and an API token — a real secret).
+
+## AI agents (MCP)
+
+The **AI agents** page (`/agents`) connects a person's own agent — Claude
+Code, Cursor, any MCP client — to the workspace-api's MCP endpoint
+(`<FT_WORKSPACE_API_URL>/mcp`) and manages the **access tokens** it
+authenticates with (`access_token.v1`: `ftw_…`, scope `workspace:read` or
+`workspace:write`, shown once at creation, revocable). The page fills this
+workspace's endpoint and a freshly created token into copy-paste setup for
+each client; the secret lives only in the page and is gone on reload.
+
+The endpoint and the token service are **off unless the workspace-api runs
+with `MCP_ENABLED=true`**. The bootstrap document does not advertise it, so
+the page asks `ListAccessTokens` and, on Unimplemented/NotFound, shows what
+the feature is and how a self-hoster turns it on rather than an error. The
+threat model (tokens act as their owner; data can contain text that steers an
+agent) is in workspace-api's `docs/mcp.md`.
 
 ## Server routes
 
