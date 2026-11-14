@@ -8,6 +8,7 @@ export default {
       new: 'New workflow',
       manualOnly: 'Manual only',
       neverRun: 'Never run',
+      failedAtStep: 'Step {step} · {name}',
       noSteps: 'No steps',
       cols: {
         workflow: 'Workflow',
@@ -114,6 +115,7 @@ export default {
       new: 'Nový workflow',
       manualOnly: 'Pouze ručně',
       neverRun: 'Zatím neběželo',
+      failedAtStep: 'Krok {step} · {name}',
       noSteps: 'Žádné kroky',
       cols: {
         workflow: 'Workflow',

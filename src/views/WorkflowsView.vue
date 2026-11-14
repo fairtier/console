@@ -69,6 +69,16 @@ const hasTargets = computed(() => pipelines.value.length + transformations.value
 function chain(w: Workflow): string {
   return chainSummary(w.steps.map((s) => s.name))
 }
+// Which step the last run failed at (workspace-api's failure summary; older
+// APIs leave it empty and the row shows the chip alone). Without a step, the
+// run's own error's first line.
+function failureSummary(w: Workflow): string {
+  if (w.lastRunStatus !== 'failed') return ''
+  if (w.lastFailedStepPosition !== undefined && w.lastFailedStepName) {
+    return t('workflowsUi.failedAtStep', { step: w.lastFailedStepPosition + 1, name: w.lastFailedStepName })
+  }
+  return w.lastRunError
+}
 function humanizeSchedule(cron: string): string {
   return cronText.summarize(cron) || t('workflowsUi.manualOnly')
 }
@@ -393,9 +403,17 @@ function onSaved(w: Workflow) {
           </div>
 
           <!-- Last run -->
-          <div v-if="w.lastRunStatus" style="display:flex; align-items:center; gap:8px; min-width:0;">
-            <StatusChip :status="w.lastRunStatus" />
-            <span v-if="w.lastRunAt" :title="w.lastRunAt" style="font-size:12px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ formatRelative(w.lastRunAt, Date.now(), locale) }}</span>
+          <div v-if="w.lastRunStatus" style="min-width:0;">
+            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+              <StatusChip :status="w.lastRunStatus" />
+              <span v-if="w.lastRunAt" :title="w.lastRunAt" style="font-size:12px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ formatRelative(w.lastRunAt, Date.now(), locale) }}</span>
+            </div>
+            <div
+              v-if="failureSummary(w)"
+              data-testid="workflow-failed-step"
+              :title="w.lastRunError"
+              style="margin-top:4px; font-size:11.5px; color:var(--err-ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
+            >{{ failureSummary(w) }}</div>
           </div>
           <div v-else style="display:flex; align-items:center; gap:7px;">
             <span style="width:8px; height:8px; border-radius:50%; flex:none; background:var(--ink-3);"></span>

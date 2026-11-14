@@ -62,6 +62,10 @@ function initialWorkflows(): Json[] {
             steps: [step('pipeline', orders, 0), step('pipeline', customers, 1), step('transformation', stgOrders, 2), step('transformation', marts, 3)],
             lastRunAt: ago(125),
             lastRunStatus: 'failed',
+            // workspace-api's failure summary (first line, failed step).
+            lastRunError: DBT_ERROR.split('\n')[0],
+            lastFailedStepPosition: 2,
+            lastFailedStepName: 'stg_orders',
         },
         {
             id: EVENTS,
