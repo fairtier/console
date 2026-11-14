@@ -9,7 +9,7 @@
 
 import { test, expect } from '@playwright/test'
 
-test('/config.json serves the deployment configuration, uncached', async ({ request }) => {
+test('/config.json serves the deployment configuration, uncached', async ({ request, baseURL }) => {
     const res = await request.get('/config.json')
     expect(res.ok()).toBeTruthy()
     expect(res.headers()['cache-control']).toBe('no-store')
@@ -17,7 +17,8 @@ test('/config.json serves the deployment configuration, uncached', async ({ requ
         workspaceApiUrl: 'http://localhost:9098',
         authUrl: 'http://localhost:9099',
         authClientId: 'smoke-e2e',
-        authRedirectUri: 'http://localhost:3000/callback',
+        // playwright.config.ts derives it from the suite's URL (FT_E2E_SMOKE_URL).
+        authRedirectUri: `${baseURL}/callback`,
         authOrganization: 'smoke',
         accountUrl: 'https://account.example.com',
     })
