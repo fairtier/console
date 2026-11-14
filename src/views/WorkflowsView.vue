@@ -7,6 +7,7 @@
 // notification links there.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Code, ConnectError } from '@connectrpc/connect'
 import { useRoute, useRouter } from 'vue-router'
 import { workflowClient, pipelineClient, transformationClient } from '../api'
 import { errorMessage } from '../api/errors'
@@ -203,8 +204,9 @@ async function runNow(w: Workflow) {
   }
 }
 
-// Enabled is a full-definition update (UpdateWorkflow replaces the workflow),
-// flipped optimistically and rolled back on failure.
+// Enabled goes through SetWorkflowEnabled, flipped optimistically and rolled
+// back on failure. An API older than that RPC answers Unimplemented; then it
+// falls back to a full-definition UpdateWorkflow, as before.
 const toggling = ref<Set<string>>(new Set())
 async function setEnabled(w: Workflow, enabled: boolean) {
   if (toggling.value.has(w.id)) return
@@ -212,15 +214,8 @@ async function setEnabled(w: Workflow, enabled: boolean) {
   const before = w.enabled
   w.enabled = enabled
   try {
-    const resp = await workflowClient.updateWorkflow({
-      id: w.id,
-      name: w.name,
-      description: w.description,
-      schedule: w.schedule,
-      enabled,
-      steps: w.steps.map((s) => ({ kind: s.kind, refId: s.refId })),
-    })
-    if (resp.workflow) replaceWorkflow(resp.workflow)
+    const saved = await setWorkflowEnabled(w, enabled)
+    if (saved) replaceWorkflow(saved)
   } catch (err) {
     w.enabled = before
     toast.error(errorMessage(err, t('workflowsUi.toast.updateFailed')))
@@ -229,6 +224,23 @@ async function setEnabled(w: Workflow, enabled: boolean) {
     next.delete(w.id)
     toggling.value = next
   }
+}
+
+async function setWorkflowEnabled(w: Workflow, enabled: boolean): Promise<Workflow | undefined> {
+  try {
+    return (await workflowClient.setWorkflowEnabled({ id: w.id, enabled })).workflow
+  } catch (err) {
+    if (!(err instanceof ConnectError && err.code === Code.Unimplemented)) throw err
+  }
+  const resp = await workflowClient.updateWorkflow({
+    id: w.id,
+    name: w.name,
+    description: w.description,
+    schedule: w.schedule,
+    enabled,
+    steps: w.steps.map((s) => ({ kind: s.kind, refId: s.refId })),
+  })
+  return resp.workflow
 }
 
 function replaceWorkflow(w: Workflow) {
