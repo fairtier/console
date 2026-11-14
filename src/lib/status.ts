@@ -8,6 +8,7 @@ export type LifecycleStatus =
     | 'provisioning'
     | 'pending'
     | 'failed'
+    | 'skipped'
     | 'off'
     | 'deprovisioning'
     | 'destroyed'
@@ -27,6 +28,8 @@ const CHIPS: Record<LifecycleStatus, ChipStyle> = {
     provisioning: { labelKey: 'status.provisioning', bg: 'var(--warn-soft)', fg: 'var(--warn-ink)', dot: 'var(--warn)' },
     pending: { labelKey: 'status.pending', bg: 'var(--warn-soft)', fg: 'var(--warn-ink)', dot: 'var(--warn)' },
     failed: { labelKey: 'status.failed', bg: 'var(--err-soft)', fg: 'var(--err-ink)', dot: 'var(--err)' },
+    // A workflow step not run because an earlier step failed.
+    skipped: { labelKey: 'status.skipped', bg: 'var(--inset)', fg: 'var(--ink-3)', dot: 'var(--ink-3)' },
     off: { labelKey: 'status.off', bg: 'var(--inset)', fg: 'var(--ink-3)', dot: 'var(--ink-3)' },
     deprovisioning: { labelKey: 'status.tearingDown', bg: 'var(--inset)', fg: 'var(--ink-3)', dot: 'var(--ink-3)' },
     destroyed: { labelKey: 'status.destroyed', bg: 'var(--inset)', fg: 'var(--ink-3)', dot: 'var(--ink-3)' },

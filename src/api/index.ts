@@ -14,6 +14,7 @@ import { QueryService } from "./gen/query_pb.js"
 import { DemoService } from "./gen/demo_pb.js"
 import { OAuthClientService } from "./gen/oauthclient_pb.js"
 import { ConnectionService } from "./gen/connection_pb.js"
+import { WorkflowService } from "./gen/workflow_pb.js"
 
 // One plane, one transport: everything here is served by the workspace's own
 // API (see ./transport). Identity, billing and provisioning are not product
@@ -37,6 +38,8 @@ export const oauthClientClient = createClient(OAuthClientService, transport)
 // Workspace-level Connections ("connect Google once"): pipelines reference
 // one by id, and the query engine consumes tokens minted from it.
 export const connectionClient = createClient(ConnectionService, transport)
+// Workflows: ordered pipeline/transformation steps on one schedule.
+export const workflowClient = createClient(WorkflowService, transport)
 export const workspaceHealthClient = createClient(WorkspaceHealthService, transport)
 
 // Re-export generated types for convenience

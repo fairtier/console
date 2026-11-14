@@ -42,6 +42,7 @@ export const navGroups: NavGroup[] = [
             { name: 'sql', labelKey: 'nav.sql', icon: 'code' },
             { name: 'pipelines', labelKey: 'nav.pipelines', icon: 'pipelines' },
             { name: 'transformations', labelKey: 'nav.transformations', icon: 'refresh' },
+            { name: 'workflows', labelKey: 'nav.workflows', icon: 'workflow' },
         ],
     },
     {
