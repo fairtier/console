@@ -213,6 +213,8 @@ export interface FakeOptions {
      * paths answer a bare 404, as an API without MCP enabled does.
      */
     mcp?: boolean
+    /** What NotificationService/ListNotifications returns (default: none). */
+    notifications?: Json[]
 }
 
 export async function fakeWorkspaceApi(page: Page, opts: FakeOptions = {}): Promise<FakeApi> {
@@ -266,8 +268,20 @@ export async function fakeWorkspaceApi(page: Page, opts: FakeOptions = {}): Prom
                 return ok(route, { pipelines: PIPELINES })
             case 'TransformationService/ListTransformations':
                 return ok(route, { transformations: TRANSFORMATIONS })
-            case 'NotificationService/ListNotifications':
-                return ok(route, { notifications: [], unreadCount: 0 })
+            case 'NotificationService/ListNotifications': {
+                const notifications = opts.notifications ?? []
+                return ok(route, { notifications, unreadCount: notifications.filter((n) => !n.read).length })
+            }
+            case 'PipelineService/GetPipeline': {
+                const pipeline = PIPELINES.find((p) => p.id === body.id)
+                if (!pipeline) return fail(route, 'not_found', 'pipeline not found')
+                return ok(route, { pipeline, recentRuns: [] })
+            }
+            case 'TransformationService/GetTransformation': {
+                const transformation = TRANSFORMATIONS.find((x) => x.id === body.id)
+                if (!transformation) return fail(route, 'not_found', 'transformation not found')
+                return ok(route, { transformation, recentRuns: [] })
+            }
             case 'DemoService/GetDemoStatus':
                 return ok(route, { status: { available: false } })
 
