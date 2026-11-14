@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import { ConnectError, Code } from '@connectrpc/connect'
 import { transformationClient, assistClient, pipelineClient, boxRepoClient } from '../api'
 import { errorMessage } from '../api/errors'
@@ -20,6 +21,7 @@ import { useExplain } from '../composables/useExplain'
 import ExplainPanel from '../components/ExplainPanel.vue'
 
 const { t } = useI18n()
+const route = useRoute()
 const toast = useToast()
 const { confirm } = useConfirm()
 
@@ -258,6 +260,11 @@ onMounted(() => {
   window.addEventListener('resize', closeMenus)
   loadTransformations()
   loadPipelines()
+  // Deep link (/transformations?transformation=<id>) opens that
+  // transformation's run history — the workflow run timeline links here, like
+  // the failed-run notification links to /pipelines?pipeline=<id>.
+  const target = route.query.transformation
+  if (typeof target === 'string' && target) void toggleRuns(target)
 })
 onBeforeUnmount(() => {
   document.removeEventListener('click', onDocClick)
