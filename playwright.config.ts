@@ -6,9 +6,11 @@ import { defineConfig, devices } from '@playwright/test'
  * fresh deployment serves before anyone signs in (config document, health
  * endpoints, login page, SPA fallback).
  *
- * There is deliberately no authenticated project here: past the login the
- * Console needs a real workspace API and a real Casdoor, which no CI
- * environment has. That testing happens against a live workspace.
+ * There is no real backend here: past the login the Console needs a workspace
+ * API and a Casdoor, which no CI environment has. Specs that need the app past
+ * the login (e2e/workflows.spec.ts) fake the API at the network layer and seed
+ * a session in localStorage — see e2e/fixtures/workspaceApi.ts. Testing
+ * against the real thing happens on a live workspace.
  */
 
 const SMOKE_URL = process.env.FT_E2E_SMOKE_URL ?? 'http://localhost:3000'
