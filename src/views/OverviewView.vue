@@ -28,13 +28,10 @@ const greeting = computed(() => {
 
 const enabledPipelineCount = computed(() => pipelines.value.filter(p => p.enabled).length)
 
-const appsOnCount = computed(() =>
-    [
-        workspace.cubeEnabled,
-        workspace.rillEnabled,
-        workspace.duckflightEnabled,
-    ].filter(Boolean).length,
-)
+// One flag per app on the Apps page (Cube, Rill, DuckFlight); the tile's
+// denominator is this list's length, so the two cannot drift apart again.
+const appFlags = computed(() => [workspace.cubeEnabled, workspace.rillEnabled, workspace.duckflightEnabled])
+const appsOnCount = computed(() => appFlags.value.filter(Boolean).length)
 
 // The pipeline list items don't carry last-run status or row counts, so we
 // surface each pipeline's enabled/paused state instead. (Backend gap.)
@@ -113,7 +110,7 @@ onMounted(async () => {
                     </div>
                     <div class="text-[26px] font-bold tracking-[-.02em]">
                         {{ appsOnCount }}
-                        <span class="text-[13px] font-semibold text-ink-3">/ 4</span>
+                        <span class="text-[13px] font-semibold text-ink-3">/ {{ appFlags.length }}</span>
                     </div>
                 </div>
                 <div class="rounded-[14px] border p-[16px_17px]" style="background:var(--surface); border-color:var(--line); box-shadow:var(--shadow)">
