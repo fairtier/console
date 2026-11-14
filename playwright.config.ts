@@ -14,6 +14,9 @@ import { defineConfig, devices } from '@playwright/test'
  */
 
 const SMOKE_URL = process.env.FT_E2E_SMOKE_URL ?? 'http://localhost:3000'
+// server.ts listens where the specs look, so FT_E2E_SMOKE_URL can move the
+// suite off :3000 (e.g. beside a dev server, or two checkouts at once).
+const SMOKE_PORT = new URL(SMOKE_URL).port || '3000'
 
 export default defineConfig({
     testDir: './e2e',
@@ -51,7 +54,7 @@ export default defineConfig({
             timeout: 240_000,
             stdout: 'pipe',
             env: {
-                PORT: '3000',
+                PORT: SMOKE_PORT,
                 // Syntactically valid dummies: the smoke specs never start a
                 // login. Values are mirrored in e2e/smoke.spec.ts.
                 FT_WORKSPACE_API_URL: 'http://localhost:9098',
