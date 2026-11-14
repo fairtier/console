@@ -789,7 +789,10 @@ export const TransformationService: GenService<{
     output: typeof DeleteTransformationResponseSchema;
   },
   /**
-   * TriggerTransformation manually starts a run outside the schedule.
+   * TriggerTransformation manually starts a run outside the schedule. A run
+   * already waiting to be picked up is returned instead of queueing a second
+   * one. A disabled transformation is refused (FailedPrecondition): disabled
+   * means it never runs, so the run would never be picked up.
    *
    * @generated from rpc transformation.v1.TransformationService.TriggerTransformation
    */
