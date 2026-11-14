@@ -175,9 +175,11 @@ for (const legacy of [false, true]) {
         const toggle = row.getByRole('switch')
         await toggle.click()
         await expect(toggle).toHaveAttribute('aria-checked', 'false')
-        expect(api.bodies['WorkflowService/SetWorkflowEnabled']!.at(-1)).toEqual({ id: NIGHTLY })
+        // The switch flips optimistically; wait for the request(s) behind it.
+        await expect.poll(() => api.bodies['WorkflowService/SetWorkflowEnabled']?.at(-1)).toEqual({ id: NIGHTLY })
         if (legacy) {
             // Fell back to the full-definition update, steps intact.
+            await expect.poll(() => api.bodies['WorkflowService/UpdateWorkflow']?.length ?? 0).toBe(1)
             const sent = api.bodies['WorkflowService/UpdateWorkflow']!.at(-1)!
             expect(sent).toMatchObject({ id: NIGHTLY, name: 'nightly_orders' })
             expect((sent.steps as unknown[]).length).toBe(4)
