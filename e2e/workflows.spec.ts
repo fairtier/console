@@ -31,6 +31,12 @@ test('the list reads at a glance: chain, schedule, enabled, last run', async ({ 
     const nightly = rows.filter({ hasText: 'nightly_orders' })
     await expect(nightly.getByTestId('workflow-chain')).toHaveText('orders → customers → stg_orders → marts')
     await expect(nightly).toContainText('Failed')
+    // The row says where it broke, with the error's first line on hover.
+    const failed = nightly.getByTestId('workflow-failed-step')
+    await expect(failed).toHaveText('Step 3 · stg_orders')
+    await expect(failed).toHaveAttribute('title', /^Database Error in model stg_orders/)
+    // Only a failed last run gets one.
+    await expect(rows.getByTestId('workflow-failed-step')).toHaveCount(1)
     await expect(nightly).toContainText('Daily at 05:00')
     await expect(nightly.getByRole('switch')).toHaveAttribute('aria-checked', 'true')
 
