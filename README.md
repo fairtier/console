@@ -1,8 +1,8 @@
 # FairTier Workspace Console
 
 The web console of a [FairTier](https://fairtier.com) data workspace — a Vue 3
-SPA for the product itself: pipelines, transformations, SQL, the Iceberg
-catalog, dashboards, service accounts. It is served next to the workspace it
+SPA for the product itself: pipelines, transformations, workflows (ordered
+pipeline/transformation steps on one schedule), SQL, the Iceberg catalog, dashboards, service accounts. It is served next to the workspace it
 manages, talks only to that workspace's own
 [workspace-api](https://github.com/fairtier/workspace-api), and authenticates
 against the workspace's own identity provider (Casdoor).
@@ -52,8 +52,11 @@ Two tiers, and the split is enforced by config rather than habit:
 - **Smoke** — `bun run test:e2e`, files at `e2e/*.spec.ts`. Hermetic: Playwright
   builds the app and starts [`server.ts`](./server.ts) with dummy `FT_*`
   values, then asserts what a fresh deployment serves before anyone signs in.
-  No backend and no identity provider — anything behind the login needs a real
-  workspace, and is tested against one.
+  No backend and no identity provider. Specs that need a page past the login
+  (`e2e/workflows.spec.ts`) seed a session in localStorage and answer the
+  Connect calls at the network layer with
+  [`e2e/fixtures/workspaceApi.ts`](./e2e/fixtures/workspaceApi.ts) — a fake,
+  so the real API contract is still tested against a live workspace.
 
 Playwright ships no Bun-native runner, but it is still invoked through Bun:
 `bun run test:e2e` resolves `node_modules/.bin/playwright`, whose

@@ -3,7 +3,7 @@
 ## Project Vision
 
 The web console of a FairTier data workspace: pipelines, transformations,
-SQL, catalog, dashboards. It is served next to the workspace it manages and
+workflows, SQL, catalog, dashboards. It is served next to the workspace it manages and
 talks only to that workspace's own API — accounts, billing and provisioning
 belong to whoever hosts the workspace, not to this app.
 
@@ -32,8 +32,9 @@ belong to whoever hosts the workspace, not to this app.
 - **Prod Run:** `bun run server.ts` (Serves /dist + API)
 - **Unit test:** `bun test` (native Bun runner; `src/**/*.test.ts` only, scoped
   by `[test] root` in `bunfig.toml`)
-- **E2E:** `bun run test:e2e` (Playwright; hermetic smoke — builds the app,
-  boots `server.ts` with dummy `FT_*`, asserts the pre-login surface)
+- **E2E:** `bun run test:e2e` (Playwright; hermetic — builds the app, boots
+  `server.ts` with dummy `FT_*`, asserts the pre-login surface; specs that
+  need the app past the login fake the API with `e2e/fixtures/workspaceApi.ts`)
 - **Type Check:** `bun run type-check` (via vue-tsc)
 
 ## Coding Standards & Patterns
@@ -69,7 +70,11 @@ generates Go only), cloned at the tag pinned by `WORKSPACE_API_VERSION` in the
 [Makefile](./Makefile); CI drift-checks the committed stubs against it.
 
 Changing a proto therefore means: land it in the public workspace-api repo,
-tag a release, bump the Makefile pin, then `make proto` here. Both
+tag a release, bump the Makefile pin, then `make proto` here. To build
+against protos that are not tagged yet, `make proto WORKSPACE_API_SRC=<path
+to a workspace-api checkout>` generates from that working tree instead — the
+result is ahead of the pin, so CI's drift check fails until the tag exists and
+the pin moves. Both
 `buf.gen.yaml` (plugin version) and `package.json` (`@bufbuild/protobuf`) pin
 the same protoc-gen-es major/minor; bump them together.
 
