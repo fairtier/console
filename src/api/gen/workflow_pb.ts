@@ -138,9 +138,10 @@ export type Workflow = Message<"workflow.v1.Workflow"> & {
   lastRunStatus: string;
 
   /**
-   * When the most recent run failed: the first line of its error (the
-   * failed step's error, else the run's), at most 200 characters. Empty
-   * otherwise.
+   * When the most recent run failed: the line of its error that names the
+   * cause (introductory lines such as one ending in "exception:", and
+   * traceback frames, are skipped), from the failed step's error, else the
+   * run's; at most 200 characters. Empty otherwise.
    *
    * @generated from field: string last_run_error = 12;
    */

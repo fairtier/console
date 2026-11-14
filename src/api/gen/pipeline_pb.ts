@@ -1298,6 +1298,8 @@ export const PipelineService: GenService<{
   },
   /**
    * TriggerPipeline manually starts a pipeline execution outside its schedule.
+   * Idempotent: when a run is already queued or running, that run is returned
+   * instead of queueing another.
    *
    * @generated from rpc pipeline.v1.PipelineService.TriggerPipeline
    */
