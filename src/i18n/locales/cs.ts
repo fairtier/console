@@ -76,6 +76,7 @@ export default {
         git: 'Git',
         integrations: 'Integrace',
         serviceAccounts: 'Servisní účty',
+        agents: 'AI agenti',
         accountExternal: 'Účet a fakturace',
         // Obrazovky konzole účtu — viz layouts/navContract.ts.
         general: 'Obecné',

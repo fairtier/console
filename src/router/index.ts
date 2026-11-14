@@ -19,6 +19,7 @@ const AppsView = () => import('../views/AppsView.vue')
 const GitView = () => import('../views/GitView.vue')
 const IntegrationsView = () => import('../views/IntegrationsView.vue')
 const ServiceAccountsView = () => import('../views/ServiceAccountsView.vue')
+const AgentsView = () => import('../views/AgentsView.vue')
 
 const appChildren: RouteRecordRaw[] = [
     { path: 'overview', name: 'overview', component: OverviewView },
@@ -33,6 +34,7 @@ const appChildren: RouteRecordRaw[] = [
     { path: 'git', name: 'git', component: GitView },
     { path: 'integrations', name: 'integrations', component: IntegrationsView },
     { path: 'service-accounts', name: 'service-accounts', component: ServiceAccountsView },
+    { path: 'agents', name: 'agents', component: AgentsView },
     // Old URLs that moved.
     { path: 'dashboard', redirect: { name: 'overview' } },
     { path: 'iceberg', redirect: { name: 'catalog' } },

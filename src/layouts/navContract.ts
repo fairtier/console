@@ -52,6 +52,7 @@ export const LOCAL_CONTRACT_PATHS = [
     '/git',
     '/integrations',
     '/service-accounts',
+    '/agents',
 ] as const
 
 /**
