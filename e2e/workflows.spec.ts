@@ -167,6 +167,26 @@ test('Run now queues a run and shows it pending', async ({ page }) => {
     expect(api.bodies['WorkflowService/TriggerWorkflow']!.at(-1)).toEqual({ id: BACKFILL })
 })
 
+for (const legacy of [false, true]) {
+    test(`the enabled switch pauses a workflow${legacy ? ' (API without SetWorkflowEnabled)' : ''}`, async ({ page }) => {
+        const api = await fakeWorkspaceApi(page, { legacyWorkflows: legacy })
+        await page.goto('/workflows')
+        const row = page.getByTestId('workflow-row').filter({ hasText: 'nightly_orders' })
+        const toggle = row.getByRole('switch')
+        await toggle.click()
+        await expect(toggle).toHaveAttribute('aria-checked', 'false')
+        expect(api.bodies['WorkflowService/SetWorkflowEnabled']!.at(-1)).toEqual({ id: NIGHTLY })
+        if (legacy) {
+            // Fell back to the full-definition update, steps intact.
+            const sent = api.bodies['WorkflowService/UpdateWorkflow']!.at(-1)!
+            expect(sent).toMatchObject({ id: NIGHTLY, name: 'nightly_orders' })
+            expect((sent.steps as unknown[]).length).toBe(4)
+        } else {
+            expect(api.bodies['WorkflowService/UpdateWorkflow']).toBeUndefined()
+        }
+    })
+}
+
 test('the empty state explains workflows and offers to create one', async ({ page }) => {
     await fakeWorkspaceApi(page, { empty: true })
     await page.goto('/workflows')

@@ -217,6 +217,8 @@ export interface FakeOptions {
      * paths answer a bare 404, as an API without MCP enabled does.
      */
     mcp?: boolean
+    /** Answer as a workspace-api from before SetWorkflowEnabled (Unimplemented). */
+    legacyWorkflows?: boolean
     /** What NotificationService/ListNotifications returns (default: none). */
     notifications?: Json[]
 }
@@ -330,6 +332,14 @@ export async function fakeWorkspaceApi(page: Page, opts: FakeOptions = {}): Prom
                 if (existing) api.workflows.splice(api.workflows.indexOf(existing), 1, wf)
                 else api.workflows.push(wf)
                 api.runs[String(wf.id)] ??= []
+                return ok(route, { workflow: wf })
+            }
+
+            case 'WorkflowService/SetWorkflowEnabled': {
+                if (opts.legacyWorkflows) break
+                const wf = api.workflows.find((w) => w.id === body.id)
+                if (!wf) return fail(route, 'not_found', 'workflow not found')
+                wf.enabled = !!body.enabled
                 return ok(route, { workflow: wf })
             }
 
