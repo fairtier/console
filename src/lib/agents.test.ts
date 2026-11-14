@@ -7,7 +7,9 @@ import {
     capabilitiesByScope,
     clientSnippet,
     daysLeft,
+    mcpAvailability,
     mcpEndpoint,
+    resolveMcpEndpoint,
     scopeLabel,
     scopesFor,
     sortTokens,
@@ -19,6 +21,26 @@ import {
 const DAY = 86_400_000
 const NOW = Date.parse('2026-11-14T12:00:00Z')
 const inDays = (d: number) => new Date(NOW + d * DAY).toISOString()
+
+describe('mcpAvailability', () => {
+    test('follows the advertised capability', () => {
+        expect(mcpAvailability(true)).toBe('enabled')
+        expect(mcpAvailability(false)).toBe('disabled')
+    })
+    test('probes only a box too old to advertise it', () => {
+        expect(mcpAvailability(undefined)).toBe('probe')
+    })
+})
+
+describe('resolveMcpEndpoint', () => {
+    test('prefers the endpoint the box advertises', () => {
+        expect(resolveMcpEndpoint('https://data.example.com/mcp', 'https://api.example.com')).toBe('https://data.example.com/mcp')
+    })
+    test('derives it from the API base when none is advertised', () => {
+        expect(resolveMcpEndpoint('', 'https://api.example.com/')).toBe('https://api.example.com/mcp')
+        expect(resolveMcpEndpoint('  ', 'https://api.example.com')).toBe('https://api.example.com/mcp')
+    })
+})
 
 describe('mcpEndpoint', () => {
     test('appends /mcp to the API base', () => {

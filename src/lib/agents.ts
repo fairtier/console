@@ -33,6 +33,23 @@ export function mcpEndpoint(apiBase: string): string {
     return `${apiBase.trim().replace(/\/+$/, '')}/mcp`
 }
 
+/**
+ * How the AI agents page learns whether MCP is on: from the bootstrap
+ * document's `capabilities.mcp` when the box sends it, and only for a box
+ * too old to send it by probing `ListAccessTokens`.
+ */
+export type McpAvailability = 'enabled' | 'disabled' | 'probe'
+
+export function mcpAvailability(advertised: boolean | undefined): McpAvailability {
+    if (advertised === undefined) return 'probe'
+    return advertised ? 'enabled' : 'disabled'
+}
+
+/** The endpoint the box advertises, else the one derived from the API base. */
+export function resolveMcpEndpoint(advertised: string, apiBase: string): string {
+    return advertised.trim() !== '' ? advertised.trim() : mcpEndpoint(apiBase)
+}
+
 export type ClientId = 'claude-code' | 'cursor' | 'generic'
 export const CLIENTS: readonly ClientId[] = ['claude-code', 'cursor', 'generic']
 

@@ -2,9 +2,11 @@
 // AI agents: connect a person's own MCP client (Claude Code, Cursor, …) to
 // this workspace's /mcp endpoint, and manage the access tokens it uses
 // (workspace-api access_token.v1). The endpoint and the token service are off
-// unless the box sets MCP_ENABLED=true; the bootstrap document does not say
-// so, so the page probes ListAccessTokens and treats Unimplemented/NotFound as
-// "not enabled here" — a calm explanatory state, not an error.
+// unless the box sets MCP_ENABLED=true, which the bootstrap document says in
+// capabilities.mcp (with the endpoint in mcp_url). Only a box too old to send
+// the field is probed: ListAccessTokens answering Unimplemented/NotFound
+// means "not enabled here". Either way that is a calm explanatory state, not
+// an error.
 //
 // The secret of a freshly created token lives in this component only: shown
 // once, filled into the snippets, gone on reload or dismissal.
@@ -12,6 +14,7 @@ import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Code, ConnectError } from '@connectrpc/connect'
 import { accessTokenClient, workspaceApiBase } from '../api'
+import { useWorkspaceStore } from '../stores/workspace'
 import { errorMessage, fieldViolations } from '../api/errors'
 import type { AccessToken } from '../api/gen/access_token_pb.js'
 import Icon from '../components/ui/Icon.vue'
@@ -30,7 +33,8 @@ import {
   clientSnippet,
   clientSnippetFile,
   daysLeft,
-  mcpEndpoint,
+  mcpAvailability,
+  resolveMcpEndpoint,
   scopeLabel,
   scopesFor,
   sortTokens,
@@ -72,10 +76,21 @@ async function loadTokens(initial = false) {
     if (initial) loading.value = false
   }
 }
-onMounted(() => loadTokens(true))
+const workspace = useWorkspaceStore()
+onMounted(async () => {
+  await workspace.ensureLoaded()
+  if (mcpAvailability(workspace.mcpEnabled) === 'disabled') {
+    unavailable.value = true
+    loading.value = false
+    return
+  }
+  // Enabled: the list is the page's data. Not advertised: the same call is
+  // also the probe.
+  await loadTokens(true)
+})
 
 // --- Connect snippets ----------------------------------------------------------------
-const endpoint = computed(() => mcpEndpoint(workspaceApiBase()))
+const endpoint = computed(() => resolveMcpEndpoint(workspace.mcpUrl, workspaceApiBase()))
 const client = ref<ClientId>('claude-code')
 const clientOptions = computed(() => CLIENTS.map((c) => ({ value: c, label: t(`agentsUi.connect.clients.${c}`) })))
 const secret = ref('')

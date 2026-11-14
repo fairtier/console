@@ -27,6 +27,7 @@ async function shot(page: Page, name: string) {
 test.use({ viewport: { width: 1360, height: SHOTS ? 1700 : 900 } })
 
 test('without MCP on the box, the page explains what it is and how it is enabled', async ({ page }) => {
+    // A current box says so in the bootstrap document: no probe.
     const api = await fakeWorkspaceApi(page)
     await page.goto('/agents')
 
@@ -38,7 +39,7 @@ test('without MCP on the box, the page explains what it is and how it is enabled
     await expect(page.getByRole('button', { name: 'New token' })).toHaveCount(0)
     // What the operator would be turning on is still described.
     await expect(page.getByTestId('agents-capabilities')).toBeVisible()
-    expect(api.calls).toContain('AccessTokenService/ListAccessTokens')
+    expect(api.calls).not.toContain('AccessTokenService/ListAccessTokens')
 
     // It sits in the Workspace group of the sidebar.
     await expect(page.getByRole('link', { name: 'AI agents' })).toBeVisible()
@@ -128,4 +129,27 @@ test('create: validation, the secret once, snippets filled, gone on reload; revo
     await expect(page.getByText('Access token revoked.')).toBeVisible()
     expect(api.bodies['AccessTokenService/RevokeAccessToken']!.at(-1)).toEqual({ id: 'tok-4' })
     await expect(page.getByTestId('agents-token-row').filter({ hasText: 'ci agent' })).toHaveAttribute('data-state', 'revoked')
+})
+
+test('a box too old to advertise MCP is probed: off', async ({ page }) => {
+    const api = await fakeWorkspaceApi(page, { bootstrapMcp: 'omit' })
+    await page.goto('/agents')
+    await expect(page.getByTestId('agents-disabled')).toBeVisible()
+    await expect(page.getByText('Could not load access tokens.')).toHaveCount(0)
+    expect(api.calls).toContain('AccessTokenService/ListAccessTokens')
+})
+
+test('a box too old to advertise MCP is probed: on, endpoint from the API base', async ({ page }) => {
+    await fakeWorkspaceApi(page, { mcp: true, bootstrapMcp: 'omit' })
+    await page.goto('/agents')
+    await expect(page.getByTestId('agents-disabled')).toHaveCount(0)
+    await expect(page.getByTestId('agents-endpoint')).toHaveText(ENDPOINT)
+})
+
+test('the advertised MCP endpoint is the one the snippets use', async ({ page }) => {
+    const advertised = 'https://data.example.test/mcp'
+    await fakeWorkspaceApi(page, { mcp: true, mcpUrl: advertised })
+    await page.goto('/agents')
+    await expect(page.getByTestId('agents-endpoint')).toHaveText(advertised)
+    await expect(page.getByTestId('agents-snippet')).toContainText(`claude mcp add --transport http fairtier ${advertised}`)
 })
