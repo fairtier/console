@@ -11,7 +11,7 @@
 # @bufbuild/protobuf in package.json — an unpinned plugin rewrites every
 # stub's header and fails the drift check spuriously.
 
-WORKSPACE_API_VERSION := v0.37.1
+WORKSPACE_API_VERSION := v0.39.0
 WORKSPACE_API_REPO := https://github.com/fairtier/workspace-api
 
 # Local development only: point at an existing workspace-api checkout to
