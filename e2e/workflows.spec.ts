@@ -197,3 +197,23 @@ test('the empty state explains workflows and offers to create one', async ({ pag
     await expect(empty.getByRole('button', { name: 'Create workflow' })).toBeVisible()
     await shot(page, 'workflows-empty')
 })
+
+test('a workspace-api without WorkflowService: a calm state, the rest of the app unaffected', async ({ page }) => {
+    // Images roll independently: a new Console can meet a box older than workflow.v1.
+    await fakeWorkspaceApi(page, { noWorkflowService: true })
+    await page.goto(`/workflows?workflow=${NIGHTLY}`)
+
+    const unavailable = page.getByTestId('workflows-unavailable')
+    await expect(unavailable).toContainText('Workflows are not available on this workspace yet')
+    // Not an error: no toast, no create affordance, no empty-state CTA.
+    await expect(page.getByText('Could not load workflows')).toHaveCount(0)
+    await expect(page.getByText('That workflow no longer exists.')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'New workflow' })).toHaveCount(0)
+    await expect(page.getByTestId('workflows-empty')).toHaveCount(0)
+    await shot(page, 'workflows-unavailable')
+
+    // The other pages still work from the same session.
+    await page.getByRole('link', { name: 'Pipelines' }).first().click()
+    await expect(page).toHaveURL(/\/pipelines$/)
+    await expect(page.getByText('raw_orders').first()).toBeVisible()
+})
