@@ -227,6 +227,8 @@ export interface FakeOptions {
     mcpUrl?: string
     /** Answer as a workspace-api from before SetWorkflowEnabled (Unimplemented). */
     legacyWorkflows?: boolean
+    /** Answer as a workspace-api from before workflow.v1: no WorkflowService at all. */
+    noWorkflowService?: boolean
     /** What NotificationService/ListNotifications returns (default: none). */
     notifications?: Json[]
 }
@@ -276,6 +278,9 @@ export async function fakeWorkspaceApi(page: Page, opts: FakeOptions = {}): Prom
 
         // Without MCP_ENABLED the service is not mounted at all: the Go mux
         // answers a plain 404, which Connect clients read as Unimplemented.
+        if (opts.noWorkflowService && rpc.startsWith('WorkflowService/')) {
+            return route.fulfill({ status: 404, headers: { ...CORS, 'content-type': 'text/plain' }, body: '404 page not found\n' })
+        }
         if (!opts.mcp && rpc.startsWith('AccessTokenService/')) {
             return route.fulfill({ status: 404, headers: { ...CORS, 'content-type': 'text/plain' }, body: '404 page not found\n' })
         }

@@ -36,6 +36,10 @@ export default {
         cta: 'Create workflow',
         needTargets: 'Create a pipeline or a transformation first — a workflow is made of them.',
       },
+      unavailable: {
+        title: 'Workflows are not available on this workspace yet',
+        body: 'This workspace runs a workspace-api version without workflows. Pipelines, transformations and everything else work as before; this page lights up once the workspace is updated.',
+      },
       form: {
         createTitle: 'New workflow',
         editTitle: 'Edit workflow',
@@ -142,6 +146,10 @@ export default {
         body: 'Workflow spouští vaše pipeline a transformace v pevném pořadí podle jednoho plánu — nejdřív nahraje data, pak nad nimi postaví modely — a zastaví se u prvního kroku, který selže.',
         cta: 'Vytvořit workflow',
         needTargets: 'Nejdřív vytvořte pipeline nebo transformaci — workflow se skládá z nich.',
+      },
+      unavailable: {
+        title: 'Workflowy na tomto workspace zatím nejsou k dispozici',
+        body: 'Tento workspace běží na verzi workspace-api bez workflowů. Pipeline, transformace a vše ostatní fungují jako dřív; tato stránka ožije, jakmile se workspace aktualizuje.',
       },
       form: {
         createTitle: 'Nový workflow',

@@ -39,6 +39,10 @@ const workflows = ref<Workflow[]>([])
 const pipelines = ref<Pipeline[]>([])
 const transformations = ref<Transformation[]>([])
 const loading = ref(true)
+// A workspace-api from before workflow.v1 has no WorkflowService: the call
+// answers Unimplemented (a 404 from the mux reads the same). That is a box
+// whose image is older than this Console's, not an error — say so calmly.
+const unavailable = ref(false)
 
 // silent skips the full-section loading state — polls refresh in place.
 async function loadWorkflows(silent = false) {
@@ -46,8 +50,10 @@ async function loadWorkflows(silent = false) {
   try {
     const resp = await workflowClient.listWorkflows({})
     workflows.value = resp.workflows
+    unavailable.value = false
   } catch (err) {
-    if (!silent) toast.error(errorMessage(err, t('workflowsUi.toast.loadFailed')))
+    if (err instanceof ConnectError && err.code === Code.Unimplemented) unavailable.value = true
+    else if (!silent) toast.error(errorMessage(err, t('workflowsUi.toast.loadFailed')))
   } finally {
     if (!silent) loading.value = false
   }
@@ -114,7 +120,7 @@ function toggleExpand(id: string) {
 // clicked while this page is already open (same route, new query).
 async function openFromQuery() {
   const id = route.query.workflow
-  if (typeof id !== 'string' || !id || expandedId.value === id) return
+  if (unavailable.value || typeof id !== 'string' || !id || expandedId.value === id) return
   if (!workflows.value.some((w) => w.id === id)) {
     toast.error(t('workflowsUi.detail.notFound'))
     setQuery(null)
@@ -302,7 +308,7 @@ function onSaved(w: Workflow) {
         <div style="font-size:13.5px; color:var(--ink-2);">{{ t('workflowsUi.subtitle') }}</div>
       </div>
       <button
-        v-if="!loading && !editorOpen && workflows.length > 0"
+        v-if="!loading && !unavailable && !editorOpen && workflows.length > 0"
         @click="openEditor(null)"
         style="display:flex; align-items:center; gap:8px; height:40px; padding:0 16px; border:none; border-radius:11px; background:var(--accent); color:var(--accent-ink); font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; box-shadow:var(--shadow); flex:none;"
       >
@@ -323,6 +329,19 @@ function onSaved(w: Workflow) {
     <!-- Loading -->
     <div v-if="loading" style="display:flex; align-items:center; justify-content:center; padding:60px 0;">
       <Spinner />
+    </div>
+
+    <!-- Not served by this workspace's API (older than workflow.v1) -->
+    <div
+      v-else-if="unavailable"
+      data-testid="workflows-unavailable"
+      style="background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:48px 34px; text-align:center;"
+    >
+      <div style="width:48px; height:48px; margin:0 auto 16px; border-radius:13px; background:var(--accent-soft); color:var(--accent-soft-ink); display:flex; align-items:center; justify-content:center;">
+        <Icon name="workflow" :size="24" />
+      </div>
+      <h2 style="margin:0 0 6px; font-size:18px; font-weight:700; letter-spacing:-.01em;">{{ t('workflowsUi.unavailable.title') }}</h2>
+      <div style="font-size:13.5px; color:var(--ink-2); max-width:470px; margin:0 auto; line-height:1.55;">{{ t('workflowsUi.unavailable.body') }}</div>
     </div>
 
     <!-- Empty state -->
